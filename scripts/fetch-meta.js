@@ -79,18 +79,16 @@ async function ddgFallback(url) {
     });
     if (!r.ok) return { title: "", icon: "" };
     const j = await r.json();
-    let title = "", icon = "";
-    if (j.Heading) title = clean(j.Heading);
-    const res = (j.Results || [])[0];
-    if (!title && res) {
-      title = clean(res.Text);
-      if (res.Icon && res.Icon.URL && /^https?:/.test(res.Icon.URL)) icon = res.Icon.URL;
+    let title = "";
+    for (const res of j.Results || []) {
+      let rn = "";
+      try { rn = new URL(res.FirstURL).hostname.replace(/^www\./, ""); } catch (e) {}
+      if (rn && (rn === host || rn.includes(host) || host.includes(rn))) {
+        const t = clean(res.Text);
+        if (t) { title = t; break; }
+      }
     }
-    if (!title && res && res.FirstURL) {
-      const m = res.FirstURL.match(/^https?:\/\/([^\/]+)/);
-      title = clean(m ? m[1] : "");
-    }
-    return { title, icon };
+    return { title, icon: "" };
   } catch (e) {
     return { title: "", icon: "" };
   }
