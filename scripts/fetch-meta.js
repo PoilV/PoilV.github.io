@@ -95,6 +95,20 @@ async function ddgFallback(url) {
     return { title: "", icon: "" };
   }
 }
+async function directFavicon(url) {
+  try {
+    const base = new URL(url).origin;
+    const r = await fetch(base + "/favicon.ico", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    if (!/^image\//.test(ct)) return "";
+    return base + "/favicon.ico";
+  } catch (e) {
+    return "";
+  }
+}
 async function fetchPage(url) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -107,23 +121,20 @@ async function fetchPage(url) {
     if (!r.ok) return { title: "", icon: "" };
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-    let title = m ? clean(m[1]) : "";
-    if (title && isBadTitle(title)) title = "";
+    const pageTitle = m ? clean(m[1]) : "";
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+    const fb = await ddgFallback(url);
+    let title = fb.title;
+    if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
+    if (!title) title = await bingSearch(hostname);
+    if (!title) title = await baiduSearch(hostname);
     let icon = parseIcon(html, url);
-    if (!title || !icon) {
-      const hostname = new URL(url).hostname.replace(/^www\./, "");
-      if (!title) title = await bingSearch(hostname);
-      if (!title) title = await baiduSearch(hostname);
-      if (!title || !icon) {
-        const fb = await ddgFallback(url);
-        if (!title) title = fb.title;
-        if (!icon) icon = fb.icon;
-      }
-      if (!icon) icon = "https://favicon.im/" + new URL(url).hostname;
-    }
+    if (!icon) icon = await directFavicon(url);
     return { title, icon };
   } catch (e) {
-    return { title: "", icon: "" };
+    const fb = await ddgFallback(url);
+    const icon = await directFavicon(url);
+    return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
   }
