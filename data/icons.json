@@ -27,7 +27,7 @@
  "https://store.steampowered.com/account/remotestorage": "https://store.steampowered.com/favicon.ico",
  "https://www.gamer520.com/": "https://v1.imagehub.cc/images/2026/04/21/1210e985ce56b56f20e06094f6817d28.png",
  "https://docs.sillytavern.app/": "https://docs.sillytavern.app/favicon.ico",
- "https://www.runoob.com/w3cnote/windows-finds-port-usage.html": "https://www.runoob.com/favicon.ico",
+ "https://www.runoob.com/w3cnote/windows-finds-port-usage.html": "https://static.char123.com/images/favicon.ico",
  "https://dvel.me/posts/rime-ice/": "https://dvel.me/favicon.ico",
  "https://www.123pan.com/": "https://statics.123957.com/static-by-custom/favicon.ico",
  "https://scoop.sh/": "https://scoop.sh/favicon.ico",
@@ -86,7 +86,7 @@
  "https://photos.google.com/": "https://storage.googleapis.com/gweb-mobius-cdn/photos/uploads/383ce0413fa82bcaf6de49fd7997678b21b9762e.svg",
  "https://mega.nz/fm/r3xmFDLJ": "https://mega.nz/favicon.ico?v=3",
  "https://60s-demo.viki.moe/": "https://favicon.im/60s-demo.viki.moe",
- "https://onedrive.live.com/?view=0": "https://logincdn.msauth.net/16.000.31164.6/images/favicon.ico",
+ "https://onedrive.live.com/?view=0": "https://logincdn.msftauth.net/16.000.31164.6/images/favicon.ico",
  "https://drive.google.com/drive/my-drive": "https://favicon.im/drive.google.com",
  "https://up.woozooo.com/mydisk.php": "https://favicon.im/up.woozooo.com",
  "https://mail.qq.com/": "https://favicon.im/mail.qq.com",
@@ -128,5 +128,6 @@
  "https://claude.ai/": "https://www.anthropic.com/images/icons/favicon.ico",
  "https://ngabbs.com/": "https://ngabbs.com/favicon.ico",
  "https://www.reddit.com/": "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png",
- "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/": "https://favicon.im/download.schenker-tech.de"
+ "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/": "https://favicon.im/download.schenker-tech.de",
+ "http://49.233.78.71:17861/": "https://favicon.im/49.233.78.71"
 }
