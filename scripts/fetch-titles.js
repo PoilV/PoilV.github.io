@@ -32,6 +32,30 @@ const parseIcon = (html, url) => {
 };
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+async function ddgFallback(url) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    const r = await fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(host) + "&format=json&no_html=1&no_redirect=1", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) return { title: "", icon: "" };
+    const j = await r.json();
+    let title = "", icon = "";
+    const res = (j.Results || [])[0];
+    if (res) {
+      title = clean(res.Text);
+      if (res.Icon && res.Icon.URL && /^https?:/.test(res.Icon.URL)) icon = res.Icon.URL;
+    }
+    if (!title && j.Heading) title = clean(j.Heading);
+    if (!title && res && res.FirstURL) {
+      const m = res.FirstURL.match(/^https?:\/\/([^\/]+)/);
+      title = clean(m ? m[1] : "");
+    }
+    return { title, icon };
+  } catch (e) {
+    return { title: "", icon: "" };
+  }
+}
 async function fetchPage(url) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -44,7 +68,15 @@ async function fetchPage(url) {
     if (!r.ok) return { title: "", icon: "" };
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-    return { title: m ? clean(m[1]) : "", icon: parseIcon(html, url) };
+    let title = m ? clean(m[1]) : "";
+    let icon = parseIcon(html, url);
+    if (!title || !icon) {
+      const fb = await ddgFallback(url);
+      if (!title) title = fb.title;
+      if (!icon) icon = fb.icon;
+    }
+    if (!icon) icon = "https://icons.duckduckgo.com/ip3/" + new URL(url).hostname + ".ico";
+    return { title, icon };
   } catch (e) {
     return { title: "", icon: "" };
   } finally {
