@@ -1,12 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 const repo = path.join(__dirname, "..");
-const linksPath = path.join(repo, "links.js");
-const titlesPath = path.join(repo, "titles.json");
-const iconsPath = path.join(repo, "icons.json");
+const linksPath = path.join(repo, "links.json");
+const titlesPath = path.join(repo, "data", "titles.json");
+const iconsPath = path.join(repo, "data", "icons.json");
 
-const src = fs.readFileSync(linksPath, "utf8");
-const urls = [...src.matchAll(/url:\s*"([^"]*)"/g)].map(m => m[1]).filter(u => /^https?:/.test(u));
+const cfg = JSON.parse(fs.readFileSync(linksPath, "utf8"));
+const urls = cfg.categories.flatMap(c => c.links).filter(u => /^https?:/.test(u));
 
 const BAD = new Set(["official site", "official website", "homepage", "home page", "search", "login", "sign in"]);
 const clean = s => {

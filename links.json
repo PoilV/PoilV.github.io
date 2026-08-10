@@ -1,0 +1,196 @@
+{
+  "categories": [
+    {
+      "name": "工作",
+      "links": [
+        "https://www.feishu.cn/",
+        "https://docs.qq.com/",
+        "https://www.zhipin.com/",
+        "https://www.zhaopin.com/"
+      ]
+    },
+    {
+      "name": "AI",
+      "links": [
+        "https://chat.deepseek.com/",
+        "https://www.doubao.com/chat/30171912988103170",
+        "https://chatgpt.com/",
+        "https://gemini.google.com/app",
+        "https://labs.google/fx/tools/flow",
+        "https://labs.google/",
+        "https://copilot.microsoft.com/",
+        "https://claude.ai/",
+        "https://duck.ai/",
+        "https://civitai.com/",
+        "https://civitai.red/",
+        "https://huggingface.co/",
+        "https://gabriel.devenyi.ca/huggingface-estimate/"
+      ]
+    },
+    {
+      "name": "AI API",
+      "links": [
+        "https://bigmodel.cn/",
+        "https://platform.deepseek.com/usage",
+        "https://openrouter.ai/",
+        "https://minimaxi.com/",
+        "https://www.tavily.com/"
+      ]
+    },
+    {
+      "name": "AI 视频",
+      "links": [
+        "https://video.jurilu.com/",
+        "https://ai.lfxqai.com/videos",
+        "https://nova.shanhaix.com/",
+        "https://www.woaiduanju.com/",
+        "https://jimeng.jianying.com/ai-tool/generate?workspace=0",
+        "https://www.vidu.cn/home/recommend",
+        "https://www.liblib.tv/",
+        "https://www.liblib.art/",
+        "https://story.neodomain.cn/home",
+        "https://xyq.jianying.com/",
+        "https://klingai.com/app",
+        "http://49.233.78.71:17861/",
+        "https://voiceailabs.com/zh",
+        "https://www.ttson.cn/"
+      ]
+    },
+    {
+      "name": "游戏",
+      "links": [
+        "https://game.maj-soul.com/1/",
+        "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
+        "https://www.pxb7.com/",
+        "https://store.epicgames.com/zh-CN/",
+        "https://store.steampowered.com/",
+        "https://store.steampowered.com/account/remotestorage",
+        "https://www.protondb.com/",
+        "https://steamdb.info/",
+        "https://www.gamer520.com/",
+        "https://docs.sillytavern.app/"
+      ]
+    },
+    {
+      "name": "系统",
+      "links": [
+        "https://dvel.me/posts/rime-ice/",
+        "https://lemmy.dbzer0.com/c/GenP",
+        "https://store.rg-adguard.net/",
+        "https://www.catalog.update.microsoft.com/Home.aspx",
+        "https://www.portablefreeware.com/",
+        "https://www.powershellgallery.com/",
+        "https://scoop.sh/",
+        "https://learn.microsoft.com/zh-cn/sysinternals/",
+        "https://zhuanlan.zhihu.com/p/429496671",
+        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
+        "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/",
+        "https://wiki.lineageos.org/devices/kebab/",
+        "https://www.archlinuxcn.org/",
+        "https://flathub.org/",
+        "https://wiki.archlinux.org/title/V4l2loopback"
+      ]
+    },
+    {
+      "name": "网盘",
+      "links": [
+        "https://www.123pan.com/",
+        "https://www.alipan.com/drive/home",
+        "https://pan.baidu.com/disk/main#/index?category=all",
+        "https://www.jianguoyun.com/#/",
+        "https://up.woozooo.com/mydisk.php",
+        "https://data.cstcloud.cn/",
+        "https://cloud.189.cn/web/main/file/folder/-11",
+        "https://photo.baidu.com/photo/web/home",
+        "https://yun.139.com/w/#/index",
+        "https://mypikpak.com/drive/all",
+        "https://www.dropbox.com/home",
+        "https://photos.google.com/",
+        "https://drive.google.com/drive/my-drive",
+        "https://mega.nz/fm/r3xmFDLJ",
+        "https://onedrive.live.com/?view=0"
+      ]
+    },
+    {
+      "name": "邮箱",
+      "links": [
+        "https://mail.qq.com/"
+      ]
+    },
+    {
+      "name": "论坛资讯社交",
+      "links": [
+        "https://60s-demo.viki.moe/",
+        "https://newsnow.busiyi.world/",
+        "https://sspai.com/",
+        "https://weibo.com/",
+        "https://m.weibo.cn/",
+        "https://x.com/",
+        "https://www.xiaohongshu.com/",
+        "https://meta.appinn.net/",
+        "https://bbs.pcbeta.com/",
+        "https://discord.com/channels/@me",
+        "https://hellogithub.com/",
+        "https://www.itsk.com/",
+        "https://www.instagram.com/",
+        "https://linux.do/",
+        "https://ngabbs.com/",
+        "https://www.reddit.com/",
+        "https://rutracker.org/forum/index.php",
+        "https://www.v2ex.com/",
+        "https://xdaforums.com/"
+      ]
+    },
+    {
+      "name": "视频音乐",
+      "links": [
+        "https://www.bilibili.com/",
+        "https://www.douyin.com/",
+        "https://www.tiktok.com/?lang=zh-Hans",
+        "https://www.agedm.io/",
+        "https://www.youtube.com/",
+        "https://share.dmhy.org/",
+        "https://mikanani.me/",
+        "https://vcb-s.com/",
+        "https://open.spotify.com/",
+        "https://music.youtube.com/"
+      ]
+    },
+    {
+      "name": "漫画图片小说",
+      "links": [
+        "https://www.mangacopy.com/",
+        "https://www.kongfz.com/",
+        "https://shuyuan.yiove.com/",
+        "https://huaban.com/",
+        "https://www.pinterest.com/",
+        "https://www.artstation.com/",
+        "https://www.ggac.com/",
+        "https://www.pixiv.net/",
+        "https://anilist.co/"
+      ]
+    },
+    {
+      "name": "工具",
+      "links": [
+        "https://metacubex.github.io/metacubexd/#/",
+        "about:translations#src=detect&trg=zh-Hans",
+        "https://fanyi.caiyunapp.com/",
+        "https://test.ustc.edu.cn/",
+        "https://caniuse.com/",
+        "https://wiki.metacubex.one/",
+        "https://geoviewer.aloxaf.com/",
+        "https://alternativeto.net/",
+        "https://www.cloudflare.com/cdn-cgi/trace",
+        "https://www.aliyun.com/",
+        "https://console.cloud.tencent.com/",
+        "https://dash.cloudflare.com/",
+        "https://github.com/",
+        "https://ppio.com/",
+        "https://q.qq.com/",
+        "https://www.virustotal.com/gui/home/upload",
+        "https://poilv.github.io/"
+      ]
+    }
+  ]
+}
