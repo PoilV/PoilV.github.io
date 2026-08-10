@@ -1,6 +1,6 @@
 {
  "https://docs.qq.com/": "腾讯文档",
- "https://chat.deepseek.com/": "DeepSeek",
+ "https://chat.deepseek.com/": "DeepSeek (chatbot)",
  "https://www.zhaopin.com/": "Security Verification",
  "https://www.feishu.cn/": "Lark",
  "https://www.zhipin.com/": "BOSS直聘",
@@ -104,5 +104,7 @@
  "https://www.pixiv.net/": "插画、漫画、小说作品交流服务 [pixiv]",
  "https://www.mangacopy.com/": "拷貝漫畫",
  "https://alternativeto.net/": "AlternativeTo",
- "https://poilv.github.io/": "我的导航"
+ "https://poilv.github.io/": "我的导航",
+ "https://store.steampowered.com/account/remotestorage": "Steam (service)",
+ "https://www.cloudflare.com/cdn-cgi/trace": "Cloudflare"
 }
