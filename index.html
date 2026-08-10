@@ -133,10 +133,13 @@ const hostOf = url => {
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
 async function loadTitles() {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 4000);
   try {
-    const r = await fetch("titles.json", { cache: "no-store" });
+    const r = await fetch("titles.json", { cache: "no-store", signal: c.signal });
     if (r.ok) titlesJson = await r.json();
   } catch (e) {}
+  finally { clearTimeout(t); }
 }
 function titleOf(url) { return titlesJson[url] || ""; }
 const FAV_SOURCES = [
@@ -244,6 +247,7 @@ function render(q) {
 }
 
 CONFIG.forEach(c => total += c.links.length);
+render("");
 loadTitles().then(() => render(""));
 let debounceId;
 search.addEventListener("input", e => {
