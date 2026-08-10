@@ -80,12 +80,12 @@ async function ddgFallback(url) {
     if (!r.ok) return { title: "", icon: "" };
     const j = await r.json();
     let title = "", icon = "";
+    if (j.Heading) title = clean(j.Heading);
     const res = (j.Results || [])[0];
-    if (res) {
+    if (!title && res) {
       title = clean(res.Text);
       if (res.Icon && res.Icon.URL && /^https?:/.test(res.Icon.URL)) icon = res.Icon.URL;
     }
-    if (!title && j.Heading) title = clean(j.Heading);
     if (!title && res && res.FirstURL) {
       const m = res.FirstURL.match(/^https?:\/\/([^\/]+)/);
       title = clean(m ? m[1] : "");
