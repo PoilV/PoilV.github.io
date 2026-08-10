@@ -90,18 +90,18 @@ try { titles = JSON.parse(fs.readFileSync(titlesPath, "utf8")); } catch (e) {}
 try { icons = JSON.parse(fs.readFileSync(iconsPath, "utf8")); } catch (e) {}
 
 const CONCURRENCY = 10;
-let idx = 0, okTitle = 0, okIcon = 0;
+let idx = 0, tChanged = 0, iChanged = 0;
 async function worker() {
   while (idx < urls.length) {
     const url = urls[idx++];
     const { title, icon } = await fetchPage(url);
-    if (title) { titles[url] = title; okTitle++; }
-    if (icon) { icons[url] = icon; okIcon++; }
+    if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
+    if (icon && icon !== icons[url]) { icons[url] = icon; iChanged++; }
   }
 }
 (async () => {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
   fs.writeFileSync(titlesPath, JSON.stringify(titles, null, 1) + "\n");
   fs.writeFileSync(iconsPath, JSON.stringify(icons, null, 1) + "\n");
-  console.log(`done: ${okTitle} titles, ${okIcon} icons (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);
+  console.log(`done: ${tChanged} titles changed, ${iChanged} icons changed (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);
 })().catch(e => { console.error(e); process.exit(1); });
