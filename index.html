@@ -1,7 +1,255 @@
 <!DOCTYPE html>
-<html>
- <body>
-   <h1>Hello, GitHub Pages!</h1>
-   <p>这是我的第一个 GitHub Pages 网站。</p>
- </body>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的导航</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script>
+try {
+  var t = localStorage.getItem("theme");
+  if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", t);
+} catch (e) {}
+</script>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #1f2329;
+    --muted: #8a919f;
+    --border: #e4e7ed;
+    --accent: #e8772e;
+    --shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  [data-theme="dark"] {
+    --bg: #14161a;
+    --card: #1e2126;
+    --text: #e6e8eb;
+    --muted: #8a919f;
+    --border: #2b2f36;
+    --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    transition: background .3s, color .3s;
+    min-height: 100vh;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: 16px 24px;
+    display: flex; align-items: center; gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 20px; font-weight: 700; white-space: nowrap; }
+  #search {
+    flex: 1; max-width: 520px; margin: 0 auto;
+    padding: 10px 16px; font-size: 14px;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); outline: none;
+  }
+  #search:focus { border-color: var(--accent); }
+  #themeBtn {
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 14px;
+  }
+  #themeBtn:hover { border-color: var(--accent); }
+  .count { color: var(--muted); font-size: 13px; text-align: center; padding: 10px; display: none; }
+  section { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
+  section h2 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: 600; margin-bottom: 14px;
+  }
+  section h2::before {
+    content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent);
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  a.card {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; text-decoration: none; color: var(--text);
+    box-shadow: var(--shadow); transition: transform .15s, border-color .15s;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  a.card img { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; background: #fff; }
+  a.card .fb {
+    display: none; width: 32px; height: 32px; border-radius: 8px;
+    background: var(--border); color: var(--muted);
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+    align-items: center; justify-content: center;
+  }
+  a.card .info { min-width: 0; }
+  a.card .name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.card .host { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .no-result { text-align: center; color: var(--muted); padding: 60px 0; display: none; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>我的导航</h1>
+  <input id="search" type="text" placeholder="搜索链接、名称或网址…">
+  <button id="themeBtn" title="切换明暗">🌙</button>
+</header>
+
+<div class="count" id="count"></div>
+<div class="no-result" id="noResult">没有匹配的链接</div>
+
+<div id="content"></div>
+
+<footer>PoilV · 个人导航</footer>
+
+<script src="links.js"></script>
+<script>
+const state = { theme: document.documentElement.getAttribute("data-theme") || "light" };
+
+const themeBtn = document.getElementById("themeBtn");
+const mq = matchMedia("(prefers-color-scheme: dark)");
+function applyTheme() {
+  document.documentElement.setAttribute("data-theme", state.theme);
+  themeBtn.textContent = state.theme === "dark" ? "☀️" : "🌙";
+}
+mq.addEventListener("change", e => {
+  if (localStorage.getItem("theme")) return;
+  state.theme = e.matches ? "dark" : "light";
+  applyTheme();
+});
+applyTheme();
+themeBtn.onclick = () => {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  applyTheme();
+  localStorage.setItem("theme", state.theme);
+};
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const hostOf = url => {
+  try { return new URL(url).hostname; } catch (e) { return ""; }
+};
+const nhost = h => h.replace(/^www\./, "");
+let titlesJson = {};
+async function loadTitles() {
+  try {
+    const r = await fetch("titles.json", { cache: "no-store" });
+    if (r.ok) titlesJson = await r.json();
+  } catch (e) {}
+}
+function titleOf(url) { return titlesJson[url] || ""; }
+const FAV_SOURCES = [
+  { id: "direct", url: h => "https://" + h + "/favicon.ico" },
+  { id: "faviconim", url: h => "https://favicon.im/" + h },
+  { id: "ddg", url: h => "https://icons.duckduckgo.com/ip3/" + h + ".ico" },
+  { id: "google", url: h => "https://www.google.com/s2/favicons?domain=" + h + "&sz=64" },
+];
+let favSource = null;
+let probePromise = null;
+const pendingFavs = [];
+const probeFavicons = host => new Promise(resolve => {
+  let i = 0, done = false;
+  const next = () => {
+    if (done) return;
+    if (i >= FAV_SOURCES.length) { done = true; resolve(null); return; }
+    const s = FAV_SOURCES[i++];
+    const img = new Image();
+    const finish = ok => {
+      if (done) return;
+      done = true;
+      resolve(ok ? s : null);
+    };
+    img.onload = () => finish(true);
+    img.onerror = () => finish(false);
+    img.src = s.url(host);
+    setTimeout(() => finish(false), 5000);
+  };
+  next();
+});
+const showFallback = img => {
+  img.onerror = null;
+  img.onload = null;
+  const fb = img.parentElement && img.parentElement.querySelector(".fb");
+  img.remove();
+  if (fb) fb.style.display = "flex";
+};
+function setFavicon(img, host) {
+  if (!host) { showFallback(img); return; }
+  if (img.dataset.icon) {
+    img.onerror = () => {
+      img.dataset.icon = "";
+      setFavicon(img, host);
+    };
+    img.src = img.dataset.icon;
+    return;
+  }
+  const assign = () => {
+    if (!favSource) { showFallback(img); return; }
+    img.onerror = () => showFallback(img);
+    img.src = favSource.url(host);
+  };
+  if (favSource) { assign(); return; }
+  pendingFavs.push([img, host]);
+  if (!probePromise) {
+    probePromise = probeFavicons(host).then(s => {
+      favSource = s;
+      for (const [im, h] of pendingFavs.splice(0)) {
+        const a = () => {
+          if (!favSource) { showFallback(im); return; }
+          im.onerror = () => showFallback(im);
+          im.src = favSource.url(h);
+        };
+        a();
+      }
+    });
+  }
+}
+const cardHTML = link => {
+  const host = hostOf(link.url);
+  const name = link.name || titleOf(link.url) || host;
+  return `
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link.url)}">
+      <img alt="" loading="lazy" data-icon="${esc(link.icon || "")}">
+      <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
+      <span class="info">
+        <span class="name">${esc(name)}</span>
+        <span class="host">${esc(host)}</span>
+      </span>
+    </a>`;
+};
+
+const content = document.getElementById("content");
+const countEl = document.getElementById("count");
+const noResult = document.getElementById("noResult");
+const search = document.getElementById("search");
+let total = 0;
+
+function render(q) {
+  q = (q || "").trim().toLowerCase();
+  let html = "", matched = 0;
+  for (const cat of CONFIG) {
+    const links = cat.links.filter(l =>
+      !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
+    );
+    if (!links.length) continue;
+    matched += links.length;
+    html += `<section><h2>${esc(cat.name)}</h2><div class="grid">${links.map(cardHTML).join("")}</div></section>`;
+  }
+  content.innerHTML = html;
+  content.querySelectorAll("a.card img").forEach(img => setFavicon(img, hostOf(img.closest("a").dataset.url)));
+  countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${matched} 条` : ""}`;
+  countEl.style.display = q ? "block" : "none";
+  noResult.style.display = q && !matched ? "block" : "none";
+}
+
+CONFIG.forEach(c => total += c.links.length);
+loadTitles().then(() => render(""));
+let debounceId;
+search.addEventListener("input", e => {
+  clearTimeout(debounceId);
+  debounceId = setTimeout(() => render(e.target.value), 200);
+});
+</script>
+</body>
 </html>
