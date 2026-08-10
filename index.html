@@ -75,7 +75,7 @@ try {
     box-shadow: var(--shadow); transition: transform .15s, border-color .15s;
   }
   a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
-  a.card img { width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0; background: #fff; }
+  a.card img { width: 32px; height: 32px; padding: 4px; object-fit: contain; border-radius: 8px; background: var(--border); flex-shrink: 0; }
   a.card .fb {
     display: none; width: 32px; height: 32px; border-radius: 8px;
     background: var(--border); color: var(--muted);
@@ -83,8 +83,8 @@ try {
     align-items: center; justify-content: center;
   }
   a.card .info { min-width: 0; }
-  a.card .name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  a.card .host { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.card .host { display: block; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .no-result { text-align: center; color: var(--muted); padding: 60px 0; display: none; }
   footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; }
 </style>
@@ -132,12 +132,13 @@ const hostOf = url => {
 };
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
-async function loadTitles() {
+let iconsJson = {};
+async function loadJson(name, target) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 4000);
   try {
-    const r = await fetch("titles.json", { cache: "no-store", signal: c.signal });
-    if (r.ok) titlesJson = await r.json();
+    const r = await fetch(name, { cache: "no-store", signal: c.signal });
+    if (r.ok) Object.assign(target, await r.json());
   } catch (e) {}
   finally { clearTimeout(t); }
 }
@@ -179,6 +180,9 @@ const showFallback = img => {
 };
 function setFavicon(img, host) {
   if (!host) { showFallback(img); return; }
+  const a = img.closest("a");
+  const url = a && a.dataset.url;
+  if (!img.dataset.icon && url && iconsJson[url]) img.dataset.icon = iconsJson[url];
   if (img.dataset.icon) {
     img.onerror = () => {
       img.dataset.icon = "";
@@ -216,8 +220,8 @@ const cardHTML = link => {
       <img alt="" loading="lazy" data-icon="${esc(link.icon || "")}">
       <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
       <span class="info">
-        <span class="name">${esc(name)}</span>
-        <span class="host">${esc(host)}</span>
+        <span class="name" title="${esc(name)}">${esc(name)}</span>
+        <span class="host" title="${esc(host)}">${esc(host)}</span>
       </span>
     </a>`;
 };
@@ -248,7 +252,8 @@ function render(q) {
 
 CONFIG.forEach(c => total += c.links.length);
 render("");
-loadTitles().then(() => render(""));
+loadJson("titles.json", titlesJson).then(() => render(""));
+loadJson("icons.json", iconsJson).then(() => render(""));
 let debounceId;
 search.addEventListener("input", e => {
   clearTimeout(debounceId);
