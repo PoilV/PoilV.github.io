@@ -119,7 +119,7 @@ async function fetchPage(url) {
         if (!title) title = fb.title;
         if (!icon) icon = fb.icon;
       }
-      if (!icon) icon = "https://icons.duckduckgo.com/ip3/" + new URL(url).hostname + ".ico";
+      if (!icon) icon = "https://favicon.im/" + new URL(url).hostname;
     }
     return { title, icon };
   } catch (e) {
