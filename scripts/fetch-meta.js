@@ -45,7 +45,7 @@ const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 async function ddgFallback(url) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
-    const r = await fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(host) + "&format=json&no_html=1&no_redirect=1", {
+    const r = await fetch("https://api.duckduckgo.com/?q=" + encodeURIComponent(host) + "&format=json&no_html=1&no_redirect=1&kl=cn-zh", {
       headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
     });
     if (!r.ok) return { title: "", icon: "" };
