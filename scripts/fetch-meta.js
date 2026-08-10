@@ -19,6 +19,16 @@ const ICON_RES = [
   /<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut\s+)?icon["']/i,
   /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i
 ];
+const BAD_PAGE_TITLES = [
+  /^lark\b/i,
+  /security verification/i,
+  /sina visitor system/i,
+  /^alibaba cloud/i,
+  /x\. it'?s what'?s happening/i,
+  /just a moment/i,
+  /attention required/i,
+  /access denied/i
+];
 const parseIcon = (html, url) => {
   for (const re of ICON_RES) {
     const m = html.match(re);
@@ -69,6 +79,7 @@ async function fetchPage(url) {
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     let title = m ? clean(m[1]) : "";
+    if (title && BAD_PAGE_TITLES.some(re => re.test(title))) title = "";
     let icon = parseIcon(html, url);
     if (!title || !icon) {
       const fb = await ddgFallback(url);
