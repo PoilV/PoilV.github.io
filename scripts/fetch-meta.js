@@ -42,6 +42,35 @@ const parseIcon = (html, url) => {
 };
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+const isBadTitle = s => BAD_PAGE_TITLES.some(re => re.test(s));
+async function bingSearch(host) {
+  try {
+    const r = await fetch("https://cn.bing.com/search?q=" + encodeURIComponent(host) + "&mkt=zh-CN", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) return "";
+    const html = await r.text();
+    const m = html.match(/<h2[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>\s*<\/h2>/i);
+    const t = m ? clean(m[1]) : "";
+    return t && !isBadTitle(t) ? t : "";
+  } catch (e) {
+    return "";
+  }
+}
+async function baiduSearch(host) {
+  try {
+    const r = await fetch("https://www.baidu.com/s?wd=" + encodeURIComponent(host), {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) return "";
+    const html = await r.text();
+    const m = html.match(/<h3[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h3>/i);
+    const t = m ? clean(m[1]) : "";
+    return t && !isBadTitle(t) ? t : "";
+  } catch (e) {
+    return "";
+  }
+}
 async function ddgFallback(url) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
@@ -79,14 +108,19 @@ async function fetchPage(url) {
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     let title = m ? clean(m[1]) : "";
-    if (title && BAD_PAGE_TITLES.some(re => re.test(title))) title = "";
+    if (title && isBadTitle(title)) title = "";
     let icon = parseIcon(html, url);
     if (!title || !icon) {
-      const fb = await ddgFallback(url);
-      if (!title) title = fb.title;
-      if (!icon) icon = fb.icon;
+      const hostname = new URL(url).hostname.replace(/^www\./, "");
+      if (!title) title = await bingSearch(hostname);
+      if (!title) title = await baiduSearch(hostname);
+      if (!title || !icon) {
+        const fb = await ddgFallback(url);
+        if (!title) title = fb.title;
+        if (!icon) icon = fb.icon;
+      }
+      if (!icon) icon = "https://icons.duckduckgo.com/ip3/" + new URL(url).hostname + ".ico";
     }
-    if (!icon) icon = "https://icons.duckduckgo.com/ip3/" + new URL(url).hostname + ".ico";
     return { title, icon };
   } catch (e) {
     return { title: "", icon: "" };
