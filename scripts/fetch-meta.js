@@ -184,14 +184,12 @@ async function fetchPage(url) {
     if (!title) title = await baiduSearch(hostname);
     let icon = parseIcon(html, url);
     if (!icon) icon = await directFavicon(url);
-    if (icon) {
-      const data = await toDataUri(icon);
-      if (data) icon = data;
-    }
+    if (icon) icon = await toDataUri(icon);
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    const icon = await directFavicon(url);
+    const direct = await directFavicon(url);
+    const icon = direct ? await toDataUri(direct) : "";
     return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
