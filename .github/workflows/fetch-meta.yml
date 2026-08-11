@@ -17,6 +17,8 @@ jobs:
           node-version: 20
       - name: Validate JSON
         run: node -e "['links.json','data/titles.json','data/icons.json'].forEach(f => JSON.parse(require('fs').readFileSync(f,'utf8'))); console.log('all json valid')"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
       - run: node scripts/fetch-meta.js
       - name: Commit data
         run: |

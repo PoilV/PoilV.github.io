@@ -135,6 +135,8 @@ async function directFavicon(url) {
     return "";
   }
 }
+let sharp = null;
+try { sharp = require("sharp"); } catch (e) {}
 async function toDataUri(iconUrl) {
   try {
     const r = await fetch(iconUrl, {
@@ -142,10 +144,22 @@ async function toDataUri(iconUrl) {
     });
     if (!r.ok) return "";
     const ct = r.headers.get("content-type") || "";
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 1024 * 1024) return "";
+    if (/svg/.test(ct) || /\.svg($|\?)/i.test(iconUrl)) {
+      if (buf.length > 20 * 1024) return "";
+      return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8"));
+    }
     if (!/^image\//.test(ct)) return "";
-    const buf = await r.arrayBuffer();
-    if (buf.byteLength > 40 * 1024) return "";
-    return "data:" + ct + ";base64," + Buffer.from(buf).toString("base64");
+    if (sharp) {
+      const png = await sharp(buf, { density: 96 })
+        .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .png()
+        .toBuffer();
+      if (png.length < 20 * 1024) return "data:image/png;base64," + png.toString("base64");
+    }
+    if (buf.length > 40 * 1024) return "";
+    return "data:" + ct + ";base64," + buf.toString("base64");
   } catch (e) {
     return "";
   }
