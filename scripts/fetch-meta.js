@@ -34,7 +34,7 @@ const BAD_PAGE_TITLES = [
   /security verification/i,
   /sina visitor system/i,
   /^alibaba cloud/i,
-  /x\. it'?s what'?s happening/i,
+  /x\. it[’']?s what[’']?s happening/i,
   /just a moment/i,
   /attention required/i,
   /access denied/i,
