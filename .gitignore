@@ -3,3 +3,5 @@
 .claude/
 bookmarks.html
 *.png
+node_modules/
+package-lock.json

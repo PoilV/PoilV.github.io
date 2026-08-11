@@ -147,7 +147,7 @@ async function toDataUri(iconUrl) {
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 1024 * 1024) return "";
     if (/svg/.test(ct) || /\.svg($|\?)/i.test(iconUrl)) {
-      if (buf.length > 20 * 1024) return "";
+      if (buf.length > 50 * 1024) return "";
       return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8"));
     }
     if (!/^image\//.test(ct)) return "";
@@ -156,10 +156,9 @@ async function toDataUri(iconUrl) {
         .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
-      if (webp.length < 20 * 1024) return "data:image/webp;base64," + webp.toString("base64");
+      if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
     }
-    if (buf.length > 40 * 1024) return "";
-    return "data:" + ct + ";base64," + buf.toString("base64");
+    return "";
   } catch (e) {
     return "";
   }
@@ -211,7 +210,12 @@ async function worker() {
     const url = urls[idx++];
     const { title, icon } = await fetchPage(url);
     if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
-    if (icon && icon !== icons[url]) { icons[url] = icon; iChanged++; }
+    if (icon) {
+      if (icon !== icons[url]) { icons[url] = icon; iChanged++; }
+    } else if (icons[url] && !icons[url].startsWith("data:image/")) {
+      delete icons[url];
+      iChanged++;
+    }
   }
 }
 (async () => {
