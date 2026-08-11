@@ -70,121 +70,8 @@ const parseIcon = (html, url) => {
 };
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
-const LOBE_ICONS = {
-  "chat.deepseek.com": "deepseek",
-  "platform.deepseek.com": "deepseek",
-  "www.doubao.com": "doubao",
-  "chatgpt.com": "openai",
-  "gemini.google.com": "gemini",
-  "claude.ai": "claude",
-  "civitai.com": "civitai",
-  "civitai.red": "civitai",
-  "civitai.red": "civitai",
-  "huggingface.co": "huggingface",
-  "openrouter.ai": "openrouter",
-  "www.tavily.com": "tavily",
-  "www.vidu.cn": "vidu",
-  "docs.sillytavern.app": "sillytavern",
-  "bigmodel.cn": "zhipu",
-  "minimaxi.com": "minimax",
-  "klingai.com": "kling",
-  "www.aliyun.com": "alibaba",
-  "console.cloud.tencent.com": "tencent",
-  "dash.cloudflare.com": "cloudflare",
-  "www.cloudflare.com": "cloudflare",
-  "github.com": "github",
-  "pan.baidu.com": "baidu",
-  "photo.baidu.com": "baidu",
-  "www.bilibili.com": "bilibili",
-  "ppio.com": "ppio"
-};
-const SVGLOGO_ICONS = {
-  "www.feishu.cn": ["social", "feiShu"],
-  "weibo.com": ["social", "weiBo"],
-  "m.weibo.cn": ["social", "weiBo"],
-  "www.xiaohongshu.com": ["social", "xiaoHongShu"],
-  "q.qq.com": ["social", "QQ"],
-  "mail.qq.com": ["social", "QQ"],
-  "www.douyin.com": ["social", "douYin"],
-  "fanyi.caiyunapp.com": ["tools", "caiyunapp"],
-  "www.aliyun.com": ["tools", "aliyun"],
-  "www.alipan.com": ["tools", "alipan"]
-};
-async function fetchSvg(url) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const r = await fetch(url, {
-        headers: { "User-Agent": UA }, signal: AbortSignal.timeout(15000), redirect: "follow"
-      });
-      if (!r.ok) continue;
-      const txt = await r.text();
-      if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
-      return txt;
-    } catch (e) {}
-  }
-  return "";
-}
-async function svglogoIcon(url) {
-  const hit = SVGLOGO_ICONS[new URL(url).hostname];
-  if (!hit) return "";
-  const txt = await fetchSvg("https://raw.githubusercontent.com/HeyHuazi/SVGLOGO/main/static/library/" + hit[0] + "/" + hit[1] + ".svg");
-  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
-}
-const GILBARBARA_ICONS = {
-  "x.com": "x",
-  "discord.com": "discord",
-  "www.reddit.com": "reddit",
-  "www.instagram.com": "instagram",
-  "www.youtube.com": "youtube",
-  "music.youtube.com": "youtube",
-  "open.spotify.com": "spotify",
-  "www.pinterest.com": "pinterest",
-  "www.dropbox.com": "dropbox",
-  "www.tiktok.com": "tiktok",
-  "store.steampowered.com": "steam",
-  "duck.ai": "duckduckgo"
-};
-async function gilbarbaraIcon(url) {
-  const name = GILBARBARA_ICONS[new URL(url).hostname];
-  if (!name) return "";
-  const txt = await fetchSvg("https://raw.githubusercontent.com/gilbarbara/logos/main/logos/" + name + ".svg");
-  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
-}
-async function lobeIcon(url) {
-  const name = LOBE_ICONS[new URL(url).hostname];
-  if (!name) return "";
-  const txt = await fetchSvg("https://cdn.jsdelivr.net/gh/lobehub/lobe-icons@latest/packages/static-svg/icons/" + name + ".svg");
-  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
-}
 const isBadTitle = s => BAD_PAGE_TITLES.some(re => re.test(s));
-async function bingSearch(host) {
-  try {
-    const r = await fetch("https://cn.bing.com/search?q=" + encodeURIComponent(host) + "&mkt=zh-CN", {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
-    });
-    if (!r.ok) return "";
-    const html = await r.text();
-    const m = html.match(/<h2[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>\s*<\/h2>/i);
-    const t = m ? clean(m[1]) : "";
-    return t && !isBadTitle(t) ? t : "";
-  } catch (e) {
-    return "";
-  }
-}
-async function baiduSearch(host) {
-  try {
-    const r = await fetch("https://www.baidu.com/s?wd=" + encodeURIComponent(host), {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000)
-    });
-    if (!r.ok) return "";
-    const html = await r.text();
-    const m = html.match(/<h3[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h3>/i);
-    const t = m ? clean(m[1]) : "";
-    return t && !isBadTitle(t) ? t : "";
-  } catch (e) {
-    return "";
-  }
-}
+
 async function ddgFallback(url) {
   try {
     const host = new URL(url).hostname.replace(/^www\./, "");
@@ -207,20 +94,7 @@ async function ddgFallback(url) {
     return { title: "", icon: "" };
   }
 }
-async function directFavicon(url) {
-  try {
-    const base = new URL(url).origin;
-    const r = await fetch(base + "/favicon.ico", {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000), redirect: "follow"
-    });
-    if (!r.ok) return "";
-    const ct = r.headers.get("content-type") || "";
-    if (!/^image\//.test(ct)) return "";
-    return base + "/favicon.ico";
-  } catch (e) {
-    return "";
-  }
-}
+
 let sharp = null;
 try { sharp = require("sharp"); } catch (e) {}
 async function toDataUri(iconUrl) {
@@ -260,7 +134,6 @@ async function toDataUri(iconUrl) {
     return "";
   }
 }
-const libIcon = async url => (await lobeIcon(url)) || (await svglogoIcon(url)) || (await gilbarbaraIcon(url));
 async function ddgIcon(url) {
   const host = new URL(url).hostname;
   try {
@@ -286,34 +159,43 @@ async function ddgIcon(url) {
     return "";
   }
 }
+async function directFavicon(url) {
+  try {
+    const base = new URL(url).origin;
+    const r = await fetch(base + "/favicon.ico", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(8000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    if (!/^image\//.test(ct)) return "";
+    return base + "/favicon.ico";
+  } catch (e) {
+    return "";
+  }
+}
+
 async function fetchPage(url) {
   const c = new AbortController();
-  const t = setTimeout(() => c.abort(), 12000);
+  const t = setTimeout(() => c.abort(), 15000);
   try {
-    const r = await fetch(url, {
+    const rP = fetch(url, {
       headers: { "User-Agent": UA, "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" },
-      signal: c.signal,
-      redirect: "follow"
+      signal: c.signal, redirect: "follow"
     });
+    const [r, fb] = await Promise.all([rP, ddgFallback(url)]);
+    let title = fb.title;
+    let icon = await ddgIcon(url);
     if (!r.ok) {
-      const fb = await ddgFallback(url);
-      let icon = await ddgIcon(url) || await libIcon(url);
       if (!icon) {
         const direct = await directFavicon(url);
         if (direct) icon = await toDataUri(direct);
       }
-      return { title: fb.title, icon };
+      return { title, icon };
     }
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     const pageTitle = m ? clean(m[1]) : "";
-    const hostname = new URL(url).hostname.replace(/^www\./, "");
-    const fb = await ddgFallback(url);
-    let title = fb.title;
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
-    if (!title) title = await bingSearch(hostname);
-    if (!title) title = await baiduSearch(hostname);
-    let icon = await ddgIcon(url) || await libIcon(url);
     if (!icon) {
       const u = parseIcon(html, url) || await directFavicon(url);
       if (u) icon = await toDataUri(u);
@@ -321,7 +203,11 @@ async function fetchPage(url) {
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    const icon = await ddgIcon(url) || await libIcon(url);
+    let icon = await ddgIcon(url);
+    if (!icon) {
+      const direct = await directFavicon(url);
+      if (direct) icon = await toDataUri(direct);
+    }
     return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
@@ -340,12 +226,7 @@ async function worker() {
     const url = urls[idx++];
     const { title, icon } = await fetchPage(url);
     if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
-    if (icon) {
-      if (icon !== icons[url]) { icons[url] = icon; iChanged++; }
-    } else if (icons[url] && !icons[url].startsWith("data:image/")) {
-      delete icons[url];
-      iChanged++;
-    }
+    if (icon && icon !== icons[url]) { icons[url] = icon; iChanged++; }
   }
 }
 (async () => {
