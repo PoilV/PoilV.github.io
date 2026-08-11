@@ -79,6 +79,7 @@ const LOBE_ICONS = {
   "claude.ai": "claude",
   "civitai.com": "civitai",
   "civitai.red": "civitai",
+  "civitai.red": "civitai",
   "huggingface.co": "huggingface",
   "openrouter.ai": "openrouter",
   "www.tavily.com": "tavily",
@@ -109,20 +110,25 @@ const SVGLOGO_ICONS = {
   "www.aliyun.com": ["tools", "aliyun"],
   "www.alipan.com": ["tools", "alipan"]
 };
+async function fetchSvg(url) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(url, {
+        headers: { "User-Agent": UA }, signal: AbortSignal.timeout(15000), redirect: "follow"
+      });
+      if (!r.ok) continue;
+      const txt = await r.text();
+      if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
+      return txt;
+    } catch (e) {}
+  }
+  return "";
+}
 async function svglogoIcon(url) {
   const hit = SVGLOGO_ICONS[new URL(url).hostname];
   if (!hit) return "";
-  try {
-    const r = await fetch("https://raw.githubusercontent.com/HeyHuazi/SVGLOGO/main/static/library/" + hit[0] + "/" + hit[1] + ".svg", {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
-    });
-    if (!r.ok) return "";
-    const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
-    return "data:image/svg+xml," + encodeURIComponent(txt);
-  } catch (e) {
-    return "";
-  }
+  const txt = await fetchSvg("https://raw.githubusercontent.com/HeyHuazi/SVGLOGO/main/static/library/" + hit[0] + "/" + hit[1] + ".svg");
+  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
 }
 const GILBARBARA_ICONS = {
   "x.com": "x",
@@ -141,32 +147,14 @@ const GILBARBARA_ICONS = {
 async function gilbarbaraIcon(url) {
   const name = GILBARBARA_ICONS[new URL(url).hostname];
   if (!name) return "";
-  try {
-    const r = await fetch("https://raw.githubusercontent.com/gilbarbara/logos/main/logos/" + name + ".svg", {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
-    });
-    if (!r.ok) return "";
-    const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
-    return "data:image/svg+xml," + encodeURIComponent(txt);
-  } catch (e) {
-    return "";
-  }
+  const txt = await fetchSvg("https://raw.githubusercontent.com/gilbarbara/logos/main/logos/" + name + ".svg");
+  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
 }
 async function lobeIcon(url) {
   const name = LOBE_ICONS[new URL(url).hostname];
   if (!name) return "";
-  try {
-    const r = await fetch("https://cdn.jsdelivr.net/gh/lobehub/lobe-icons@latest/packages/static-svg/icons/" + name + ".svg", {
-      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
-    });
-    if (!r.ok) return "";
-    const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
-    return "data:image/svg+xml," + encodeURIComponent(txt);
-  } catch (e) {
-    return "";
-  }
+  const txt = await fetchSvg("https://cdn.jsdelivr.net/gh/lobehub/lobe-icons@latest/packages/static-svg/icons/" + name + ".svg");
+  return txt ? "data:image/svg+xml," + encodeURIComponent(txt) : "";
 }
 const isBadTitle = s => BAD_PAGE_TITLES.some(re => re.test(s));
 async function bingSearch(host) {
