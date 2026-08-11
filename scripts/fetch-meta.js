@@ -152,11 +152,11 @@ async function toDataUri(iconUrl) {
     }
     if (!/^image\//.test(ct)) return "";
     if (sharp) {
-      const png = await sharp(buf, { density: 96 })
+      const webp = await sharp(buf, { density: 96 })
         .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .png()
+        .webp()
         .toBuffer();
-      if (png.length < 20 * 1024) return "data:image/png;base64," + png.toString("base64");
+      if (webp.length < 20 * 1024) return "data:image/webp;base64," + webp.toString("base64");
     }
     if (buf.length > 40 * 1024) return "";
     return "data:" + ct + ";base64," + buf.toString("base64");
