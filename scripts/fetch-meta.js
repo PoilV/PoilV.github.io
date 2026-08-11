@@ -95,8 +95,12 @@ async function ddgFallback(url) {
   }
 }
 
-let sharp = null;
-try { sharp = require("sharp"); } catch (e) {}
+const icoSize = buf => {
+  if (buf.length < 22 || buf[0] !== 0 || buf[1] !== 0 || buf[2] !== 1 || buf[3] !== 0) return null;
+  const count = buf.readUInt16LE(4);
+  if (count < 1) return null;
+  return { w: buf[6] || 256, h: buf[7] || 256 };
+};
 async function toDataUri(iconUrl) {
   try {
     const r = await fetch(iconUrl, {
@@ -119,15 +123,6 @@ async function toDataUri(iconUrl) {
       if (buf.length > 50 * 1024) return "";
       return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8"));
     }
-    if (sharp) {
-      try {
-        const webp = await sharp(buf, { density: 96 })
-          .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-          .webp()
-          .toBuffer();
-        if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
-      } catch (e) {}
-    }
     if (buf.length <= 40 * 1024) return "data:" + ct + ";base64," + buf.toString("base64");
     return "";
   } catch (e) {
@@ -143,17 +138,19 @@ async function ddgIcon(url) {
     if (!r.ok) return "";
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 1024 * 1024) return "";
-    if (sharp) {
-      try {
-        const meta = await sharp(buf).metadata();
-        if (meta.width === 48 && meta.height === 48) return "";
-        const webp = await sharp(buf)
-          .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-          .webp()
-          .toBuffer();
-        if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
-      } catch (e) {}
+    const size = icoSize(buf);
+    if (size && size.w === 48 && size.h === 48) return "";
+    if (!size) {
+      const head = buf.toString("utf8", 0, 200);
+      const isImage =
+        (buf[0] === 0x89 && buf[1] === 0x50) ||
+        (buf[0] === 0xff && buf[1] === 0xd8) ||
+        head.slice(0, 4) === "GIF8" ||
+        (head.slice(0, 4) === "RIFF" && head.slice(8, 12) === "WEBP") ||
+        /^\s*<svg/i.test(head);
+      if (!isImage) return "";
     }
+    if (buf.length <= 40 * 1024) return "data:image/x-icon;base64," + buf.toString("base64");
     return "";
   } catch (e) {
     return "";
