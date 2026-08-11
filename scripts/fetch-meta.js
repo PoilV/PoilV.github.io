@@ -118,7 +118,7 @@ async function svglogoIcon(url) {
     });
     if (!r.ok) return "";
     const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
     return "data:image/svg+xml," + encodeURIComponent(txt);
   } catch (e) {
     return "";
@@ -147,7 +147,7 @@ async function gilbarbaraIcon(url) {
     });
     if (!r.ok) return "";
     const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
     return "data:image/svg+xml," + encodeURIComponent(txt);
   } catch (e) {
     return "";
@@ -162,7 +162,7 @@ async function lobeIcon(url) {
     });
     if (!r.ok) return "";
     const txt = await r.text();
-    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    if (txt.length > 50 * 1024 || !/<\s*svg[\s>]/i.test(txt)) return "";
     return "data:image/svg+xml," + encodeURIComponent(txt);
   } catch (e) {
     return "";
