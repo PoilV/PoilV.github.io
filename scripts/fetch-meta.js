@@ -20,7 +20,7 @@ const decodeEntities = s => s
   .replace(/&#39;/g, "'");
 const clean = s => {
   s = decodeEntities(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  const seg = s.split(/[|｜]/)[0].split(/[-–—]/)[0].trim().slice(0, 60);
+  const seg = s.split(/[|｜\-–—：:·…]|\.\.\./)[0].trim().slice(0, 60);
   if (!seg || seg.length < 3 || /^error[:\s]/i.test(seg) || BAD.has(seg.toLowerCase())) return "";
   return seg;
 };
@@ -37,7 +37,25 @@ const BAD_PAGE_TITLES = [
   /x\. it'?s what'?s happening/i,
   /just a moment/i,
   /attention required/i,
-  /access denied/i
+  /access denied/i,
+  /^登录/,
+  /登录$/,
+  /^退出中/,
+  /^加载中/,
+  /^首頁/,
+  /^首页/,
+  /^i challenge thee/i,
+  /^context$/i,
+  /^哔哩哔哩\s*\(゜/,
+  /^招聘网_/,
+  /^【孔夫子旧书网】网上买书/,
+  /^天翼云盘\s/,
+  /^一刻相册：/,
+  /^插画、漫画、小说/,
+  /^书生梦工厂/,
+  /^小云雀AI\s/,
+  /^duck\.ai\s/i,
+  /^portable$/i
 ];
 const parseIcon = (html, url) => {
   for (const re of ICON_RES) {
@@ -95,7 +113,7 @@ async function ddgFallback(url) {
       try { rn = new URL(res.FirstURL).hostname.replace(/^www\./, ""); } catch (e) {}
       if (rn && (rn === host || rn.includes(host) || host.includes(rn))) {
         const t = clean(res.Text);
-        if (t) { title = t; break; }
+        if (t && !isBadTitle(t)) { title = t; break; }
       }
     }
     return { title, icon: "" };
