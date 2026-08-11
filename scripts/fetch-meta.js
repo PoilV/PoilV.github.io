@@ -20,8 +20,9 @@ const decodeEntities = s => s
   .replace(/&#39;/g, "'");
 const clean = s => {
   s = decodeEntities(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  if (!s || s.length < 3 || /^error[:\s]/i.test(s) || BAD.has(s.toLowerCase())) return "";
-  return s.split(/[|｜]/)[0].split(/[-–—]/)[0].trim().slice(0, 60);
+  const seg = s.split(/[|｜]/)[0].split(/[-–—]/)[0].trim().slice(0, 60);
+  if (!seg || seg.length < 3 || /^error[:\s]/i.test(seg) || BAD.has(seg.toLowerCase())) return "";
+  return seg;
 };
 const ICON_RES = [
   /<link[^>]*rel=["'](?:shortcut\s+)?icon["'][^>]*href=["']([^"']+)["']/i,
