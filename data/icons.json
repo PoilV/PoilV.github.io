@@ -117,5 +117,7 @@
  "https://www.douyin.com/": "https://www.douyin.com/favicon.ico",
  "https://huaban.com/": "https://huaban.com/favicon.ico",
  "https://www.cloudflare.com/cdn-cgi/trace": "https://www.cloudflare.com/favicon.ico",
- "https://ppio.com/": "https://ppio.com/favicon.ico"
+ "https://ppio.com/": "https://ppio.com/favicon.ico",
+ "https://chat.deepseek.com/": "https://fe-static.deepseek.com/chat/favicon.svg",
+ "https://platform.deepseek.com/usage": "https://fe-static.deepseek.com/chat/favicon.svg"
 }
