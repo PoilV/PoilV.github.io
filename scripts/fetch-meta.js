@@ -8,9 +8,18 @@ const iconsPath = path.join(repo, "data", "icons.json");
 const cfg = JSON.parse(fs.readFileSync(linksPath, "utf8"));
 const urls = cfg.categories.flatMap(c => c.links).filter(u => /^https?:/.test(u));
 
-const BAD = new Set(["official site", "official website", "homepage", "home page", "search", "login", "sign in"]);
+const BAD = new Set(["official site", "official website", "homepage", "home page", "search", "login", "sign in", "登录", "登入", "请登录", "账户登录"]);
+const decodeEntities = s => s
+  .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+  .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
+  .replace(/&nbsp;/g, " ")
+  .replace(/&amp;/g, "&")
+  .replace(/&lt;/g, "<")
+  .replace(/&gt;/g, ">")
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;/g, "'");
 const clean = s => {
-  s = (s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  s = decodeEntities(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
   if (!s || s.length < 3 || /^error[:\s]/i.test(s) || BAD.has(s.toLowerCase())) return "";
   return s.split(/[|｜]/)[0].split(/[-–—]/)[0].trim().slice(0, 60);
 };
