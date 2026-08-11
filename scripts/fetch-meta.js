@@ -70,6 +70,48 @@ const parseIcon = (html, url) => {
 };
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+const LOBE_ICONS = {
+  "chat.deepseek.com": "deepseek",
+  "platform.deepseek.com": "deepseek",
+  "www.doubao.com": "doubao",
+  "chatgpt.com": "openai",
+  "gemini.google.com": "gemini",
+  "claude.ai": "claude",
+  "civitai.com": "civitai",
+  "civitai.red": "civitai",
+  "huggingface.co": "huggingface",
+  "openrouter.ai": "openrouter",
+  "www.tavily.com": "tavily",
+  "www.vidu.cn": "vidu",
+  "docs.sillytavern.app": "sillytavern",
+  "bigmodel.cn": "zhipu",
+  "minimaxi.com": "minimax",
+  "klingai.com": "kling",
+  "www.aliyun.com": "alibaba",
+  "console.cloud.tencent.com": "tencent",
+  "dash.cloudflare.com": "cloudflare",
+  "www.cloudflare.com": "cloudflare",
+  "github.com": "github",
+  "pan.baidu.com": "baidu",
+  "photo.baidu.com": "baidu",
+  "www.bilibili.com": "bilibili",
+  "ppio.com": "ppio"
+};
+async function lobeIcon(url) {
+  const name = LOBE_ICONS[new URL(url).hostname];
+  if (!name) return "";
+  try {
+    const r = await fetch("https://cdn.jsdelivr.net/gh/lobehub/lobe-icons@latest/packages/static-svg/icons/" + name + ".svg", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const txt = await r.text();
+    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    return "data:image/svg+xml," + encodeURIComponent(txt);
+  } catch (e) {
+    return "";
+  }
+}
 const isBadTitle = s => BAD_PAGE_TITLES.some(re => re.test(s));
 async function bingSearch(host) {
   try {
@@ -193,14 +235,19 @@ async function fetchPage(url) {
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
     if (!title) title = await bingSearch(hostname);
     if (!title) title = await baiduSearch(hostname);
-    let icon = parseIcon(html, url);
-    if (!icon) icon = await directFavicon(url);
-    if (icon) icon = await toDataUri(icon);
+    let icon = await lobeIcon(url);
+    if (!icon) {
+      const u = parseIcon(html, url) || await directFavicon(url);
+      if (u) icon = await toDataUri(u);
+    }
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    const direct = await directFavicon(url);
-    const icon = direct ? await toDataUri(direct) : "";
+    let icon = await lobeIcon(url);
+    if (!icon) {
+      const direct = await directFavicon(url);
+      if (direct) icon = await toDataUri(direct);
+    }
     return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
