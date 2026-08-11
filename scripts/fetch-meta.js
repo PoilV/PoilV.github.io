@@ -261,6 +261,31 @@ async function toDataUri(iconUrl) {
   }
 }
 const libIcon = async url => (await lobeIcon(url)) || (await svglogoIcon(url)) || (await gilbarbaraIcon(url));
+async function ddgIcon(url) {
+  const host = new URL(url).hostname;
+  try {
+    const r = await fetch("https://icons.duckduckgo.com/ip3/" + host + ".ico", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 1024 * 1024) return "";
+    if (sharp) {
+      try {
+        const meta = await sharp(buf).metadata();
+        if (meta.width === 48 && meta.height === 48) return "";
+        const webp = await sharp(buf)
+          .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .webp()
+          .toBuffer();
+        if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
+      } catch (e) {}
+    }
+    return "";
+  } catch (e) {
+    return "";
+  }
+}
 async function fetchPage(url) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -272,7 +297,7 @@ async function fetchPage(url) {
     });
     if (!r.ok) {
       const fb = await ddgFallback(url);
-      let icon = await libIcon(url);
+      let icon = await ddgIcon(url) || await libIcon(url);
       if (!icon) {
         const direct = await directFavicon(url);
         if (direct) icon = await toDataUri(direct);
@@ -288,7 +313,7 @@ async function fetchPage(url) {
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
     if (!title) title = await bingSearch(hostname);
     if (!title) title = await baiduSearch(hostname);
-    let icon = await libIcon(url);
+    let icon = await ddgIcon(url) || await libIcon(url);
     if (!icon) {
       const u = parseIcon(html, url) || await directFavicon(url);
       if (u) icon = await toDataUri(u);
@@ -296,7 +321,7 @@ async function fetchPage(url) {
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    const icon = await libIcon(url);
+    const icon = await ddgIcon(url) || await libIcon(url);
     return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
