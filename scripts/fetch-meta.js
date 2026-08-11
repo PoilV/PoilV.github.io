@@ -97,6 +97,33 @@ const LOBE_ICONS = {
   "www.bilibili.com": "bilibili",
   "ppio.com": "ppio"
 };
+const SVGLOGO_ICONS = {
+  "www.feishu.cn": ["social", "feiShu"],
+  "weibo.com": ["social", "weiBo"],
+  "m.weibo.cn": ["social", "weiBo"],
+  "www.xiaohongshu.com": ["social", "xiaoHongShu"],
+  "q.qq.com": ["social", "QQ"],
+  "mail.qq.com": ["social", "QQ"],
+  "www.douyin.com": ["social", "douYin"],
+  "fanyi.caiyunapp.com": ["tools", "caiyunapp"],
+  "www.aliyun.com": ["tools", "aliyun"],
+  "www.alipan.com": ["tools", "alipan"]
+};
+async function svglogoIcon(url) {
+  const hit = SVGLOGO_ICONS[new URL(url).hostname];
+  if (!hit) return "";
+  try {
+    const r = await fetch("https://raw.githubusercontent.com/HeyHuazi/SVGLOGO/main/static/library/" + hit[0] + "/" + hit[1] + ".svg", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const txt = await r.text();
+    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    return "data:image/svg+xml," + encodeURIComponent(txt);
+  } catch (e) {
+    return "";
+  }
+}
 async function lobeIcon(url) {
   const name = LOBE_ICONS[new URL(url).hostname];
   if (!name) return "";
@@ -235,7 +262,7 @@ async function fetchPage(url) {
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
     if (!title) title = await bingSearch(hostname);
     if (!title) title = await baiduSearch(hostname);
-    let icon = await lobeIcon(url);
+    let icon = await lobeIcon(url) || await svglogoIcon(url);
     if (!icon) {
       const u = parseIcon(html, url) || await directFavicon(url);
       if (u) icon = await toDataUri(u);
@@ -243,7 +270,7 @@ async function fetchPage(url) {
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    let icon = await lobeIcon(url);
+    let icon = await lobeIcon(url) || await svglogoIcon(url);
     if (!icon) {
       const direct = await directFavicon(url);
       if (direct) icon = await toDataUri(direct);
