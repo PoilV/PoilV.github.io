@@ -135,6 +135,21 @@ async function directFavicon(url) {
     return "";
   }
 }
+async function toDataUri(iconUrl) {
+  try {
+    const r = await fetch(iconUrl, {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    if (!/^image\//.test(ct)) return "";
+    const buf = await r.arrayBuffer();
+    if (buf.byteLength > 40 * 1024) return "";
+    return "data:" + ct + ";base64," + Buffer.from(buf).toString("base64");
+  } catch (e) {
+    return "";
+  }
+}
 async function fetchPage(url) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -156,6 +171,10 @@ async function fetchPage(url) {
     if (!title) title = await baiduSearch(hostname);
     let icon = parseIcon(html, url);
     if (!icon) icon = await directFavicon(url);
+    if (icon) {
+      const data = await toDataUri(icon);
+      if (data) icon = data;
+    }
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
