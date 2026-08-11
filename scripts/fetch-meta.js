@@ -124,6 +124,35 @@ async function svglogoIcon(url) {
     return "";
   }
 }
+const GILBARBARA_ICONS = {
+  "x.com": "x",
+  "discord.com": "discord",
+  "www.reddit.com": "reddit",
+  "www.instagram.com": "instagram",
+  "www.youtube.com": "youtube",
+  "music.youtube.com": "youtube",
+  "open.spotify.com": "spotify",
+  "www.pinterest.com": "pinterest",
+  "www.dropbox.com": "dropbox",
+  "www.tiktok.com": "tiktok",
+  "store.steampowered.com": "steam",
+  "duck.ai": "duckduckgo"
+};
+async function gilbarbaraIcon(url) {
+  const name = GILBARBARA_ICONS[new URL(url).hostname];
+  if (!name) return "";
+  try {
+    const r = await fetch("https://raw.githubusercontent.com/gilbarbara/logos/main/logos/" + name + ".svg", {
+      headers: { "User-Agent": UA }, signal: AbortSignal.timeout(10000), redirect: "follow"
+    });
+    if (!r.ok) return "";
+    const txt = await r.text();
+    if (txt.length > 50 * 1024 || !/^\s*<svg/i.test(txt)) return "";
+    return "data:image/svg+xml," + encodeURIComponent(txt);
+  } catch (e) {
+    return "";
+  }
+}
 async function lobeIcon(url) {
   const name = LOBE_ICONS[new URL(url).hostname];
   if (!name) return "";
@@ -262,7 +291,7 @@ async function fetchPage(url) {
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
     if (!title) title = await bingSearch(hostname);
     if (!title) title = await baiduSearch(hostname);
-    let icon = await lobeIcon(url) || await svglogoIcon(url);
+    let icon = await lobeIcon(url) || await svglogoIcon(url) || await gilbarbaraIcon(url);
     if (!icon) {
       const u = parseIcon(html, url) || await directFavicon(url);
       if (u) icon = await toDataUri(u);
@@ -270,7 +299,7 @@ async function fetchPage(url) {
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    let icon = await lobeIcon(url) || await svglogoIcon(url);
+    let icon = await lobeIcon(url) || await svglogoIcon(url) || await gilbarbaraIcon(url);
     if (!icon) {
       const direct = await directFavicon(url);
       if (direct) icon = await toDataUri(direct);
