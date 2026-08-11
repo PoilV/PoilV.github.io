@@ -146,18 +146,29 @@ async function toDataUri(iconUrl) {
     const ct = r.headers.get("content-type") || "";
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 1024 * 1024) return "";
+    const head = buf.toString("utf8", 0, 200);
+    const isImage =
+      (buf[0] === 0x89 && buf[1] === 0x50) ||
+      (buf[0] === 0xff && buf[1] === 0xd8) ||
+      head.slice(0, 4) === "GIF8" ||
+      (head.slice(0, 4) === "RIFF" && head.slice(8, 12) === "WEBP") ||
+      (buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0) ||
+      /^\s*<svg/i.test(head);
+    if (!isImage) return "";
     if (/svg/.test(ct) || /\.svg($|\?)/i.test(iconUrl)) {
       if (buf.length > 50 * 1024) return "";
       return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8"));
     }
-    if (!/^image\//.test(ct)) return "";
     if (sharp) {
-      const webp = await sharp(buf, { density: 96 })
-        .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .webp()
-        .toBuffer();
-      if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
+      try {
+        const webp = await sharp(buf, { density: 96 })
+          .resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .webp()
+          .toBuffer();
+        if (webp.length < 40 * 1024) return "data:image/webp;base64," + webp.toString("base64");
+      } catch (e) {}
     }
+    if (buf.length <= 40 * 1024) return "data:" + ct + ";base64," + buf.toString("base64");
     return "";
   } catch (e) {
     return "";
