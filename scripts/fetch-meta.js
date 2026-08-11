@@ -272,7 +272,11 @@ async function fetchPage(url) {
     });
     if (!r.ok) {
       const fb = await ddgFallback(url);
-      const icon = await libIcon(url);
+      let icon = await libIcon(url);
+      if (!icon) {
+        const direct = await directFavicon(url);
+        if (direct) icon = await toDataUri(direct);
+      }
       return { title: fb.title, icon };
     }
     const html = await r.text();
