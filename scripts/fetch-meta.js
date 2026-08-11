@@ -260,6 +260,7 @@ async function toDataUri(iconUrl) {
     return "";
   }
 }
+const libIcon = async url => (await lobeIcon(url)) || (await svglogoIcon(url)) || (await gilbarbaraIcon(url));
 async function fetchPage(url) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 12000);
@@ -269,7 +270,11 @@ async function fetchPage(url) {
       signal: c.signal,
       redirect: "follow"
     });
-    if (!r.ok) return { title: "", icon: "" };
+    if (!r.ok) {
+      const fb = await ddgFallback(url);
+      const icon = await libIcon(url);
+      return { title: fb.title, icon };
+    }
     const html = await r.text();
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     const pageTitle = m ? clean(m[1]) : "";
@@ -279,7 +284,7 @@ async function fetchPage(url) {
     if (!title && pageTitle && !isBadTitle(pageTitle)) title = pageTitle;
     if (!title) title = await bingSearch(hostname);
     if (!title) title = await baiduSearch(hostname);
-    let icon = await lobeIcon(url) || await svglogoIcon(url) || await gilbarbaraIcon(url);
+    let icon = await libIcon(url);
     if (!icon) {
       const u = parseIcon(html, url) || await directFavicon(url);
       if (u) icon = await toDataUri(u);
@@ -287,11 +292,7 @@ async function fetchPage(url) {
     return { title, icon };
   } catch (e) {
     const fb = await ddgFallback(url);
-    let icon = await lobeIcon(url) || await svglogoIcon(url) || await gilbarbaraIcon(url);
-    if (!icon) {
-      const direct = await directFavicon(url);
-      if (direct) icon = await toDataUri(direct);
-    }
+    const icon = await libIcon(url);
     return { title: fb.title, icon };
   } finally {
     clearTimeout(t);
