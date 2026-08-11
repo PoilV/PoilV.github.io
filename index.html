@@ -198,9 +198,8 @@ function titleOf(url) { return titlesJson[url] || ""; }
 const FAV_SOURCES = [
   { id: "direct", url: h => "https://" + h + "/favicon.ico" },
 ];
-let favSource = null;
-let probePromise = null;
-const pendingFavs = [];
+const favCache = new Map();
+const favProbes = new Map();
 const probeFavicons = host => new Promise(resolve => {
   let i = 0, done = false;
   const next = () => {
@@ -220,6 +219,17 @@ const probeFavicons = host => new Promise(resolve => {
   };
   next();
 });
+const sourceFor = host => {
+  if (favCache.has(host)) return Promise.resolve(favCache.get(host));
+  if (favProbes.has(host)) return favProbes.get(host);
+  const p = probeFavicons(host).then(s => {
+    favCache.set(host, s);
+    favProbes.delete(host);
+    return s;
+  });
+  favProbes.set(host, p);
+  return p;
+};
 const showFallback = img => {
   img.onerror = null;
   img.onload = null;
@@ -240,26 +250,11 @@ function setFavicon(img, host) {
     img.src = img.dataset.icon;
     return;
   }
-  const assign = () => {
-    if (!favSource) { showFallback(img); return; }
+  sourceFor(host).then(src => {
+    if (!src) { showFallback(img); return; }
     img.onerror = () => showFallback(img);
-    img.src = favSource.url(host);
-  };
-  if (favSource) { assign(); return; }
-  pendingFavs.push([img, host]);
-  if (!probePromise) {
-    probePromise = probeFavicons(host).then(s => {
-      favSource = s;
-      for (const [im, h] of pendingFavs.splice(0)) {
-        const a = () => {
-          if (!favSource) { showFallback(im); return; }
-          im.onerror = () => showFallback(im);
-          im.src = favSource.url(h);
-        };
-        a();
-      }
-    });
-  }
+    img.src = src.url(host);
+  });
 }
 const cardHTML = (link, custom) => {
   const host = hostOf(link.url);

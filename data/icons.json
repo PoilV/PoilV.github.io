@@ -32,7 +32,7 @@
  "https://www.powershellgallery.com/": "https://www.powershellgallery.com/favicon.ico",
  "https://www.archlinuxcn.org/": "https://www.archlinuxcn.org/wp-content/themes/askin2010/images/favicon.ico",
  "https://data.cstcloud.cn/": "https://data.cstcloud.cn/favicon.svg",
- "https://yun.139.com/w/#/index": "https://yun.139.com/w/favicon.ico",
+ "https://yun.139.com/w/#/index": "https://yun.139.com/w/static/img/LOGO.png",
  "https://store.rg-adguard.net/": "https://store.rg-adguard.net/favicon.ico",
  "https://cloud.189.cn/web/main/file/folder/-11": "https://cloud.dlife.cn/web/main/logo.ico",
  "https://sspai.com/": "https://cdn-static.sspai.com/favicon/sspai.ico",
@@ -57,7 +57,7 @@
  "https://geoviewer.aloxaf.com/": "https://geoviewer.aloxaf.com/favicon.svg",
  "https://www.aliyun.com/": "https://img.alicdn.com/tfs/TB1ugg7M9zqK1RjSZPxXXc4tVXa-32-32.png_.webp",
  "https://console.cloud.tencent.com/": "https://cloudcache.tencent-cloud.com/qcloud/favicon.ico",
- "https://github.com/": "https://github.githubassets.com/favicons/favicon",
+ "https://github.com/": "https://github.githubassets.com/favicons/favicon.svg",
  "https://q.qq.com/": "https://qqminiapp.cdn-go.cn/qq-open-platform/2394b5dc/favicon.svg",
  "https://www.virustotal.com/gui/home/upload": "https://www.virustotal.com/gui/home/images/favicon.svg",
  "https://labs.google/": "https://labs.google/assets/icons/favicon-48x48.png",
@@ -71,7 +71,7 @@
  "https://mega.nz/fm/r3xmFDLJ": "https://mega.nz/favicon.ico?v=3",
  "https://onedrive.live.com/?view=0": "https://logincdn.msauth.net/16.000.31164.7/images/favicon.ico",
  "https://www.dropbox.com/home": "https://cfl.dropboxstatic.com/static/metaserver/static/images/favicon.ico",
- "https://x.com/": "https://x.com/favicon.ico",
+ "https://x.com/": "https://abs.twimg.com/favicons/twitter.2.ico",
  "https://discord.com/channels/@me": "https://discord.com/assets/favicon.ico",
  "https://www.instagram.com/": "https://static.cdninstagram.com/rsrc.php/yr/r/rzWiSjZRxk5.webp",
  "https://www.v2ex.com/": "https://www.v2ex.com/static/icon-192.png",
@@ -119,5 +119,9 @@
  "https://www.cloudflare.com/cdn-cgi/trace": "https://www.cloudflare.com/favicon.ico",
  "https://ppio.com/": "https://ppio.com/favicon.ico",
  "https://chat.deepseek.com/": "https://fe-static.deepseek.com/chat/favicon.svg",
- "https://platform.deepseek.com/usage": "https://fe-static.deepseek.com/chat/favicon.svg"
+ "https://platform.deepseek.com/usage": "https://fe-static.deepseek.com/chat/favicon.svg",
+ "https://docs.qq.com/": "https://docs.idqqimg.com/tim/docs/desktop/favicon.ico",
+ "https://www.zhaopin.com/": "https://www.zhaopin.com/favicon.ico",
+ "https://pan.baidu.com/disk/main#/index?category=all": "https://nd-static.bdstatic.com/m-static/v20-main/favicon-main.ico",
+ "https://photo.baidu.com/photo/web/home": "https://staticsns.cdn.bcebos.com/amis/2023-2/1676342310828/favicon.ico"
 }
