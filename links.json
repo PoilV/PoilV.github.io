@@ -1,7 +1,7 @@
 {
   "categories": [
     {
-      "name": "工作",
+      "name": "工作办公",
       "links": [
         "https://www.feishu.cn/",
         "https://docs.qq.com/",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "name": "游戏",
+      "name": "游戏娱乐",
       "links": [
         "https://game.maj-soul.com/1/",
         "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "name": "网盘",
+      "name": "网络存储",
       "links": [
         "https://www.123pan.com/",
         "https://www.alipan.com/drive/home",
@@ -111,7 +111,7 @@
       ]
     },
     {
-      "name": "社交资讯",
+      "name": "资讯社交",
       "links": [
         "https://60s-demo.viki.moe/",
         "https://newsnow.busiyi.world/",
@@ -127,7 +127,7 @@
       ]
     },
     {
-      "name": "论坛",
+      "name": "技术论坛",
       "links": [
         "https://meta.appinn.net/",
         "https://bbs.pcbeta.com/",
@@ -141,7 +141,7 @@
       ]
     },
     {
-      "name": "视频动漫",
+      "name": "影音动漫",
       "links": [
         "https://www.bilibili.com/",
         "https://www.douyin.com/",
@@ -156,7 +156,7 @@
       ]
     },
     {
-      "name": "绘画阅读",
+      "name": "图文阅读",
       "links": [
         "https://www.mangacopy.com/",
         "https://www.kongfz.com/",
@@ -191,7 +191,7 @@
       ]
     },
     {
-      "name": "NSFW",
+      "name": "成人内容",
       "links": [
         "https://nhentai.net/",
         "https://hanime1.me/",
