@@ -151,41 +151,6 @@ async function loadJson(name, target) {
   finally { clearTimeout(t); }
 }
 function titleOf(url) { return titlesJson[url] || ""; }
-const FAV_SOURCES = [
-  { id: "direct", url: h => "https://" + h + "/favicon.ico" },
-];
-const favCache = new Map();
-const favProbes = new Map();
-const probeFavicons = host => new Promise(resolve => {
-  let i = 0, done = false;
-  const next = () => {
-    if (done) return;
-    if (i >= FAV_SOURCES.length) { done = true; resolve(null); return; }
-    const s = FAV_SOURCES[i++];
-    const img = new Image();
-    const finish = ok => {
-      if (done) return;
-      done = true;
-      resolve(ok ? s : null);
-    };
-    img.onload = () => finish(true);
-    img.onerror = () => finish(false);
-    img.src = s.url(host);
-    setTimeout(() => finish(false), 5000);
-  };
-  next();
-});
-const sourceFor = host => {
-  if (favCache.has(host)) return Promise.resolve(favCache.get(host));
-  if (favProbes.has(host)) return favProbes.get(host);
-  const p = probeFavicons(host).then(s => {
-    favCache.set(host, s);
-    favProbes.delete(host);
-    return s;
-  });
-  favProbes.set(host, p);
-  return p;
-};
 const showFallback = img => {
   img.onerror = null;
   img.onload = null;
@@ -199,18 +164,11 @@ function setFavicon(img, host) {
   const url = a && a.dataset.url;
   if (!img.dataset.icon && url && iconsJson[url]) img.dataset.icon = iconsJson[url];
   if (img.dataset.icon) {
-    img.onerror = () => {
-      img.dataset.icon = "";
-      setFavicon(img, host);
-    };
+    img.onerror = () => showFallback(img);
     img.src = img.dataset.icon;
     return;
   }
-  sourceFor(host).then(src => {
-    if (!src) { showFallback(img); return; }
-    img.onerror = () => showFallback(img);
-    img.src = src.url(host);
-  });
+  showFallback(img);
 }
 const cardHTML = link => {
   const host = hostOf(link.url);
