@@ -243,7 +243,8 @@ let total = 0;
 function render(q) {
   q = (q || "").trim().toLowerCase();
   let html = "", matched = 0, t = 0, nav = "";
-  config.categories.forEach((cat, i) => {
+  const cats = [...config.categories].sort((a, b) => compareNames(a, b));
+  cats.forEach((cat, i) => {
     const links = cat.links.map(normalize).filter(l =>
       !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
     ).sort(compareNames);
