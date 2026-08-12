@@ -3,91 +3,91 @@
     {
       "name": "工作办公",
       "links": [
-        "https://www.feishu.cn/",
         "https://docs.qq.com/",
+        "https://www.feishu.cn/",
         "https://mail.qq.com/",
-        "https://www.zhipin.com/",
-        "https://www.zhaopin.com/"
+        "https://www.zhaopin.com/",
+        "https://www.zhipin.com/"
       ]
     },
     {
       "name": "AI 聊天",
       "links": [
         "https://chat.deepseek.com/",
-        "https://www.doubao.com/chat/30171912988103170",
         "https://chatgpt.com/",
-        "https://gemini.google.com/app",
-        "https://labs.google/fx/tools/flow",
-        "https://labs.google/",
-        "https://copilot.microsoft.com/",
         "https://claude.ai/",
+        "https://copilot.microsoft.com/",
+        "https://docs.sillytavern.app/",
+        "https://www.doubao.com/chat/30171912988103170",
         "https://duck.ai/",
-        "https://docs.sillytavern.app/"
+        "https://gemini.google.com/app",
+        "https://labs.google/",
+        "https://labs.google/fx/tools/flow"
       ]
     },
     {
       "name": "AI 模型",
       "links": [
+        "https://bigmodel.cn/",
         "https://civitai.com/",
         "https://civitai.red/",
-        "https://huggingface.co/",
         "https://gabriel.devenyi.ca/huggingface-estimate/",
-        "https://bigmodel.cn/",
-        "https://platform.deepseek.com/usage",
-        "https://openrouter.ai/",
+        "https://huggingface.co/",
         "https://minimaxi.com/",
+        "https://openrouter.ai/",
+        "https://platform.deepseek.com/usage",
         "https://www.tavily.com/"
       ]
     },
     {
       "name": "AI 视频",
       "links": [
-        "https://video.jurilu.com/",
-        "https://ai.lfxqai.com/videos",
-        "https://nova.shanhaix.com/",
-        "https://www.woaiduanju.com/",
-        "https://jimeng.jianying.com/ai-tool/generate?workspace=0",
-        "https://www.vidu.cn/home/recommend",
-        "https://www.liblib.tv/",
-        "https://www.liblib.art/",
-        "https://story.neodomain.cn/home",
-        "https://xyq.jianying.com/",
-        "https://klingai.com/app",
         "http://49.233.78.71:17861/",
+        "https://ai.lfxqai.com/videos",
+        "https://jimeng.jianying.com/ai-tool/generate?workspace=0",
+        "https://klingai.com/app",
+        "https://www.liblib.art/",
+        "https://www.liblib.tv/",
+        "https://nova.shanhaix.com/",
+        "https://story.neodomain.cn/home",
+        "https://www.ttson.cn/",
+        "https://video.jurilu.com/",
+        "https://www.vidu.cn/home/recommend",
         "https://voiceailabs.com/zh",
-        "https://www.ttson.cn/"
+        "https://www.woaiduanju.com/",
+        "https://xyq.jianying.com/"
       ]
     },
     {
       "name": "游戏娱乐",
       "links": [
-        "https://game.maj-soul.com/1/",
         "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
+        "https://game.maj-soul.com/1/",
+        "https://www.gamer520.com/",
+        "https://www.protondb.com/",
         "https://www.pxb7.com/",
+        "https://steamdb.info/",
         "https://store.epicgames.com/zh-CN/",
         "https://store.steampowered.com/",
-        "https://store.steampowered.com/account/remotestorage",
-        "https://www.protondb.com/",
-        "https://steamdb.info/",
-        "https://www.gamer520.com/"
+        "https://store.steampowered.com/account/remotestorage"
       ]
     },
     {
       "name": "系统软件",
       "links": [
-        "https://dvel.me/posts/rime-ice/",
-        "https://lemmy.dbzer0.com/c/GenP",
-        "https://store.rg-adguard.net/",
+        "https://www.archlinuxcn.org/",
         "https://www.catalog.update.microsoft.com/Home.aspx",
+        "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/",
+        "https://dvel.me/posts/rime-ice/",
+        "https://flathub.org/",
+        "https://learn.microsoft.com/zh-cn/sysinternals/",
+        "https://lemmy.dbzer0.com/c/GenP",
         "https://www.portablefreeware.com/",
         "https://www.powershellgallery.com/",
         "https://scoop.sh/",
-        "https://learn.microsoft.com/zh-cn/sysinternals/",
-        "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/",
-        "https://wiki.lineageos.org/devices/kebab/",
-        "https://www.archlinuxcn.org/",
-        "https://flathub.org/",
-        "https://wiki.archlinux.org/title/V4l2loopback"
+        "https://store.rg-adguard.net/",
+        "https://wiki.archlinux.org/title/V4l2loopback",
+        "https://wiki.lineageos.org/devices/kebab/"
       ]
     },
     {
@@ -95,45 +95,45 @@
       "links": [
         "https://www.123pan.com/",
         "https://www.alipan.com/drive/home",
-        "https://pan.baidu.com/disk/main#/index?category=all",
-        "https://www.jianguoyun.com/#/",
-        "https://up.woozooo.com/mydisk.php",
-        "https://data.cstcloud.cn/",
         "https://cloud.189.cn/web/main/file/folder/-11",
-        "https://photo.baidu.com/photo/web/home",
-        "https://yun.139.com/w/#/index",
-        "https://mypikpak.com/drive/all",
-        "https://www.dropbox.com/home",
-        "https://photos.google.com/",
+        "https://data.cstcloud.cn/",
         "https://drive.google.com/drive/my-drive",
+        "https://www.dropbox.com/home",
+        "https://www.jianguoyun.com/#/",
         "https://mega.nz/fm/r3xmFDLJ",
-        "https://onedrive.live.com/?view=0"
+        "https://mypikpak.com/drive/all",
+        "https://onedrive.live.com/?view=0",
+        "https://pan.baidu.com/disk/main#/index?category=all",
+        "https://photo.baidu.com/photo/web/home",
+        "https://photos.google.com/",
+        "https://up.woozooo.com/mydisk.php",
+        "https://yun.139.com/w/#/index"
       ]
     },
     {
       "name": "资讯社交",
       "links": [
         "https://60s-demo.viki.moe/",
+        "https://discord.com/channels/@me",
+        "https://www.instagram.com/",
+        "https://m.weibo.cn/",
         "https://newsnow.busiyi.world/",
+        "https://q.qq.com/",
+        "https://www.reddit.com/",
         "https://sspai.com/",
         "https://weibo.com/",
-        "https://m.weibo.cn/",
         "https://x.com/",
-        "https://www.xiaohongshu.com/",
-        "https://www.instagram.com/",
-        "https://discord.com/channels/@me",
-        "https://www.reddit.com/",
-        "https://q.qq.com/"
+        "https://www.xiaohongshu.com/"
       ]
     },
     {
       "name": "技术论坛",
       "links": [
-        "https://meta.appinn.net/",
         "https://bbs.pcbeta.com/",
         "https://hellogithub.com/",
         "https://www.itsk.com/",
         "https://linux.do/",
+        "https://meta.appinn.net/",
         "https://ngabbs.com/",
         "https://rutracker.org/forum/index.php",
         "https://www.v2ex.com/",
@@ -143,65 +143,65 @@
     {
       "name": "影音动漫",
       "links": [
+        "https://www.agedm.io/",
         "https://www.bilibili.com/",
         "https://www.douyin.com/",
-        "https://www.tiktok.com/?lang=zh-Hans",
-        "https://www.youtube.com/",
-        "https://open.spotify.com/",
-        "https://music.youtube.com/",
-        "https://www.agedm.io/",
-        "https://share.dmhy.org/",
         "https://mikanani.me/",
-        "https://vcb-s.com/"
+        "https://music.youtube.com/",
+        "https://open.spotify.com/",
+        "https://share.dmhy.org/",
+        "https://www.tiktok.com/?lang=zh-Hans",
+        "https://vcb-s.com/",
+        "https://www.youtube.com/"
       ]
     },
     {
       "name": "图文阅读",
       "links": [
-        "https://www.mangacopy.com/",
-        "https://www.kongfz.com/",
-        "https://shuyuan.yiove.com/",
-        "https://huaban.com/",
-        "https://www.pinterest.com/",
+        "https://anilist.co/",
         "https://www.artstation.com/",
         "https://www.ggac.com/",
+        "https://huaban.com/",
+        "https://www.kongfz.com/",
+        "https://www.mangacopy.com/",
+        "https://www.pinterest.com/",
         "https://www.pixiv.net/",
-        "https://anilist.co/"
+        "https://shuyuan.yiove.com/"
       ]
     },
     {
       "name": "开发工具",
       "links": [
-        "https://metacubex.github.io/metacubexd/#/",
-        "https://fanyi.caiyunapp.com/",
-        "https://test.ustc.edu.cn/",
-        "https://caniuse.com/",
-        "https://wiki.metacubex.one/",
-        "https://geoviewer.aloxaf.com/",
-        "https://alternativeto.net/",
-        "https://www.cloudflare.com/cdn-cgi/trace",
-        "https://github.com/",
-        "https://www.virustotal.com/gui/home/upload",
-        "https://zhuanlan.zhihu.com/p/429496671",
-        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
         "https://www.aliyun.com/",
+        "https://alternativeto.net/",
+        "https://caniuse.com/",
+        "https://www.cloudflare.com/cdn-cgi/trace",
         "https://console.cloud.tencent.com/",
         "https://dash.cloudflare.com/",
-        "https://ppio.com/"
+        "https://fanyi.caiyunapp.com/",
+        "https://geoviewer.aloxaf.com/",
+        "https://github.com/",
+        "https://metacubex.github.io/metacubexd/#/",
+        "https://ppio.com/",
+        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
+        "https://test.ustc.edu.cn/",
+        "https://www.virustotal.com/gui/home/upload",
+        "https://wiki.metacubex.one/",
+        "https://zhuanlan.zhihu.com/p/429496671"
       ]
     },
     {
       "name": "NSFW",
       "links": [
-        "https://nhentai.net/",
-        "https://hanime1.me/",
-        "https://missav.ai/",
-        "https://iwara.tv/",
-        "https://hxcy.top/",
-        "https://pornhub.com/",
         "https://e-hentai.org",
-        "https://theporndb.net/",
-        "https://manhuapica.com/"
+        "https://hanime1.me/",
+        "https://hxcy.top/",
+        "https://iwara.tv/",
+        "https://manhuapica.com/",
+        "https://missav.ai/",
+        "https://nhentai.net/",
+        "https://pornhub.com/",
+        "https://theporndb.net/"
       ]
     }
   ]
