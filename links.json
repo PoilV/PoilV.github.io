@@ -11,7 +11,7 @@
       ]
     },
     {
-      "name": "AI 聊天",
+      "name": "AI",
       "links": [
         "https://chat.deepseek.com/",
         "https://www.doubao.com/chat/30171912988103170",
@@ -22,12 +22,7 @@
         "https://copilot.microsoft.com/",
         "https://claude.ai/",
         "https://duck.ai/",
-        "https://docs.sillytavern.app/"
-      ]
-    },
-    {
-      "name": "AI 模型",
-      "links": [
+        "https://docs.sillytavern.app/",
         "https://civitai.com/",
         "https://civitai.red/",
         "https://huggingface.co/",
@@ -40,7 +35,7 @@
       ]
     },
     {
-      "name": "AI 视频",
+      "name": "视频",
       "links": [
         "https://video.jurilu.com/",
         "https://ai.lfxqai.com/videos",
@@ -73,7 +68,7 @@
       ]
     },
     {
-      "name": "系统软件",
+      "name": "系统",
       "links": [
         "https://dvel.me/posts/rime-ice/",
         "https://lemmy.dbzer0.com/c/GenP",
@@ -111,7 +106,7 @@
       ]
     },
     {
-      "name": "社交资讯",
+      "name": "社区",
       "links": [
         "https://60s-demo.viki.moe/",
         "https://newsnow.busiyi.world/",
@@ -123,12 +118,7 @@
         "https://www.instagram.com/",
         "https://discord.com/channels/@me",
         "https://www.reddit.com/",
-        "https://q.qq.com/"
-      ]
-    },
-    {
-      "name": "论坛",
-      "links": [
+        "https://q.qq.com/",
         "https://meta.appinn.net/",
         "https://bbs.pcbeta.com/",
         "https://hellogithub.com/",
@@ -141,7 +131,7 @@
       ]
     },
     {
-      "name": "视频动漫",
+      "name": "影音",
       "links": [
         "https://www.bilibili.com/",
         "https://www.douyin.com/",
@@ -156,7 +146,7 @@
       ]
     },
     {
-      "name": "绘画阅读",
+      "name": "图文",
       "links": [
         "https://www.mangacopy.com/",
         "https://www.kongfz.com/",
@@ -170,7 +160,7 @@
       ]
     },
     {
-      "name": "开发工具",
+      "name": "工具",
       "links": [
         "https://metacubex.github.io/metacubexd/#/",
         "https://fanyi.caiyunapp.com/",
@@ -191,7 +181,7 @@
       ]
     },
     {
-      "name": "NSFW",
+      "name": "成人",
       "links": [
         "https://nhentai.net/",
         "https://hanime1.me/",
