@@ -6,11 +6,12 @@
         "https://www.feishu.cn/",
         "https://docs.qq.com/",
         "https://www.zhipin.com/",
-        "https://www.zhaopin.com/"
+        "https://www.zhaopin.com/",
+        "https://mail.qq.com/"
       ]
     },
     {
-      "name": "AI",
+      "name": "AI 聊天",
       "links": [
         "https://chat.deepseek.com/",
         "https://www.doubao.com/chat/30171912988103170",
@@ -21,15 +22,16 @@
         "https://copilot.microsoft.com/",
         "https://claude.ai/",
         "https://duck.ai/",
-        "https://civitai.com/",
-        "https://civitai.red/",
-        "https://huggingface.co/",
-        "https://gabriel.devenyi.ca/huggingface-estimate/"
+        "https://docs.sillytavern.app/"
       ]
     },
     {
-      "name": "AI API",
+      "name": "AI 模型与 API",
       "links": [
+        "https://civitai.com/",
+        "https://civitai.red/",
+        "https://huggingface.co/",
+        "https://gabriel.devenyi.ca/huggingface-estimate/",
         "https://bigmodel.cn/",
         "https://platform.deepseek.com/usage",
         "https://openrouter.ai/",
@@ -67,12 +69,11 @@
         "https://store.steampowered.com/account/remotestorage",
         "https://www.protondb.com/",
         "https://steamdb.info/",
-        "https://www.gamer520.com/",
-        "https://docs.sillytavern.app/"
+        "https://www.gamer520.com/"
       ]
     },
     {
-      "name": "系统",
+      "name": "系统软件",
       "links": [
         "https://dvel.me/posts/rime-ice/",
         "https://lemmy.dbzer0.com/c/GenP",
@@ -82,8 +83,6 @@
         "https://www.powershellgallery.com/",
         "https://scoop.sh/",
         "https://learn.microsoft.com/zh-cn/sysinternals/",
-        "https://zhuanlan.zhihu.com/p/429496671",
-        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
         "https://download.schenker-tech.de/package/xmg-core-16-l23-xco16l23/",
         "https://wiki.lineageos.org/devices/kebab/",
         "https://www.archlinuxcn.org/",
@@ -112,13 +111,7 @@
       ]
     },
     {
-      "name": "邮箱",
-      "links": [
-        "https://mail.qq.com/"
-      ]
-    },
-    {
-      "name": "论坛资讯社交",
+      "name": "社交资讯",
       "links": [
         "https://60s-demo.viki.moe/",
         "https://newsnow.busiyi.world/",
@@ -138,26 +131,27 @@
         "https://www.reddit.com/",
         "https://rutracker.org/forum/index.php",
         "https://www.v2ex.com/",
-        "https://xdaforums.com/"
+        "https://xdaforums.com/",
+        "https://q.qq.com/"
       ]
     },
     {
-      "name": "视频音乐",
+      "name": "视频动漫",
       "links": [
         "https://www.bilibili.com/",
         "https://www.douyin.com/",
         "https://www.tiktok.com/?lang=zh-Hans",
-        "https://www.agedm.io/",
         "https://www.youtube.com/",
+        "https://open.spotify.com/",
+        "https://music.youtube.com/",
+        "https://www.agedm.io/",
         "https://share.dmhy.org/",
         "https://mikanani.me/",
-        "https://vcb-s.com/",
-        "https://open.spotify.com/",
-        "https://music.youtube.com/"
+        "https://vcb-s.com/"
       ]
     },
     {
-      "name": "漫画图片小说",
+      "name": "绘画与阅读",
       "links": [
         "https://www.mangacopy.com/",
         "https://www.kongfz.com/",
@@ -171,7 +165,7 @@
       ]
     },
     {
-      "name": "工具",
+      "name": "开发工具",
       "links": [
         "https://metacubex.github.io/metacubexd/#/",
         "https://fanyi.caiyunapp.com/",
@@ -181,13 +175,19 @@
         "https://geoviewer.aloxaf.com/",
         "https://alternativeto.net/",
         "https://www.cloudflare.com/cdn-cgi/trace",
+        "https://github.com/",
+        "https://www.virustotal.com/gui/home/upload",
+        "https://zhuanlan.zhihu.com/p/429496671",
+        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html"
+      ]
+    },
+    {
+      "name": "云服务",
+      "links": [
         "https://www.aliyun.com/",
         "https://console.cloud.tencent.com/",
         "https://dash.cloudflare.com/",
-        "https://github.com/",
-        "https://ppio.com/",
-        "https://q.qq.com/",
-        "https://www.virustotal.com/gui/home/upload"
+        "https://ppio.com/"
       ]
     },
     {
