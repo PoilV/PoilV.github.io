@@ -118,11 +118,6 @@ try {
 
 <footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航</a></footer>
 
-<script type="module">
-import { pinyin } from "./vendor/pinyin-pro.js";
-window.pinyin = pinyin;
-window.dispatchEvent(new Event("pinyin-ready"));
-</script>
 <script>
 const mq = matchMedia("(prefers-color-scheme: dark)");
 function applyTheme() {
@@ -294,6 +289,10 @@ search.addEventListener("input", e => {
   debounceId = setTimeout(() => render(e.target.value), 200);
 });
 window.addEventListener("pinyin-ready", () => render(search.value));
+import("./vendor/pinyin-pro.js").then(m => {
+  window.pinyin = m.pinyin;
+  window.dispatchEvent(new Event("pinyin-ready"));
+}).catch(() => {});
 </script>
 </body>
 </html>
