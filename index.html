@@ -118,6 +118,11 @@ try {
 
 <footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航</a></footer>
 
+<script type="module">
+import { pinyin } from "./vendor/pinyin-pro.js";
+window.pinyin = pinyin;
+window.dispatchEvent(new Event("pinyin-ready"));
+</script>
 <script>
 const mq = matchMedia("(prefers-color-scheme: dark)");
 function applyTheme() {
@@ -130,14 +135,14 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const hostOf = url => {
   try { return new URL(url).hostname; } catch (e) { return ""; }
 };
-const nameKey = l => (l.name || titleOf(l.url) || hostOf(l.url) || "").toLowerCase();
-const nameColl = new Intl.Collator("zh");
-const compareNames = (a, b) => {
-  const na = nameKey(a), nb = nameKey(b);
-  const aa = /^[a-z0-9]/.test(na), ab = /^[a-z0-9]/.test(nb);
-  if (aa !== ab) return aa ? -1 : 1;
-  return nameColl.compare(na, nb);
+const nameKey = l => {
+  const n = (l.name || titleOf(l.url) || hostOf(l.url) || "").toLowerCase();
+  try {
+    if (window.pinyin) return window.pinyin(n, { toneType: "none", type: "array" }).join("").toLowerCase();
+  } catch (e) {}
+  return n;
 };
+const compareNames = (a, b) => nameKey(a).localeCompare(nameKey(b));
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
 let iconsJson = {};
@@ -287,6 +292,7 @@ search.addEventListener("input", e => {
   clearTimeout(debounceId);
   debounceId = setTimeout(() => render(e.target.value), 200);
 });
+window.addEventListener("pinyin-ready", () => render(search.value));
 </script>
 </body>
 </html>
