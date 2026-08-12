@@ -5,9 +5,9 @@
       "links": [
         "https://www.feishu.cn/",
         "https://docs.qq.com/",
+        "https://mail.qq.com/",
         "https://www.zhipin.com/",
-        "https://www.zhaopin.com/",
-        "https://mail.qq.com/"
+        "https://www.zhaopin.com/"
       ]
     },
     {
@@ -26,7 +26,7 @@
       ]
     },
     {
-      "name": "AI 模型与 API",
+      "name": "AI 模型",
       "links": [
         "https://civitai.com/",
         "https://civitai.red/",
@@ -120,19 +120,24 @@
         "https://m.weibo.cn/",
         "https://x.com/",
         "https://www.xiaohongshu.com/",
+        "https://www.instagram.com/",
+        "https://discord.com/channels/@me",
+        "https://www.reddit.com/",
+        "https://q.qq.com/"
+      ]
+    },
+    {
+      "name": "论坛",
+      "links": [
         "https://meta.appinn.net/",
         "https://bbs.pcbeta.com/",
-        "https://discord.com/channels/@me",
         "https://hellogithub.com/",
         "https://www.itsk.com/",
-        "https://www.instagram.com/",
         "https://linux.do/",
         "https://ngabbs.com/",
-        "https://www.reddit.com/",
         "https://rutracker.org/forum/index.php",
         "https://www.v2ex.com/",
-        "https://xdaforums.com/",
-        "https://q.qq.com/"
+        "https://xdaforums.com/"
       ]
     },
     {
@@ -151,7 +156,7 @@
       ]
     },
     {
-      "name": "绘画与阅读",
+      "name": "绘画阅读",
       "links": [
         "https://www.mangacopy.com/",
         "https://www.kongfz.com/",
@@ -178,12 +183,7 @@
         "https://github.com/",
         "https://www.virustotal.com/gui/home/upload",
         "https://zhuanlan.zhihu.com/p/429496671",
-        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html"
-      ]
-    },
-    {
-      "name": "云服务",
-      "links": [
+        "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
         "https://www.aliyun.com/",
         "https://console.cloud.tencent.com/",
         "https://dash.cloudflare.com/",
