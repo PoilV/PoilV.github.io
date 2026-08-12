@@ -189,6 +189,7 @@ try { icons = JSON.parse(fs.readFileSync(iconsPath, "utf8")); } catch (e) {}
 
 let idx = 0, tChanged = 0, iChanged = 0;
 const fails = [];
+const conc = Math.min(20, Math.max(1, parseInt(process.argv[2] || "10", 10)));
 async function worker() {
   while (idx < urls.length) {
     const url = urls[idx++];
@@ -199,7 +200,7 @@ async function worker() {
   }
 }
 (async () => {
-  await Promise.all(Array.from({ length: 10 }, worker));
+  await Promise.all(Array.from({ length: conc }, worker));
   fs.writeFileSync(titlesPath, JSON.stringify(titles, null, 1) + "\n");
   fs.writeFileSync(iconsPath, JSON.stringify(icons, null, 1) + "\n");
   console.log(`done: ${tChanged} titles changed, ${iChanged} icons changed (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);

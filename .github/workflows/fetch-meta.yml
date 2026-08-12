@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "0 4 * * *"
   workflow_dispatch:
+    inputs:
+      concurrency:
+        description: 并发请求数（默认 10）
+        required: false
+        default: "10"
   push:
     paths: ["links.json", "scripts/fetch-meta.js"]
 permissions:
@@ -17,7 +22,7 @@ jobs:
           node-version: 20
       - name: Validate JSON
         run: node -e "['links.json','data/titles.json','data/icons.json'].forEach(f => JSON.parse(require('fs').readFileSync(f,'utf8'))); console.log('all json valid')"
-      - run: node scripts/fetch-meta.js
+      - run: node scripts/fetch-meta.js ${{ inputs.concurrency }}
       - name: Commit data
         run: |
           git config user.name "github-actions[bot]"
