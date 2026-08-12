@@ -82,43 +82,6 @@ try {
   footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; }
   footer a { color: var(--muted); text-decoration: none; }
   footer a:hover { color: var(--accent); }
-  .fab {
-    position: fixed; right: 24px; bottom: 24px; z-index: 20;
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 1px solid var(--border); background: var(--card); color: var(--accent);
-    font-size: 20px; cursor: pointer; box-shadow: var(--shadow);
-  }
-  #copyBtn { bottom: 78px; font-size: 15px; }
-  .fab:hover { border-color: var(--accent); }
-  .modal {
-    display: none; position: fixed; inset: 0; z-index: 30;
-    background: rgba(0,0,0,.35); align-items: center; justify-content: center;
-  }
-  .modal-box {
-    width: min(420px, 90vw); background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 20px; box-shadow: var(--shadow);
-  }
-  .modal-box input {
-    width: 100%; padding: 10px 14px; font-size: 14px;
-    border-radius: 10px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--text); outline: none; margin: 10px 0;
-  }
-  .modal-box input:focus { border-color: var(--accent); }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-  .modal-actions button {
-    border: 1px solid var(--border); background: var(--card); color: var(--text);
-    border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 14px;
-  }
-  #modalOk { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .card-wrap { position: relative; }
-  .del {
-    position: absolute; top: 6px; right: 8px; z-index: 2;
-    display: none; width: 20px; height: 20px; border-radius: 50%;
-    background: var(--border); color: var(--muted);
-    font-size: 11px; line-height: 20px; text-align: center; cursor: pointer;
-  }
-  .card-wrap:hover .del { display: block; }
-  .del:hover { color: #fff; background: #e5484d; }
   #sideNav {
     position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 15;
     background: var(--bg); border-right: 1px solid var(--border);
@@ -154,21 +117,6 @@ try {
 <div id="content"></div>
 
 <footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航</a></footer>
-
-<button class="fab" id="copyBtn" title="复制自定义链接代码">⧉</button>
-<button class="fab" id="addBtn" title="添加链接">＋</button>
-
-<div class="modal" id="modal">
-  <div class="modal-box">
-    <div style="font-size:15px;font-weight:600">添加链接</div>
-    <input id="newUrl" type="text" placeholder="https://…" autocomplete="off">
-    <input id="newName" type="text" placeholder="名字（可选）" autocomplete="off">
-    <div class="modal-actions">
-      <button id="modalCancel">取消</button>
-      <button id="modalOk">确定</button>
-    </div>
-  </div>
-</div>
 
 <script>
 const mq = matchMedia("(prefers-color-scheme: dark)");
@@ -256,53 +204,40 @@ function setFavicon(img, host) {
     img.src = src.url(host);
   });
 }
-const cardHTML = (link, custom) => {
+const cardHTML = link => {
   const host = hostOf(link.url);
   const name = link.name || titleOf(link.url) || host;
   return `
-    <div class="card-wrap">
-      <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link.url)}">
-        <img alt="" loading="lazy">
-        <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
-        <span class="info">
-          <span class="name" title="${esc(name)}">${esc(name)}</span>
-          <span class="host" title="${esc(host)}">${esc(host)}</span>
-        </span>
-      </a>
-      ${custom ? `<span class="del" data-url="${esc(link.url)}" title="删除">✕</span>` : ""}
-    </div>`;
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link.url)}">
+      <img alt="" loading="lazy">
+      <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
+      <span class="info">
+        <span class="name" title="${esc(name)}">${esc(name)}</span>
+        <span class="host" title="${esc(host)}">${esc(host)}</span>
+      </span>
+    </a>`;
 };
 
 const content = document.getElementById("content");
 const countEl = document.getElementById("count");
 const noResult = document.getElementById("noResult");
 const search = document.getElementById("search");
-const addBtn = document.getElementById("addBtn");
-const copyBtn = document.getElementById("copyBtn");
 const sideNav = document.getElementById("sideNav");
-const modal = document.getElementById("modal");
-const newUrl = document.getElementById("newUrl");
-const newName = document.getElementById("newName");
 let config = { categories: [] };
-let customLinks = [];
-try { customLinks = JSON.parse(localStorage.getItem("customLinks") || "[]"); } catch (e) { customLinks = []; }
-const saveCustom = () => { try { localStorage.setItem("customLinks", JSON.stringify(customLinks)); } catch (e) {} };
 const normalize = l => typeof l === "string" ? { url: l } : l;
 let total = 0;
 
 function render(q) {
   q = (q || "").trim().toLowerCase();
   let html = "", matched = 0, t = 0, nav = "";
-  const cats = config.categories.concat(customLinks.length ? [{ name: "我的", links: customLinks }] : []);
-  cats.forEach((cat, i) => {
+  config.categories.forEach((cat, i) => {
     const links = cat.links.map(normalize).filter(l =>
       !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
     );
     if (!links.length) return;
     t += links.length;
     matched += links.length;
-    const custom = cat.name === "我的";
-    html += `<section id="cat-${i}"><h2>${esc(cat.name)}</h2><div class="grid">${links.map(l => cardHTML(l, custom)).join("")}</div></section>`;
+    html += `<section id="cat-${i}"><h2>${esc(cat.name)}</h2><div class="grid">${links.map(cardHTML).join("")}</div></section>`;
     nav += `<a href="#cat-${i}" data-i="${i}">${esc(cat.name)}</a>`;
   });
   total = t;
@@ -334,38 +269,6 @@ function bindNavObserver() {
   }, { rootMargin: "-25% 0px -65% 0px" });
   content.querySelectorAll("section").forEach(s => navObserver.observe(s));
 }
-
-addBtn.onclick = () => { modal.style.display = "flex"; newUrl.value = ""; newName.value = ""; newUrl.focus(); };
-modalCancel.onclick = () => { modal.style.display = "none"; };
-newUrl.addEventListener("keydown", e => { if (e.key === "Enter") modalOk.click(); });
-modalOk.onclick = () => {
-  const u = newUrl.value.trim();
-  const n = newName.value.trim();
-  modal.style.display = "none";
-  if (!u) return;
-  customLinks = customLinks.filter(l => normalize(l).url !== u);
-  customLinks.push(n ? { url: u, name: n } : u);
-  saveCustom();
-  render(search.value);
-};
-content.addEventListener("click", e => {
-  const del = e.target.closest(".del");
-  if (!del) return;
-  e.preventDefault();
-  const u = del.dataset.url;
-  customLinks = customLinks.filter(l => normalize(l).url !== u);
-  saveCustom();
-  render(search.value);
-});
-copyBtn.onclick = async () => {
-  if (!customLinks.length) { copyBtn.textContent = "—"; setTimeout(() => copyBtn.textContent = "⧉", 1000); return; }
-  const code = customLinks.map(l => `    { url: ${JSON.stringify(normalize(l).url)} },`).join("\n");
-  try {
-    await navigator.clipboard.writeText(code);
-    copyBtn.textContent = "✓";
-  } catch (e) { copyBtn.textContent = "✗"; }
-  setTimeout(() => copyBtn.textContent = "⧉", 1200);
-};
 
 render("");
 loadJson("links.json", config).then(() => render(search.value));
