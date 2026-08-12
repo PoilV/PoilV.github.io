@@ -130,6 +130,9 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const hostOf = url => {
   try { return new URL(url).hostname; } catch (e) { return ""; }
 };
+const hostKey = url => {
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; }
+};
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
 let iconsJson = {};
@@ -233,7 +236,7 @@ function render(q) {
   config.categories.forEach((cat, i) => {
     const links = cat.links.map(normalize).filter(l =>
       !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
-    );
+    ).sort((a, b) => hostKey(a.url).localeCompare(hostKey(b.url)));
     if (!links.length) return;
     t += links.length;
     matched += links.length;
