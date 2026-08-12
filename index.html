@@ -130,8 +130,13 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const hostOf = url => {
   try { return new URL(url).hostname; } catch (e) { return ""; }
 };
-const hostKey = url => {
-  try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return url; }
+const nameKey = l => (l.name || titleOf(l.url) || hostOf(l.url) || "").toLowerCase();
+const nameColl = new Intl.Collator("zh");
+const compareNames = (a, b) => {
+  const na = nameKey(a), nb = nameKey(b);
+  const aa = /^[a-z0-9]/.test(na), ab = /^[a-z0-9]/.test(nb);
+  if (aa !== ab) return aa ? -1 : 1;
+  return nameColl.compare(na, nb);
 };
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
@@ -236,7 +241,7 @@ function render(q) {
   config.categories.forEach((cat, i) => {
     const links = cat.links.map(normalize).filter(l =>
       !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
-    ).sort((a, b) => hostKey(a.url).localeCompare(hostKey(b.url)));
+    ).sort(compareNames);
     if (!links.length) return;
     t += links.length;
     matched += links.length;
