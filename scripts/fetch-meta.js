@@ -201,9 +201,13 @@ async function worker() {
 }
 (async () => {
   await Promise.all(Array.from({ length: conc }, worker));
+  const urlSet = new Set(urls);
+  let tStale = 0, iStale = 0;
+  for (const k of Object.keys(titles)) if (!urlSet.has(k)) { delete titles[k]; tStale++; }
+  for (const k of Object.keys(icons)) if (!urlSet.has(k)) { delete icons[k]; iStale++; }
   fs.writeFileSync(titlesPath, JSON.stringify(titles, null, 1) + "\n");
   fs.writeFileSync(iconsPath, JSON.stringify(icons, null, 1) + "\n");
-  console.log(`done: ${tChanged} titles changed, ${iChanged} icons changed (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);
+  console.log(`done: ${tChanged} titles changed, ${iChanged} icons changed, ${tStale} stale titles, ${iStale} stale icons removed (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);
   if (fails.length) {
     console.log("--- no data for " + fails.length + " urls ---");
     fails.forEach(f => console.log("  " + f));
