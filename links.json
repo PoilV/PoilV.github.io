@@ -189,6 +189,20 @@
         "https://q.qq.com/",
         "https://www.virustotal.com/gui/home/upload"
       ]
+    },
+    {
+      "name": "NSFW",
+      "links": [
+        "https://nhentai.net/",
+        "https://hanime1.me/",
+        "https://missav.ai/",
+        "https://iwara.tv/",
+        "https://hxcy.top/",
+        "https://pornhub.com/",
+        "https://e-hentai.org",
+        "https://theporndb.net/",
+        "https://manhuapica.com/"
+      ]
     }
   ]
 }
