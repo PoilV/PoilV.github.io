@@ -4,3 +4,5 @@
 bookmarks.html
 *.png
 node_modules/
+__pycache__/
+.deps/
