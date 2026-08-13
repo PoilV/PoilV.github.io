@@ -15,6 +15,9 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      GOOGLE_CX: ${{ secrets.GOOGLE_CX }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -17,7 +17,7 @@
 ## 工作方式
 
 - `links.json` 中只需维护 URL，页面首次渲染时按拼音排序，加载数据后自动补全标题与图标。
-- [fetch-meta.py](scripts/fetch-meta.py) 依次尝试 DuckDuckGo API、页面 `<title>`（curl_cffi 浏览器指纹，可过多数反爬）、Jina 渲染回退（r.jina.ai，能执行 JS，救 SPA 与被反爬页面）、Bing/百度搜索（带域名校验）获取标题；Bing/百度仅用于补缺，不覆盖已有标题，防止好标题被搜索结果的 SEO 噪音覆盖。
+- [fetch-meta.py](scripts/fetch-meta.py) 依次尝试 DuckDuckGo API、页面 `<title>`（curl_cffi 浏览器指纹，可过多数反爬）、Jina 渲染回退（r.jina.ai，能执行 JS，救 SPA 与被反爬页面）、Bing/百度搜索（带域名校验）获取标题；兜底源（jina/Bing/百度）仅用于补缺，不覆盖已有标题，防止好标题被搜索结果的 SEO 噪音覆盖。可选配置 Google Custom Search API（仓库 Secrets 里设 `GOOGLE_API_KEY` 与 `GOOGLE_CX`，免费 100 次/天）作为最后的补缺源。
 - 图标依次尝试 Google favicon 服务（不访问目标站点，覆盖面最大，自动剔除默认占位图）、DDG 图标服务、页面 icon、`/favicon.ico`，经 Pillow 统一转 64x64 PNG（ICO 帧选择与 alpha 掩码由 Pillow 正确处理），以 data URI 存入 `data/icons.json`。
 - GitHub Actions 每日定时运行并自动提交 `data/*.json`，也可手动触发。
 

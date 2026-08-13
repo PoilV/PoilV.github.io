@@ -8,6 +8,7 @@
   jina  - r.jina.ai 渲染回退（能执行 JS，救 SPA 与被反爬的页面，限速 20 次/分）
   bing  - Bing 搜索结果（域名校验，仅补空缺）
   baidu - 百度搜索结果（域名校验，仅补空缺）
+  google- Google Custom Search API（可选，需 GOOGLE_API_KEY/GOOGLE_CX，仅补空缺）
 
 图标源（按序）:
   google    - Google faviconV2 服务（不访问目标站点，覆盖面最大，自动剔除默认占位图）
@@ -237,6 +238,32 @@ def title_baidu(ctx):
     return ""
 
 
+def title_google(ctx):
+    """Google Custom Search JSON API（可选，需 GOOGLE_API_KEY + GOOGLE_CX，免费 100 次/天）。"""
+    key, cx = os.environ.get("GOOGLE_API_KEY", ""), os.environ.get("GOOGLE_CX", "")
+    if not key or not cx:
+        return ""
+    u = ("https://www.googleapis.com/customsearch/v1?key=" + quote(key) +
+         "&cx=" + quote(cx) + "&q=" + quote(ctx["host2"]) + "&num=5")
+    code, _, text = fetch(u, 8)
+    if code != 200 or not text:
+        return ""
+    try:
+        j = json.loads(text)
+    except Exception:
+        return ""
+    for item in j.get("items") or []:
+        try:
+            rn = host_of(item.get("link", "")).replace("www.", "")
+        except Exception:
+            continue
+        if rn and (rn == ctx["host2"] or rn.endswith("." + ctx["host2"])):
+            t = clean_title(item.get("title", ""))
+            if t and not is_bad_title(t) and t.lower() != ctx["host2"]:
+                return t
+    return ""
+
+
 # ---------- 图标源 ----------
 _GOOGLE_PH = None
 
@@ -353,7 +380,7 @@ def process_url(url):
     ctx = {"url": url, "host": host_of(url), "host2": host_of(url).replace("www.", ""), "html": None}
     title, title_src, tlog = "", "", []
     for name, fn in (("ddg", title_ddg), ("page", title_page), ("jina", title_jina),
-                     ("bing", title_bing), ("baidu", title_baidu)):
+                     ("bing", title_bing), ("baidu", title_baidu), ("google", title_google)):
         try:
             v = fn(ctx) or ""
         except Exception:
