@@ -149,16 +149,8 @@ const compareLinks = (a, b) => pyKey(nameOf(a)).localeCompare(pyKey(nameOf(b)));
 const iconCandidates = link => {
   const out = [];
   if (link.icon) out.push(link.icon); // 手动指定，最高优先
-  try {
-    const u = new URL(link.url);
-    if (u.hostname) {
-      out.push(u.origin + "/favicon.ico"); // 站点惯例路径（逐个尝试，失败自动级联）
-      out.push(u.origin + "/favicon.svg");
-      out.push(u.origin + "/favicon.png");
-      out.push(u.origin + "/favicon.gif");
-      out.push("https://favicon.im/" + u.hostname + "?larger=true"); // 服务兜底
-    }
-  } catch (e) {}
+  const host = hostOf(link.url);
+  if (host) out.push("https://favicon.im/" + host + "?larger=true"); // 服务兜底
   return out;
 };
 
