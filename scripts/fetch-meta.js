@@ -7,7 +7,9 @@ const titlesPath = path.join(repo, "data", "titles.json");
 const iconsPath = path.join(repo, "data", "icons.json");
 
 const cfg = JSON.parse(fs.readFileSync(linksPath, "utf8"));
-const urls = cfg.categories.flatMap(c => c.links).filter(u => /^https?:/.test(u));
+const urls = cfg.categories.flatMap(c => c.links)
+  .map(l => typeof l === "string" ? l : l && l.url)
+  .filter(u => typeof u === "string" && /^https?:/.test(u));
 
 // ---------- 基础工具 ----------
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
@@ -25,7 +27,8 @@ const BAD_PAGE = [
   /x\. it[’']?s what[’']?s happening/i, /just a moment/i, /attention required/i,
   /access denied/i, /^登录/, /登录$/, /^退出中/, /^加载中/, /^首頁/, /^首页/,
   /^i challenge thee/i, /^context$/i, /^哔哩哔哩\s*\(゜/, /^招聘网_/, /^【孔夫子旧书网】网上买书/,
-  /^天翼云盘\s/, /^一刻相册：/, /^插画、漫画、小说/, /^书生梦工厂/, /^小云雀AI\s/, /^duck\.ai\s/i, /^portable$/i
+  /^天翼云盘\s/, /^一刻相册：/, /^插画、漫画、小说/, /^书生梦工厂/, /^小云雀AI\s/, /^duck\.ai\s/i, /^portable$/i,
+  /significado/i, /中文官网/i
 ];
 const decodeEntities = s => s
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
@@ -72,33 +75,170 @@ const icoSize = buf => {
   if (count < 1) return null;
   return { w: buf[6] || 256, h: buf[7] || 256 };
 };
-const toDataUri = (buf, ct, hint) => {
+const minimizeIco = buf => {
+  if (buf.length < 22 || buf[0] !== 0 || buf[1] !== 0 || buf[2] !== 1 || buf[3] !== 0) return null;
+  const count = buf.readUInt16LE(4);
+  if (count < 1 || count > 64) return null;
+  const entries = [];
+  for (let i = 0; i < count; i++) {
+    const o = 6 + i * 16;
+    if (o + 16 > buf.length) return null;
+    const w = buf[o] || 256, h = buf[o + 1] || 256;
+    const size = buf.readUInt32LE(o + 8), offset = buf.readUInt32LE(o + 12);
+    if (offset + size > buf.length) return null;
+    entries.push({ w, h, size, offset, dir: buf.subarray(o, o + 16) });
+  }
+  const score = e => (e.w > 32 || e.h > 32 ? 1e6 : Math.abs(e.w - 32) + Math.abs(e.h - 32));
+  const best = entries.reduce((a, e) => (score(e) < score(a) ? e : a), entries[0]);
+  const header = Buffer.alloc(22);
+  buf.copy(header, 0, 0, 4);
+  header.writeUInt16LE(1, 4);
+  best.dir.copy(header, 6);
+  header.writeUInt32LE(22, 18);
+  return Buffer.concat([header, buf.subarray(best.offset, best.offset + best.size)]);
+};
+let sharp = null;
+try { sharp = require("sharp"); } catch (e) {}
+const decodeBmp = buf => {
+  const dib = !(buf[0] === 0x42 && buf[1] === 0x4d);
+  const base = dib ? 0 : 14;
+  const biSize = buf.readUInt32LE(base);
+  if (biSize < 40 || biSize > 124 || base + biSize + 16 > buf.length) return null;
+  const w = buf.readInt32LE(base + 4), h = buf.readInt32LE(base + 8);
+  if (w <= 0 || w > 1024 || Math.abs(h) > 1024) return null;
+  const bpp = buf.readUInt16LE(base + 14);
+  const comp = buf.readUInt32LE(base + 16);
+  if (comp !== 0 || ![8, 24, 32].includes(bpp)) return null;
+  let bfOffBits = dib ? biSize : buf.readUInt32LE(10);
+  if (dib) {
+    let paletteSize = 0;
+    if (bpp === 8) paletteSize = (buf.readUInt32LE(base + 32) || 256) * 4;
+    bfOffBits = base + biSize + paletteSize;
+  }
+  const flip = h > 0;
+  const rowSize = Math.ceil((w * bpp) / 32) * 4;
+  const avail = Math.floor((buf.length - bfOffBits) / rowSize);
+  if (avail < 1) return null;
+  const H = Math.min(Math.abs(h), avail);
+  const palette = base + biSize;
+  const rgba = Buffer.alloc(w * H * 4);
+  for (let y = 0; y < H; y++) {
+    const src = bfOffBits + (flip ? H - 1 - y : y) * rowSize;
+    for (let x = 0; x < w; x++) {
+      const d = (y * w + x) * 4, s = src + x * (bpp / 8);
+      if (bpp === 32) {
+        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
+      } else if (bpp === 24) {
+        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
+      } else {
+        const idx = buf[s];
+        rgba[d] = buf[palette + idx * 4 + 2];
+        rgba[d + 1] = buf[palette + idx * 4 + 1];
+        rgba[d + 2] = buf[palette + idx * 4];
+        rgba[d + 3] = 255;
+      }
+    }
+  }
+  return { data: rgba, width: w, height: H };
+};
+const resize = async buf => {
+  if (!sharp) return null;
+  try {
+    let s;
+    const bmp = decodeBmp(buf);
+    if (bmp) s = sharp(bmp.data, { raw: { width: bmp.width, height: bmp.height, channels: 4 } });
+    else {
+      const opts = { density: 300 };
+      const head = buf.toString("utf8", 0, 4096);
+      if (/<svg/i.test(head)) {
+        const vb = /viewBox=["']\s*[\d.-]+\s+[\d.-]+\s+([\d.]+)\s+([\d.]+)/.exec(head);
+        if (vb) {
+          const max = Math.max(parseFloat(vb[1]), parseFloat(vb[2]));
+          if (max > 0) opts.density = Math.min(600, Math.max(1, 72 * 64 / max));
+        }
+      }
+      s = sharp(buf, opts);
+    }
+    const out = await s.resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toBuffer();
+    return out && out.length < 40 * 1024 ? out : null;
+  } catch (e) { return null; }
+};
+const toDataUri = async (buf, ct, hint) => {
   if (/svg/.test(ct) || /\.svg($|\?)/i.test(hint)) {
     if (buf.length > 50 * 1024) return "";
-    return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8"));
+    const png = await resize(buf);
+    if (png) return "data:image/png;base64," + png.toString("base64");
+    return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8").replace(/>\s+</g, "><").trim());
   }
-  if (buf.length <= 40 * 1024) return "data:" + ct + ";base64," + buf.toString("base64");
+  let data = buf, frame = null;
+  if (/icon/.test(ct) || (buf.length > 4 && buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0)) {
+    const mini = minimizeIco(buf);
+    if (mini) {
+      data = mini;
+      frame = mini.subarray(mini.readUInt32LE(18));
+    }
+  }
+  const png = await resize(frame || data);
+  if (png && png.length < data.length) return "data:image/png;base64," + png.toString("base64");
+  if (data.length <= 40 * 1024) {
+    const mime = data[0] === 0 && data[1] === 0 && data[2] === 1 && data[3] === 0 ? "image/x-icon" : ct;
+    return "data:" + mime + ";base64," + data.toString("base64");
+  }
   return "";
 };
 
 // ---------- 标题源（按顺序尝试，非空即用） ----------
+const hostMatch = (host, host2) => host && (host === host2 || host.includes(host2) || host2.includes(host));
+const resolveHref = raw => {
+  const u = decodeEntities(raw);
+  try {
+    let url = new URL(u, "https://cn.bing.com");
+    if (/^(www\.)?bing\.com$/.test(url.hostname)) {
+      const p = url.searchParams.get("u") || "";
+      if (!p.startsWith("a1")) return null;
+      const b64 = p.slice(2).replace(/-/g, "+").replace(/_/g, "/");
+      url = new URL(Buffer.from(b64, "base64").toString("utf8"));
+    }
+    return url;
+  } catch (e) { return null; }
+};
+const getBingTitle = async ctx => {
+  const r = await fetchT("https://cn.bing.com/search?q=" + encodeURIComponent(ctx.host2) + "&mkt=zh-CN", 8000);
+  if (!r.ok) return "";
+  const html = await r.text();
+  const re = /<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>\s*<\/h2>/gi;
+  let m;
+  while ((m = re.exec(html))) {
+    const title = cleanTitle(m[2]);
+    if (!title || isBadTitle(title)) continue;
+    const url = resolveHref(m[1]);
+    if (url && hostMatch(url.hostname.replace(/^www\./, ""), ctx.host2)) return title;
+  }
+  return "";
+};
+const getBaiduTitle = async ctx => {
+  const r = await fetchT("https://www.baidu.com/s?wd=" + encodeURIComponent(ctx.host2), 8000);
+  if (!r.ok) return "";
+  const html = await r.text();
+  const re = /<h3[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h3>/gi;
+  let m;
+  while ((m = re.exec(html))) {
+    const title = cleanTitle(m[1]);
+    if (!title || isBadTitle(title)) continue;
+    const tail = html.slice(re.lastIndex, re.lastIndex + 800);
+    const su = tail.match(/class=["'][^"']*c-showurl[^"']*["'][^>]*>([\s\S]*?)<\/span>/i) ||
+              tail.match(/class=["'][^"']*c-color-gray[^"']*["'][^>]*>([\s\S]*?)<\/span>/i);
+    if (!su) continue;
+    const shown = decodeEntities(su[1].replace(/<[^>]+>/g, "")).replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0].trim();
+    if (hostMatch(shown, ctx.host2)) return title;
+  }
+  return "";
+};
 const titleSources = [
   { name: "ddg", run: async ctx => ctx.ddgTitle || "" },
   { name: "page", run: async ctx => (ctx.pageTitle && !isBadTitle(ctx.pageTitle)) ? ctx.pageTitle : "" },
-  { name: "bing", run: async ctx => {
-    const r = await fetchT("https://cn.bing.com/search?q=" + encodeURIComponent(ctx.host2) + "&mkt=zh-CN", 8000);
-    if (!r.ok) return "";
-    const m = (await r.text()).match(/<h2[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>\s*<\/h2>/i);
-    const t = m ? cleanTitle(m[1]) : "";
-    return t && !isBadTitle(t) ? t : "";
-  }},
-  { name: "baidu", run: async ctx => {
-    const r = await fetchT("https://www.baidu.com/s?wd=" + encodeURIComponent(ctx.host2), 8000);
-    if (!r.ok) return "";
-    const m = (await r.text()).match(/<h3[^>]*>[\s\S]*?<a[^>]*>([\s\S]*?)<\/a>[\s\S]*?<\/h3>/i);
-    const t = m ? cleanTitle(m[1]) : "";
-    return t && !isBadTitle(t) ? t : "";
-  }},
+  { name: "bing", run: async ctx => getBingTitle(ctx) },
+  { name: "baidu", run: async ctx => getBaiduTitle(ctx) },
 ];
 
 // ---------- 图标源（按顺序尝试，非空即用） ----------
@@ -110,7 +250,7 @@ const iconSources = [
     if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
     const size = icoSize(buf);
     if (size && size.w === 48 && size.h === 48) return "";
-    return toDataUri(buf, "image/x-icon", ctx.host + ".ico");
+    return await toDataUri(buf, "image/x-icon", ctx.host + ".ico");
   }},
   { name: "page-icon", run: async ctx => {
     if (!ctx.pageIcon) return "";
@@ -119,7 +259,7 @@ const iconSources = [
     const ct = r.headers.get("content-type") || "";
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
-    return toDataUri(buf, ct, ctx.pageIcon);
+    return await toDataUri(buf, ct, ctx.pageIcon);
   }},
   { name: "direct", run: async ctx => {
     const base = new URL(ctx.url).origin;
@@ -129,7 +269,7 @@ const iconSources = [
     if (!/^image\//.test(ct)) return "";
     const buf = Buffer.from(await r.arrayBuffer());
     if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
-    return toDataUri(buf, ct, base + "/favicon.ico");
+    return await toDataUri(buf, ct, base + "/favicon.ico");
   }},
 ];
 

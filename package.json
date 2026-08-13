@@ -1,0 +1,7 @@
+{
+  "name": "poilv-nav",
+  "private": true,
+  "dependencies": {
+    "sharp": "^0.34.0"
+  }
+}

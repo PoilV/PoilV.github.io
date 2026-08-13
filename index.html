@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>我的导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://unpkg.com/pinyin-pro" defer></script>
 <script>
 try {
   document.documentElement.setAttribute("data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -247,10 +248,16 @@ search.addEventListener("input", e => {
   debounceId = setTimeout(() => render(e.target.value), 200);
 });
 window.addEventListener("pinyin-ready", () => render(search.value));
-import("./vendor/pinyin-pro.js").then(m => {
-  window.pinyin = m.pinyin;
+let pinyinReady = false;
+const initPinyin = () => {
+  if (pinyinReady || !window.pinyinPro) return;
+  pinyinReady = true;
+  window.pinyin = window.pinyinPro.pinyin;
   window.dispatchEvent(new Event("pinyin-ready"));
-}).catch(() => {});
+};
+document.addEventListener("DOMContentLoaded", initPinyin);
+window.addEventListener("load", initPinyin);
+initPinyin();
 </script>
 </body>
 </html>
