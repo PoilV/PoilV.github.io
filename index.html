@@ -150,7 +150,7 @@ const iconCandidates = link => {
   const out = [];
   if (link.icon) out.push(link.icon); // 手动指定，最高优先
   const host = hostOf(link.url);
-  if (host) out.push("https://favicon.im/" + host + "?larger=true"); // 服务兜底
+  if (host) out.push("https://favicon.im/" + host + "?larger=true&throw-error-on-404=true"); // 服务兜底（缺失时 404，触发字母回退）
   return out;
 };
 
