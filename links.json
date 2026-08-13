@@ -18,11 +18,10 @@
         "https://claude.ai/",
         "https://copilot.microsoft.com/",
         "https://docs.sillytavern.app/",
-        "https://www.doubao.com/chat/30171912988103170",
+        "https://www.doubao.com/",
         "https://duck.ai/",
         "https://gemini.google.com/app",
-        "https://labs.google/",
-        "https://labs.google/fx/tools/flow"
+        "https://labs.google/"
       ]
     },
     {
@@ -31,11 +30,10 @@
         "https://bigmodel.cn/",
         "https://civitai.com/",
         "https://civitai.red/",
-        "https://gabriel.devenyi.ca/huggingface-estimate/",
         "https://huggingface.co/",
         "https://minimaxi.com/",
         "https://openrouter.ai/",
-        "https://platform.deepseek.com/usage",
+        "https://platform.deepseek.com/",
         "https://www.tavily.com/"
       ]
     },
@@ -43,17 +41,17 @@
       "name": "AI 视频",
       "links": [
         "http://49.233.78.71:17861/",
-        "https://ai.lfxqai.com/videos",
-        "https://jimeng.jianying.com/ai-tool/generate?workspace=0",
-        "https://klingai.com/app",
+        "https://ai.lfxqai.com/",
+        "https://jimeng.jianying.com/",
+        "https://klingai.com/",
         "https://www.liblib.art/",
         "https://www.liblib.tv/",
         "https://nova.shanhaix.com/",
-        "https://story.neodomain.cn/home",
+        "https://story.neodomain.cn/",
         "https://www.ttson.cn/",
         "https://video.jurilu.com/",
-        "https://www.vidu.cn/home/recommend",
-        "https://voiceailabs.com/zh",
+        "https://www.vidu.cn/",
+        "https://voiceailabs.com/",
         "https://www.woaiduanju.com/",
         "https://xyq.jianying.com/"
       ]
@@ -61,15 +59,13 @@
     {
       "name": "游戏娱乐",
       "links": [
-        "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
-        "https://game.maj-soul.com/1/",
+        "https://game.maj-soul.com/",
         "https://www.gamer520.com/",
         "https://www.protondb.com/",
         "https://www.pxb7.com/",
         "https://steamdb.info/",
-        "https://store.epicgames.com/zh-CN/",
+        "https://store.epicgames.com/",
         "https://store.steampowered.com/",
-        "https://store.steampowered.com/account/remotestorage"
       ]
     },
     {
@@ -150,7 +146,7 @@
         "https://music.youtube.com/",
         "https://open.spotify.com/",
         "https://share.dmhy.org/",
-        "https://www.tiktok.com/?lang=zh-Hans",
+        "https://www.tiktok.com/",
         "https://vcb-s.com/",
         "https://www.youtube.com/"
       ]
