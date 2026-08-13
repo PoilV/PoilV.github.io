@@ -152,7 +152,9 @@ const iconCandidates = link => {
   try {
     const u = new URL(link.url);
     if (u.hostname) {
-      out.push(u.origin + "/favicon.ico");           // 站点自身的网页 favicon
+      out.push(u.origin + "/favicon.ico");  // 站点自身网页 favicon（多种格式逐个尝试）
+      out.push(u.origin + "/favicon.svg");
+      out.push(u.origin + "/favicon.png");
       out.push("https://favicon.im/" + u.hostname + "?larger=true"); // 服务兜底
     }
   } catch (e) {}

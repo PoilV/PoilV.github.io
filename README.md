@@ -17,7 +17,7 @@
   {"url": "https://www.doubao.com/", "name": "豆包"}
   ```
   想给某个链接单独指定图标，可加 `icon` 字段（图标 URL），否则走下面的默认图标服务。
-- **图标**：优先加载站点自身的 `/favicon.ico`（最准确的网页图标），加载失败回退 [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true`，再失败显示首字母回退块；图标永远最新，无需缓存。单条链接可加 `icon` 字段手动指定图标地址（最高优先级）。
+- **图标**：优先加载站点自身的 `/favicon.ico`、`/favicon.svg`、`/favicon.png`（逐个尝试，最准确的网页图标），加载失败回退 [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true`，再失败显示首字母回退块；图标永远最新，无需缓存。单条链接可加 `icon` 字段手动指定图标地址（最高优先级）。
 - **排序与搜索**：分类与链接按拼音排序（pinyin-pro），搜索框实时匹配名称与网址。
 
 ## 维护
