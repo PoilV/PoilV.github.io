@@ -11,10 +11,10 @@
   google- Google Custom Search API（可选，需 GOOGLE_API_KEY/GOOGLE_CX，仅补空缺）
 
 图标源（按序）:
-  page-icon - 页面 <link rel=icon / apple-touch-icon>（通常最大最清晰）
-  google    - Google faviconV2 服务（不访问目标站点，覆盖面最大，自动剔除默认占位图）
-  ddg-icon  - DuckDuckGo 图标服务
+  page-icon - 页面 <link rel=icon>（网页 favicon，不含 apple-touch 类 App 图标）
+  ddg-icon  - DuckDuckGo 图标服务（镜像站点实际 favicon）
   direct    - 站点根 /favicon.ico
+  google    - Google faviconV2 服务（兜底覆盖，自动剔除默认占位图）
 
 策略:
   - bing/baidu 只补空缺、不覆盖已有标题（防止好标题被搜索结果的 SEO 噪音覆盖）
@@ -304,7 +304,7 @@ def icon_ddg(ctx):
 _ICON_RES = [
     re.compile(r"<link[^>]*rel=[\"'](?:shortcut\s+)?icon[\"'][^>]*href=[\"']([^\"']+)[\"']", re.I),
     re.compile(r"<link[^>]*href=[\"']([^\"']+)[\"'][^>]*rel=[\"'](?:shortcut\s+)?icon[\"']", re.I),
-    re.compile(r"<link[^>]*rel=[\"']apple-touch-icon(?:-precomposed)?[\"'][^>]*href=[\"']([^\"']+)[\"']", re.I),
+    # 注意：不收录 apple-touch-icon，它通常是 App 图标而非网页 favicon
 ]
 
 
@@ -399,8 +399,8 @@ def process_url(url):
             break
         tlog.append(name + ":empty")
     icon, ilog = "", []
-    for name, fn in (("page-icon", icon_page), ("google", icon_google),
-                     ("ddg-icon", icon_ddg), ("direct", icon_direct)):
+    for name, fn in (("page-icon", icon_page), ("ddg-icon", icon_ddg),
+                     ("direct", icon_direct), ("google", icon_google)):
         try:
             v = fn(ctx) or ""
         except Exception:
