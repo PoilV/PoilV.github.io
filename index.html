@@ -164,19 +164,23 @@ const showFallback = img => {
 function setIcon(img, link) {
   const cands = iconCandidates(link);
   if (!cands.length) { showFallback(img); return; }
-  // 并行加载所有候选：先完成的先显示；手动图标后到则替换（优先级更高）
-  let shown = null;
-  const finished = new Set();
+  // 并行加载所有候选：先完成的先显示；后到的只有优先级更高（索引更小）才替换
+  let shown = -1;
+  const state = cands.map(() => 0); // 0=pending 1=ok 2=failed
   const tryShow = () => {
-    for (const c of cands) {
-      if (finished.has(c) && c !== shown) { img.src = c; shown = c; return; }
+    for (let i = 0; i < cands.length; i++) {
+      if (state[i] === 1 && (shown === -1 || i < shown)) {
+        img.src = cands[i];
+        shown = i;
+        return;
+      }
     }
-    if (finished.size === cands.length && !shown) showFallback(img);
+    if (state.every(s => s !== 0) && shown === -1) showFallback(img);
   };
-  cands.forEach(c => {
+  cands.forEach((c, i) => {
     const p = new Image();
-    p.onload = () => { finished.add(c); tryShow(); };
-    p.onerror = () => { finished.add(c); tryShow(); };
+    p.onload = () => { state[i] = 1; tryShow(); };
+    p.onerror = () => { state[i] = 2; tryShow(); };
     p.src = c;
   });
 }
