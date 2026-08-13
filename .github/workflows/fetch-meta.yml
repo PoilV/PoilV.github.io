@@ -9,7 +9,7 @@ on:
         required: false
         default: "10"
   push:
-    paths: ["links.json", "scripts/fetch-meta.py"]
+    paths: ["links.json", "scripts/fetch-meta.py", ".github/workflows/fetch-meta.yml"]
 permissions:
   contents: write
 jobs:
@@ -19,10 +19,10 @@ jobs:
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       GOOGLE_CX: ${{ secrets.GOOGLE_CX }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@main
+      - uses: actions/setup-python@main
         with:
-          python-version: "3.12"
+          python-version: "3.x"
       - name: Install deps
         run: pip install curl_cffi pillow
       - name: Validate JSON
