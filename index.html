@@ -71,6 +71,7 @@ try {
   }
   a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
   a.card img { width: 32px; height: 32px; padding: 4px; object-fit: contain; border-radius: 8px; background: var(--border); flex-shrink: 0; }
+  [data-theme="dark"] a.card img { background: #383e47; }
   a.card .fb {
     display: none; width: 32px; height: 32px; border-radius: 8px;
     background: var(--border); color: var(--muted);
@@ -160,17 +161,18 @@ const showFallback = img => {
   img.remove();
   if (fb) fb.style.display = "flex";
 };
-function setFavicon(img, host) {
-  if (!host) { showFallback(img); return; }
-  const a = img.closest("a");
-  const url = a && a.dataset.url;
-  if (!img.dataset.icon && url && iconsJson[url]) img.dataset.icon = iconsJson[url];
-  if (img.dataset.icon) {
-    img.onerror = () => showFallback(img);
-    img.src = img.dataset.icon;
-    return;
-  }
-  showFallback(img);
+const ICON_URL = ref => {
+  if (!ref) return "";
+  if (ref.startsWith("lobe:")) return "https://cdn.jsdelivr.net/gh/lobehub/lobe-icons@master/packages/static-svg/icons/" + ref.slice(5) + ".svg";
+  if (ref.startsWith("logos:")) return "https://api.iconify.design/logos/" + ref.slice(6) + ".svg";
+  if (ref.startsWith("si:")) return "https://cdn.simpleicons.org/" + ref.slice(3);
+  return "";
+};
+function setFavicon(img, url) {
+  const src = ICON_URL(iconsJson[url]);
+  if (!src) { showFallback(img); return; }
+  img.onerror = () => showFallback(img);
+  img.src = src;
 }
 const cardHTML = link => {
   const host = hostOf(link.url);
@@ -213,7 +215,7 @@ function render(q) {
   content.innerHTML = html;
   sideNav.innerHTML = nav;
   bindNavObserver();
-  content.querySelectorAll("a.card img").forEach(img => setFavicon(img, hostOf(img.closest("a").dataset.url)));
+  content.querySelectorAll("a.card img").forEach(img => setFavicon(img, img.closest("a").dataset.url));
   countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${matched} 条` : ""}`;
   countEl.style.display = q ? "block" : "none";
   noResult.style.display = q && !matched ? "block" : "none";
