@@ -11,9 +11,9 @@
   google- Google Custom Search API（可选，需 GOOGLE_API_KEY/GOOGLE_CX，仅补空缺）
 
 图标源（按序）:
+  page-icon - 页面 <link rel=icon / apple-touch-icon>（通常最大最清晰）
   google    - Google faviconV2 服务（不访问目标站点，覆盖面最大，自动剔除默认占位图）
   ddg-icon  - DuckDuckGo 图标服务
-  page-icon - 页面 <link rel=icon / apple-touch-icon>
   direct    - 站点根 /favicon.ico
 
 策略:
@@ -90,7 +90,7 @@ BAD_PAGE = [
     r"^i challenge thee", r"^context$", r"^哔哩哔哩\s*\(゜", r"^招聘网_", r"^【孔夫子旧书网】网上买书",
     r"^天翼云盘\s", r"^一刻相册：", r"^插画、漫画、小说", r"^书生梦工厂", r"^小云雀AI\s", r"^duck\.ai\s",
     r"^portable$", r"significado", r"中文官网", r"^动态首页$", r"^知乎专栏$",
-    r"^下载.*(?:App|客户端)", r"在你所在区域无法使用", r"电脑版下载", r"免费色情视频",
+    r"^下载.*(?:App|客户端)", r"在你所在区域无法使用", r"电脑版下载", r"免费色情视频", r"安全验证",
 ]
 BAD_PAGE = [re.compile(p, re.I) for p in BAD_PAGE]
 _ENT = re.compile(r"&#x([0-9a-f]+);|&#(\d+);", re.I)
@@ -363,7 +363,14 @@ def process_image(data, mime):
                 idx = min(range(len(sizes)), key=lambda i: abs((sizes[i][0] or 256) - 64))
                 img.seek(idx)
         img = img.convert("RGBA")
-        img.thumbnail((64, 64), _RESAMPLE)
+        bbox = img.getchannel("A").getbbox()  # 裁掉透明衬垫
+        if bbox:
+            img = img.crop(bbox)
+        w, h = img.size
+        if w > 0 and h > 0:
+            scale = min(64 / max(w, h), 4)  # 小图标放大填满画布（最多 4 倍防糊）
+            if abs(scale - 1) > 0.01:
+                img = img.resize((max(1, round(w * scale)), max(1, round(h * scale))), _RESAMPLE)
         canvas = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
         canvas.paste(img, ((64 - img.width) // 2, (64 - img.height) // 2))
         buf = io.BytesIO()
@@ -392,8 +399,8 @@ def process_url(url):
             break
         tlog.append(name + ":empty")
     icon, ilog = "", []
-    for name, fn in (("google", icon_google), ("ddg-icon", icon_ddg),
-                     ("page-icon", icon_page), ("direct", icon_direct)):
+    for name, fn in (("page-icon", icon_page), ("google", icon_google),
+                     ("ddg-icon", icon_ddg), ("direct", icon_direct)):
         try:
             v = fn(ctx) or ""
         except Exception:
