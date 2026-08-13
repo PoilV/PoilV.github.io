@@ -7,8 +7,9 @@ const titlesPath = path.join(repo, "data", "titles.json");
 const iconsPath = path.join(repo, "data", "icons.json");
 
 const cfg = JSON.parse(fs.readFileSync(linksPath, "utf8"));
-const links = cfg.categories.flatMap(c => c.links).map(l => typeof l === "string" ? { url: l } : { ...l });
-const urls = links.map(l => l.url).filter(u => /^https?:/.test(u));
+const urls = cfg.categories.flatMap(c => c.links)
+  .map(l => typeof l === "string" ? l : l && l.url)
+  .filter(u => typeof u === "string" && /^https?:/.test(u));
 
 // ---------- 基础工具 ----------
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
@@ -41,6 +42,150 @@ const cleanTitle = s => {
   return seg;
 };
 const isBadTitle = s => BAD_PAGE.some(re => re.test(s));
+
+// ---------- 图标校验与转换 ----------
+const ICON_RES = [
+  /<link[^>]*rel=["'](?:shortcut\s+)?icon["'][^>]*href=["']([^"']+)["']/i,
+  /<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut\s+)?icon["']/i,
+  /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i
+];
+const parseIcon = (html, url) => {
+  for (const re of ICON_RES) {
+    const m = html.match(re);
+    if (m) {
+      const h = m[1].trim();
+      if (!h || /^data:/i.test(h)) continue;
+      try { return new URL(h, url).href.slice(0, 500); } catch (e) {}
+    }
+  }
+  return "";
+};
+const isImage = buf => {
+  const head = buf.toString("utf8", 0, 200);
+  return (buf[0] === 0x89 && buf[1] === 0x50) ||
+    (buf[0] === 0xff && buf[1] === 0xd8) ||
+    head.slice(0, 4) === "GIF8" ||
+    (head.slice(0, 4) === "RIFF" && head.slice(8, 12) === "WEBP") ||
+    (buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0) ||
+    /^\s*<svg/i.test(head);
+};
+const icoSize = buf => {
+  if (buf.length < 22 || buf[0] !== 0 || buf[1] !== 0 || buf[2] !== 1 || buf[3] !== 0) return null;
+  const count = buf.readUInt16LE(4);
+  if (count < 1) return null;
+  return { w: buf[6] || 256, h: buf[7] || 256 };
+};
+const minimizeIco = buf => {
+  if (buf.length < 22 || buf[0] !== 0 || buf[1] !== 0 || buf[2] !== 1 || buf[3] !== 0) return null;
+  const count = buf.readUInt16LE(4);
+  if (count < 1 || count > 64) return null;
+  const entries = [];
+  for (let i = 0; i < count; i++) {
+    const o = 6 + i * 16;
+    if (o + 16 > buf.length) return null;
+    const w = buf[o] || 256, h = buf[o + 1] || 256;
+    const size = buf.readUInt32LE(o + 8), offset = buf.readUInt32LE(o + 12);
+    if (offset + size > buf.length) return null;
+    entries.push({ w, h, size, offset, dir: buf.subarray(o, o + 16) });
+  }
+  const score = e => (e.w > 32 || e.h > 32 ? 1e6 : Math.abs(e.w - 32) + Math.abs(e.h - 32));
+  const best = entries.reduce((a, e) => (score(e) < score(a) ? e : a), entries[0]);
+  const header = Buffer.alloc(22);
+  buf.copy(header, 0, 0, 4);
+  header.writeUInt16LE(1, 4);
+  best.dir.copy(header, 6);
+  header.writeUInt32LE(22, 18);
+  return Buffer.concat([header, buf.subarray(best.offset, best.offset + best.size)]);
+};
+let sharp = null;
+try { sharp = require("sharp"); } catch (e) {}
+const decodeBmp = buf => {
+  const dib = !(buf[0] === 0x42 && buf[1] === 0x4d);
+  const base = dib ? 0 : 14;
+  const biSize = buf.readUInt32LE(base);
+  if (biSize < 40 || biSize > 124 || base + biSize + 16 > buf.length) return null;
+  const w = buf.readInt32LE(base + 4), h = buf.readInt32LE(base + 8);
+  if (w <= 0 || w > 1024 || Math.abs(h) > 1024) return null;
+  const bpp = buf.readUInt16LE(base + 14);
+  const comp = buf.readUInt32LE(base + 16);
+  if (comp !== 0 || ![8, 24, 32].includes(bpp)) return null;
+  let bfOffBits = dib ? biSize : buf.readUInt32LE(10);
+  if (dib) {
+    let paletteSize = 0;
+    if (bpp === 8) paletteSize = (buf.readUInt32LE(base + 32) || 256) * 4;
+    bfOffBits = base + biSize + paletteSize;
+  }
+  const flip = h > 0;
+  const rowSize = Math.ceil((w * bpp) / 32) * 4;
+  const avail = Math.floor((buf.length - bfOffBits) / rowSize);
+  if (avail < 1) return null;
+  const H = Math.min(Math.abs(h), avail);
+  const palette = base + biSize;
+  const rgba = Buffer.alloc(w * H * 4);
+  for (let y = 0; y < H; y++) {
+    const src = bfOffBits + (flip ? H - 1 - y : y) * rowSize;
+    for (let x = 0; x < w; x++) {
+      const d = (y * w + x) * 4, s = src + x * (bpp / 8);
+      if (bpp === 32) {
+        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
+      } else if (bpp === 24) {
+        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
+      } else {
+        const idx = buf[s];
+        rgba[d] = buf[palette + idx * 4 + 2];
+        rgba[d + 1] = buf[palette + idx * 4 + 1];
+        rgba[d + 2] = buf[palette + idx * 4];
+        rgba[d + 3] = 255;
+      }
+    }
+  }
+  return { data: rgba, width: w, height: H };
+};
+const resize = async buf => {
+  if (!sharp) return null;
+  try {
+    let s;
+    const bmp = decodeBmp(buf);
+    if (bmp) s = sharp(bmp.data, { raw: { width: bmp.width, height: bmp.height, channels: 4 } });
+    else {
+      const opts = { density: 300 };
+      const head = buf.toString("utf8", 0, 4096);
+      if (/<svg/i.test(head)) {
+        const vb = /viewBox=["']\s*[\d.-]+\s+[\d.-]+\s+([\d.]+)\s+([\d.]+)/.exec(head);
+        if (vb) {
+          const max = Math.max(parseFloat(vb[1]), parseFloat(vb[2]));
+          if (max > 0) opts.density = Math.min(600, Math.max(1, 72 * 64 / max));
+        }
+      }
+      s = sharp(buf, opts);
+    }
+    const out = await s.resize(64, 64, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).png({ compressionLevel: 9 }).toBuffer();
+    return out && out.length < 40 * 1024 ? out : null;
+  } catch (e) { return null; }
+};
+const toDataUri = async (buf, ct, hint) => {
+  if (/svg/.test(ct) || /\.svg($|\?)/i.test(hint)) {
+    if (buf.length > 50 * 1024) return "";
+    const png = await resize(buf);
+    if (png) return "data:image/png;base64," + png.toString("base64");
+    return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8").replace(/>\s+</g, "><").trim());
+  }
+  let data = buf, frame = null;
+  if (/icon/.test(ct) || (buf.length > 4 && buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0)) {
+    const mini = minimizeIco(buf);
+    if (mini) {
+      data = mini;
+      frame = mini.subarray(mini.readUInt32LE(18));
+    }
+  }
+  const png = await resize(frame || data);
+  if (png && png.length < data.length) return "data:image/png;base64," + png.toString("base64");
+  if (data.length <= 40 * 1024) {
+    const mime = data[0] === 0 && data[1] === 0 && data[2] === 1 && data[3] === 0 ? "image/x-icon" : ct;
+    return "data:" + mime + ";base64," + data.toString("base64");
+  }
+  return "";
+};
 
 // ---------- 标题源（按顺序尝试，非空即用） ----------
 const hostMatch = (host, host2) => host && (host === host2 || host.includes(host2) || host2.includes(host));
@@ -96,99 +241,48 @@ const titleSources = [
   { name: "baidu", run: async ctx => getBaiduTitle(ctx) },
 ];
 
-// ---------- 图标匹配 ----------
-const ALIAS = {
-  weibo: "sinaweibo",
-  chatgpt: "openai",
-  bigmodel: "zhipu",
-  aliyun: "alibabacloud",
-  alipan: "alibabacloud",
-  jianying: "capcut",
-  steampowered: "steam",
-  steamdb: "steam",
-  klingai: "kling",
-  minimaxi: "minimax",
-  duck: "duckduckgo",
-  archlinuxcn: "archlinux",
-  onedrive: "microsoft",
-};
-const GENERIC = new Set([
-  "www", "com", "cn", "org", "net", "io", "ai", "app", "web", "mail", "docs", "chat", "labs",
-  "cloud", "store", "play", "music", "photo", "video", "news", "share", "open", "game", "drive",
-  "home", "wiki", "dash", "console", "platform", "api", "up", "q", "m", "data", "download",
-  "learn", "search", "bbs", "forum", "test", "pan", "yun", "account", "my", "static", "assets",
-  "catalog", "update", "meta", "story", "www2", "files", "index", "main", "join", "beta", "demo"
-]);
-const SPECIAL_SUFFIX = [".github.io", ".gitlab.io", ".vercel.app", ".pages.dev", ".netlify.app"];
-const getJson = async url => {
-  const r = await fetchT(url, 30000, { Accept: "application/json" });
-  if (!r.ok) throw new Error(url + " HTTP " + r.status);
-  return r.json();
-};
-const flatCollection = j => {
-  const names = new Set(j.uncategorized || []);
-  for (const arr of Object.values(j.categories || {})) arr.forEach(n => names.add(n));
-  return names;
-};
-let iconLibs = null;
-async function loadIconLibs() {
-  if (iconLibs) return iconLibs;
-  const [lobeList, logosJ, siJ] = await Promise.all([
-    getJson("https://api.github.com/repos/lobehub/lobe-icons/contents/packages/static-svg/icons"),
-    getJson("https://api.iconify.design/collection?prefix=logos"),
-    getJson("https://api.iconify.design/collection?prefix=simple-icons"),
-  ]);
-  iconLibs = {
-    lobe: new Set(lobeList.map(f => f.name.replace(/\.svg$/, ""))),
-    logos: flatCollection(logosJ),
-    si: flatCollection(siJ),
-  };
-  return iconLibs;
-}
-const candidates = host => {
-  const h = host.toLowerCase().replace(/\.+$/, "");
-  const labels = h.split(".");
-  let cands;
-  if (labels.length > 2 && SPECIAL_SUFFIX.some(s => h.endsWith(s))) {
-    cands = [labels[0]];
-  } else {
-    cands = labels.filter(l => !GENERIC.has(l));
-    if (labels.length > 1 && !GENERIC.has(labels[0])) cands.push(labels[0] + labels[1]);
-  }
-  const out = [];
-  for (const c of cands) {
-    out.push(c);
-    if (ALIAS[c]) out.push(ALIAS[c]);
-    const flat = c.replace(/-/g, "");
-    if (flat !== c) out.push(flat);
-  }
-  return [...new Set(out)];
-};
-function resolveIcon(url, manual) {
-  if (manual === "none") return "";
-  if (manual) return manual;
-  const cands = candidates(hostOf(url));
-  for (const [prefix, names] of [["lobe", iconLibs.lobe], ["logos", iconLibs.logos], ["si", iconLibs.si]]) {
-    for (const c of cands) {
-      if (!names.has(c)) continue;
-      if (prefix === "lobe") {
-        const base = c.replace(/-color$/, "");
-        return "lobe:" + (names.has(base + "-color") ? base + "-color" : base);
-      }
-      return prefix + ":" + c;
-    }
-  }
-  return "";
-}
+// ---------- 图标源（按顺序尝试，非空即用） ----------
+const iconSources = [
+  { name: "ddg-icon", run: async ctx => {
+    const r = await fetchT("https://icons.duckduckgo.com/ip3/" + ctx.host + ".ico", 10000);
+    if (!r.ok) return "";
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
+    const size = icoSize(buf);
+    if (size && size.w === 48 && size.h === 48) return "";
+    return await toDataUri(buf, "image/x-icon", ctx.host + ".ico");
+  }},
+  { name: "page-icon", run: async ctx => {
+    if (!ctx.pageIcon) return "";
+    const r = await fetchT(ctx.pageIcon, 10000);
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
+    return await toDataUri(buf, ct, ctx.pageIcon);
+  }},
+  { name: "direct", run: async ctx => {
+    const base = new URL(ctx.url).origin;
+    const r = await fetchT(base + "/favicon.ico", 8000);
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "";
+    if (!/^image\//.test(ct)) return "";
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length > 1024 * 1024 || !isImage(buf)) return "";
+    return await toDataUri(buf, ct, base + "/favicon.ico");
+  }},
+];
 
-// ---------- 单 URL 标题管道 ----------
-async function processTitle(url) {
+// ---------- 单 URL 管道 ----------
+async function processUrl(url) {
   const ctx = { url, host: hostOf(url), host2: hostOf(url).replace(/^www\./, "") };
   const pageP = fetchT(url, 15000, { "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" }).then(async r => {
     if (!r.ok) return;
     const html = await r.text();
+    ctx.html = html;
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     ctx.pageTitle = m ? cleanTitle(m[1]) : "";
+    ctx.pageIcon = parseIcon(html, url);
   }).catch(() => {});
   const ddgRun = async () => {
     try {
@@ -209,60 +303,53 @@ async function processTitle(url) {
   const ddgP = ddgRun();
   await Promise.all([pageP, ddgP]);
   ctx.ddgTitle = ddgP;
+
+  let title = "", icon = "", titleLog = [], iconLog = [];
   for (const s of titleSources) {
     try {
       const v = await s.run(ctx);
-      if (v) return { title: v, log: s.name + ":ok" };
-    } catch (e) {}
+      if (v) { title = v; titleLog.push(s.name + ":ok"); break; }
+      titleLog.push(s.name + ":empty");
+    } catch (e) { titleLog.push(s.name + ":err"); }
   }
-  return { title: "", log: "all:empty" };
+  for (const s of iconSources) {
+    try {
+      const v = await s.run(ctx);
+      if (v) { icon = v; iconLog.push(s.name + ":ok"); break; }
+      iconLog.push(s.name + ":empty");
+    } catch (e) { iconLog.push(s.name + ":err"); }
+  }
+  return { title, icon, log: titleLog.join(" ") + " | " + iconLog.join(" ") };
 }
 
 // ---------- 主流程 ----------
-let titles = {};
+let titles = {}, icons = {};
 try { titles = JSON.parse(fs.readFileSync(titlesPath, "utf8")); } catch (e) {}
+try { icons = JSON.parse(fs.readFileSync(iconsPath, "utf8")); } catch (e) {}
 
-const skipTitles = process.env.SKIP_TITLES === "1";
+let idx = 0, tChanged = 0, iChanged = 0;
+const fails = [];
 const conc = Math.min(20, Math.max(1, parseInt(process.argv[2] || "10", 10)));
-
+async function worker() {
+  while (idx < urls.length) {
+    const url = urls[idx++];
+    const { title, icon, log } = await processUrl(url);
+    if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
+    if (icon && icon !== icons[url]) { icons[url] = icon; iChanged++; }
+    if (!title && !icon) fails.push(url + "  [" + log + "]");
+  }
+}
 (async () => {
-  let icons = {};
-  try {
-    icons = JSON.parse(fs.readFileSync(iconsPath, "utf8"));
-    if (typeof Object.values(icons)[0] === "string" && /^data:/.test(Object.values(icons)[0] || "")) icons = {};
-  } catch (e) { icons = {}; }
-
-  let idx = 0, tChanged = 0;
-  const fails = [];
-  async function worker() {
-    while (idx < urls.length) {
-      const url = urls[idx++];
-      const { title, log } = await processTitle(url);
-      if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
-      if (!title) fails.push(url + "  [" + log + "]");
-    }
-  }
-
-  const titleJob = skipTitles ? Promise.resolve() : Promise.all(Array.from({ length: conc }, worker));
-  await Promise.all([titleJob, loadIconLibs()]);
-  const manualIcon = Object.fromEntries(links.filter(l => l.icon).map(l => [l.url, l.icon]));
-  let covered = 0;
-  const nextIcons = {};
-  for (const url of urls) {
-    const ref = resolveIcon(url, manualIcon[url]);
-    if (ref) { nextIcons[url] = ref; covered++; }
-  }
-  console.log(`icons: ${covered}/${urls.length} covered`);
-
+  await Promise.all(Array.from({ length: conc }, worker));
   const urlSet = new Set(urls);
-  let tStale = 0;
+  let tStale = 0, iStale = 0;
   for (const k of Object.keys(titles)) if (!urlSet.has(k)) { delete titles[k]; tStale++; }
+  for (const k of Object.keys(icons)) if (!urlSet.has(k)) { delete icons[k]; iStale++; }
   fs.writeFileSync(titlesPath, JSON.stringify(titles, null, 1) + "\n");
-  const iconsJson = JSON.stringify(nextIcons, null, 1) + "\n";
-  if (fs.readFileSync(iconsPath, "utf8") !== iconsJson) fs.writeFileSync(iconsPath, iconsJson);
-  console.log(`done: ${tChanged} titles changed, ${tStale} stale titles removed (${Object.keys(titles).length} total), icons ${covered}/${urls.length}`);
+  fs.writeFileSync(iconsPath, JSON.stringify(icons, null, 1) + "\n");
+  console.log(`done: ${tChanged} titles changed, ${iChanged} icons changed, ${tStale} stale titles, ${iStale} stale icons removed (${Object.keys(titles).length}/${Object.keys(icons).length} total)`);
   if (fails.length) {
-    console.log("--- no title for " + fails.length + " urls ---");
+    console.log("--- no data for " + fails.length + " urls ---");
     fails.forEach(f => console.log("  " + f));
   }
 })().catch(e => { console.error(e); process.exit(1); });
