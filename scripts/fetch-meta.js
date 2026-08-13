@@ -27,17 +27,21 @@ const BAD_PAGE = [
   /access denied/i, /^登录/, /登录$/, /^退出中/, /^加载中/, /^首頁/, /^首页/,
   /^i challenge thee/i, /^context$/i, /^哔哩哔哩\s*\(゜/, /^招聘网_/, /^【孔夫子旧书网】网上买书/,
   /^天翼云盘\s/, /^一刻相册：/, /^插画、漫画、小说/, /^书生梦工厂/, /^小云雀AI\s/, /^duck\.ai\s/i, /^portable$/i,
-  /significado/i, /中文官网/i, /^动态首页$/, /^知乎专栏$/, /^下载.*(?:App|客户端)/i, /在你所在区域无法使用/i, /电脑版下载/
+  /significado/i, /中文官网/i, /^动态首页$/, /^知乎专栏$/, /^下载.*(?:App|客户端)/i, /在你所在区域无法使用/i, /电脑版下载/,
+  /免费色情视频/
 ];
 const decodeEntities = s => s
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
   .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(parseInt(d, 10)))
   .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<")
   .replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+const CJK = /[\u4e00-\u9fff]/;
 const cleanTitle = s => {
   s = decodeEntities(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
   const seg = s.split(/[|｜\-–—：:·…，,›]|\.\.\./)[0].trim().slice(0, 60);
-  if (!seg || seg.length < 3 || /^error[:\s]/i.test(seg) || BAD.has(seg.toLowerCase())) return "";
+  // 纯 ASCII 标题至少 3 字符；2 个汉字的品牌名（如"豆包"）允许
+  const tooShort = !seg || (seg.length < 3 && !(seg.length === 2 && CJK.test(seg)));
+  if (tooShort || /^error[:\s]/i.test(seg) || BAD.has(seg.toLowerCase())) return "";
   return seg;
 };
 const isBadTitle = s => BAD_PAGE.some(re => re.test(s));
@@ -98,35 +102,40 @@ const minimizeIco = buf => {
 };
 let sharp = null;
 try { sharp = require("sharp"); } catch (e) {}
-const decodeBmp = buf => {
+const decodeBmp = (buf, icoHeight) => {
   const dib = !(buf[0] === 0x42 && buf[1] === 0x4d);
   const base = dib ? 0 : 14;
   const biSize = buf.readUInt32LE(base);
   if (biSize < 40 || biSize > 124 || base + biSize + 16 > buf.length) return null;
-  const w = buf.readInt32LE(base + 4), h = buf.readInt32LE(base + 8);
-  if (w <= 0 || w > 1024 || Math.abs(h) > 1024) return null;
+  const w = buf.readInt32LE(base + 4), hRaw = buf.readInt32LE(base + 8);
+  if (w <= 0 || w > 1024 || Math.abs(hRaw) > 2048) return null;
   const bpp = buf.readUInt16LE(base + 14);
   const comp = buf.readUInt32LE(base + 16);
   if (comp !== 0 || ![8, 24, 32].includes(bpp)) return null;
+  // ICO 帧的 DIB 高度 = 图像高度 × 2（下半是 AND 掩码），按 ICO 条目高度还原
+  let h = Math.abs(hRaw);
+  if (icoHeight && h === icoHeight * 2) h = icoHeight;
   let bfOffBits = dib ? biSize : buf.readUInt32LE(10);
   if (dib) {
     let paletteSize = 0;
     if (bpp === 8) paletteSize = (buf.readUInt32LE(base + 32) || 256) * 4;
     bfOffBits = base + biSize + paletteSize;
   }
-  const flip = h > 0;
+  const flip = hRaw > 0;
   const rowSize = Math.ceil((w * bpp) / 32) * 4;
   const avail = Math.floor((buf.length - bfOffBits) / rowSize);
   if (avail < 1) return null;
-  const H = Math.min(Math.abs(h), avail);
+  const H = Math.min(h, avail);
   const palette = base + biSize;
   const rgba = Buffer.alloc(w * H * 4);
+  let sawAlpha = false;
   for (let y = 0; y < H; y++) {
     const src = bfOffBits + (flip ? H - 1 - y : y) * rowSize;
     for (let x = 0; x < w; x++) {
       const d = (y * w + x) * 4, s = src + x * (bpp / 8);
       if (bpp === 32) {
-        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
+        rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = buf[s + 3];
+        if (buf[s + 3]) sawAlpha = true;
       } else if (bpp === 24) {
         rgba[d] = buf[s + 2]; rgba[d + 1] = buf[s + 1]; rgba[d + 2] = buf[s]; rgba[d + 3] = 255;
       } else {
@@ -138,13 +147,15 @@ const decodeBmp = buf => {
       }
     }
   }
+  // 32bpp 帧若 alpha 全为零（老式 ICO 靠 AND 掩码做透明），回退为不透明
+  if (bpp === 32 && !sawAlpha) for (let i = 3; i < rgba.length; i += 4) rgba[i] = 255;
   return { data: rgba, width: w, height: H };
 };
-const resize = async buf => {
+const resize = async (buf, icoHeight) => {
   if (!sharp) return null;
   try {
     let s;
-    const bmp = decodeBmp(buf);
+    const bmp = decodeBmp(buf, icoHeight);
     if (bmp) s = sharp(bmp.data, { raw: { width: bmp.width, height: bmp.height, channels: 4 } });
     else {
       const opts = { density: 300 };
@@ -169,15 +180,16 @@ const toDataUri = async (buf, ct, hint) => {
     if (png) return "data:image/png;base64," + png.toString("base64");
     return "data:image/svg+xml," + encodeURIComponent(buf.toString("utf8").replace(/>\s+</g, "><").trim());
   }
-  let data = buf, frame = null;
+  let data = buf, frame = null, icoHeight = undefined;
   if (/icon/.test(ct) || (buf.length > 4 && buf[0] === 0 && buf[1] === 0 && buf[2] === 1 && buf[3] === 0)) {
     const mini = minimizeIco(buf);
     if (mini) {
       data = mini;
       frame = mini.subarray(mini.readUInt32LE(18));
+      icoHeight = mini[7] || 256; // ICO 条目高度（0 表示 256）
     }
   }
-  const png = await resize(frame || data);
+  const png = await resize(frame || data, frame ? icoHeight : undefined);
   if (png && png.length < data.length) return "data:image/png;base64," + png.toString("base64");
   if (data.length <= 40 * 1024) {
     const mime = data[0] === 0 && data[1] === 0 && data[2] === 1 && data[3] === 0 ? "image/x-icon" : ct;
