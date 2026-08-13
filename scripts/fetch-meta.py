@@ -11,10 +11,12 @@
   google- Google Custom Search API（可选，需 GOOGLE_API_KEY/GOOGLE_CX，仅补空缺）
 
 图标源（按序）:
+  override  - data/icon-overrides.json 手动指定（URL → 图标地址，最高优先级）
+  favim     - favicon.im 服务（larger=true 取大图，无图标时 404 让位）
   page-icon - 页面 <link rel=icon>（网页 favicon，不含 apple-touch 类 App 图标）
   ddg-icon  - DuckDuckGo 图标服务（镜像站点实际 favicon）
   direct    - 站点根 /favicon.ico
-  google    - Google faviconV2 服务（兜底覆盖，自动剔除默认占位图）
+  google    - Google faviconV2 服务（最后兜底，自动剔除默认占位图）
 
 策略:
   - bing/baidu 只补空缺、不覆盖已有标题（防止好标题被搜索结果的 SEO 噪音覆盖）
@@ -265,6 +267,40 @@ def title_google(ctx):
 
 
 # ---------- 图标源 ----------
+OVERRIDES_PATH = os.path.join(REPO, "data", "icon-overrides.json")
+
+
+def load_overrides():
+    try:
+        with open(OVERRIDES_PATH, encoding="utf8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+OVERRIDES = load_overrides()
+
+
+def icon_override(ctx):
+    """手动覆盖：data/icon-overrides.json 里 URL → 图标地址，优先级最高。"""
+    u = OVERRIDES.get(ctx["url"])
+    if not u:
+        return ""
+    code, _, data = fetch(u, 10, binary=True)
+    if code != 200 or not data or len(data) > 1024 * 1024:
+        return ""
+    return process_image(data, "image")
+
+
+def icon_favim(ctx):
+    """favicon.im：主图标源，larger=true 取大图，404 时让位给后续源。"""
+    u = "https://favicon.im/" + ctx["host"] + "?larger=true&throw-error-on-404=true"
+    code, _, data = fetch(u, 12, binary=True)
+    if code != 200 or not data or len(data) > 1024 * 1024:
+        return ""
+    return process_image(data, "image")
+
+
 _GOOGLE_PH = None
 
 
@@ -399,7 +435,8 @@ def process_url(url):
             break
         tlog.append(name + ":empty")
     icon, ilog = "", []
-    for name, fn in (("page-icon", icon_page), ("ddg-icon", icon_ddg),
+    for name, fn in (("override", icon_override), ("favim", icon_favim),
+                     ("page-icon", icon_page), ("ddg-icon", icon_ddg),
                      ("direct", icon_direct), ("google", icon_google)):
         try:
             v = fn(ctx) or ""
