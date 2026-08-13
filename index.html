@@ -146,7 +146,18 @@ const nameOf = l => (l.name || hostOf(l.url) || "");
 const catKey = c => pyKey(c.name || "");
 const compareCats = (a, b) => catKey(a).localeCompare(catKey(b));
 const compareLinks = (a, b) => pyKey(nameOf(a)).localeCompare(pyKey(nameOf(b)));
-const iconOf = l => l.icon || (hostOf(l.url) ? "https://favicon.im/" + hostOf(l.url) + "?larger=true" : "");
+const iconCandidates = link => {
+  const out = [];
+  if (link.icon) out.push(link.icon); // 手动指定，最高优先
+  try {
+    const u = new URL(link.url);
+    if (u.hostname) {
+      out.push(u.origin + "/favicon.ico");           // 站点自身的网页 favicon
+      out.push("https://favicon.im/" + u.hostname + "?larger=true"); // 服务兜底
+    }
+  } catch (e) {}
+  return out;
+};
 
 const showFallback = img => {
   img.onerror = null;
@@ -156,10 +167,15 @@ const showFallback = img => {
   if (fb) fb.style.display = "flex";
 };
 function setIcon(img, link) {
-  const src = iconOf(link);
-  if (!src) { showFallback(img); return; }
-  img.onerror = () => showFallback(img);
-  img.src = src;
+  const cands = iconCandidates(link);
+  let i = 0;
+  const next = () => {
+    if (i >= cands.length) { showFallback(img); return; }
+    img.onerror = next;
+    img.onload = null;
+    img.src = cands[i++];
+  };
+  next();
 }
 const cardHTML = link => {
   link = normalize(link);
