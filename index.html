@@ -152,10 +152,8 @@ const iconCandidates = link => {
   try {
     const u = new URL(link.url);
     if (u.hostname) {
-      out.push(u.origin + "/favicon.ico");  // 站点自身网页 favicon（多种格式逐个尝试）
-      out.push(u.origin + "/favicon.svg");
-      out.push(u.origin + "/favicon.png");
-      out.push("https://favicon.im/" + u.hostname + "?larger=true"); // 服务兜底
+      out.push(u.origin + "/favicon.ico"); // 站点惯例路径（实测约 2/3 站点可用）
+      out.push("https://favicon.im/" + u.hostname + "?larger=true"); // 服务解析站点声明的图标（svg/png 等格式都覆盖）
     }
   } catch (e) {}
   return out;
