@@ -140,24 +140,14 @@ const pyKey = s => {
   } catch (e) {}
   return s.toLowerCase();
 };
-const nameKey = l => pyKey(titleOf(l) || hostOf(l) || "");
-const catKey = c => pyKey(c.name || "");
-const compareNames = (a, b) => nameKey(a).localeCompare(nameKey(b));
-const compareCats = (a, b) => catKey(a).localeCompare(catKey(b));
 const nhost = h => h.replace(/^www\./, "");
-let titlesJson = {};
-let iconsJson = {};
-async function loadJson(name, target) {
-  const c = new AbortController();
-  const t = setTimeout(() => c.abort(), 4000);
-  try {
-    const r = await fetch(name, { cache: "no-cache", signal: c.signal });
-    if (r.ok) { Object.assign(target, await r.json()); return true; }
-  } catch (e) {}
-  finally { clearTimeout(t); }
-  return false;
-}
-function titleOf(url) { return titlesJson[url] || ""; }
+const normalize = l => typeof l === "string" ? { url: l } : l;
+const nameOf = l => (l.name || hostOf(l.url) || "");
+const catKey = c => pyKey(c.name || "");
+const compareCats = (a, b) => catKey(a).localeCompare(catKey(b));
+const compareLinks = (a, b) => pyKey(nameOf(a)).localeCompare(pyKey(nameOf(b)));
+const iconOf = l => l.icon || (hostOf(l.url) ? "https://favicon.im/" + hostOf(l.url) + "?larger=true" : "");
+
 const showFallback = img => {
   img.onerror = null;
   img.onload = null;
@@ -165,23 +155,18 @@ const showFallback = img => {
   img.remove();
   if (fb) fb.style.display = "flex";
 };
-function setFavicon(img, host) {
-  if (!host) { showFallback(img); return; }
-  const a = img.closest("a");
-  const url = a && a.dataset.url;
-  if (!img.dataset.icon && url && iconsJson[url]) img.dataset.icon = iconsJson[url];
-  if (img.dataset.icon) {
-    img.onerror = () => showFallback(img);
-    img.src = img.dataset.icon;
-    return;
-  }
-  showFallback(img);
+function setIcon(img, link) {
+  const src = iconOf(link);
+  if (!src) { showFallback(img); return; }
+  img.onerror = () => showFallback(img);
+  img.src = src;
 }
 const cardHTML = link => {
-  const host = hostOf(link);
-  const name = titleOf(link) || host;
+  link = normalize(link);
+  const host = hostOf(link.url);
+  const name = link.name || host;
   return `
-    <a class="card" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link)}">
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
       <img alt="" loading="lazy">
       <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
       <span class="info">
@@ -200,14 +185,25 @@ let config = { categories: [] };
 let total = 0;
 let linksFailed = false;
 
+async function loadLinks() {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 8000);
+  try {
+    const r = await fetch("links.json", { cache: "no-cache", signal: c.signal });
+    if (r.ok) { Object.assign(config, await r.json()); return true; }
+  } catch (e) {}
+  finally { clearTimeout(t); }
+  return false;
+}
+
 function render(q) {
   q = (q || "").trim().toLowerCase();
   let html = "", matched = 0, t = 0, nav = "";
   const cats = [...config.categories].sort(compareCats);
   cats.forEach((cat, i) => {
-    const links = cat.links.filter(l =>
-      !q || l.toLowerCase().includes(q) || titleOf(l).toLowerCase().includes(q)
-    ).sort(compareNames);
+    const links = cat.links.map(normalize).filter(l =>
+      !q || l.url.toLowerCase().includes(q) || nameOf(l).toLowerCase().includes(q)
+    ).sort(compareLinks);
     if (!links.length) return;
     t += links.length;
     matched += links.length;
@@ -218,12 +214,21 @@ function render(q) {
   content.innerHTML = html;
   sideNav.innerHTML = nav;
   bindNavObserver();
-  content.querySelectorAll("a.card img").forEach(img => setFavicon(img, hostOf(img.closest("a").dataset.url)));
+  content.querySelectorAll("a.card").forEach(a => setIcon(a.querySelector("img"), findLink(a.href)));
   countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${matched} 条` : ""}`;
   countEl.style.display = q ? "block" : "none";
   const empty = !total && linksFailed;
   noResult.textContent = empty ? "数据加载失败，请检查网络后刷新重试" : "没有匹配的链接";
   noResult.style.display = (q && !matched) || empty ? "block" : "none";
+}
+function findLink(href) {
+  for (const cat of config.categories) {
+    for (const l of cat.links) {
+      const link = normalize(l);
+      if (link.url === href) return link;
+    }
+  }
+  return { url: href };
 }
 
 sideNav.addEventListener("click", e => {
@@ -247,9 +252,7 @@ function bindNavObserver() {
 }
 
 render("");
-loadJson("links.json", config).then(ok => { if (!ok) linksFailed = true; render(search.value); });
-loadJson("data/titles.json", titlesJson).then(() => render(search.value));
-loadJson("data/icons.json", iconsJson).then(() => render(search.value));
+loadLinks().then(ok => { if (!ok) linksFailed = true; render(search.value); });
 let debounceId;
 search.addEventListener("input", e => {
   clearTimeout(debounceId);
