@@ -9,7 +9,7 @@ on:
         required: false
         default: "10"
   push:
-    paths: ["links.json", "scripts/fetch-meta.js"]
+    paths: ["links.json", "scripts/fetch-meta.py"]
 permissions:
   contents: write
 jobs:
@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-python@v5
         with:
-          node-version: 24
-      - name: Install sharp
-        run: npm install sharp --no-save --no-package-lock --no-audit --no-fund
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install curl_cffi pillow
       - name: Validate JSON
-        run: node -e "JSON.parse(require('fs').readFileSync('links.json','utf8')); ['data/titles.json','data/icons.json'].forEach(f => { try { JSON.parse(require('fs').readFileSync(f,'utf8')) } catch (e) {} }); console.log('all json valid')"
-      - run: node scripts/fetch-meta.js ${{ inputs.concurrency }}
+        run: python -c "import json, os; json.load(open('links.json', encoding='utf8')); [json.load(open(f, encoding='utf8')) for f in ('data/titles.json', 'data/icons.json') if os.path.exists(f)]; print('all json valid')"
+      - run: python scripts/fetch-meta.py ${{ inputs.concurrency }}
       - name: Commit data
         if: github.event_name != 'push'
         run: |
