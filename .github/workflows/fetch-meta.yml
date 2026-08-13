@@ -20,9 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
+      - name: Install sharp
+        run: npm install sharp --no-save --no-package-lock --no-audit --no-fund
       - name: Validate JSON
         run: node -e "['links.json','data/titles.json','data/icons.json'].forEach(f => JSON.parse(require('fs').readFileSync(f,'utf8'))); console.log('all json valid')"
       - run: node scripts/fetch-meta.js ${{ inputs.concurrency }}
