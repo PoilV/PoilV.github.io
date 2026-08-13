@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>我的导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<script src="https://unpkg.com/pinyin-pro" defer></script>
+<script src="https://unpkg.com/pinyin-pro@3" defer></script>
 <script>
 try {
   document.documentElement.setAttribute("data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -19,8 +19,10 @@ try {
     --muted: #8a919f;
     --border: #e4e7ed;
     --accent: #e8772e;
-    --accent: AccentColor;
     --shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  @supports (color: AccentColor) {
+    :root { --accent: AccentColor; }
   }
   [data-theme="dark"] {
     --bg: #14161a;
@@ -81,13 +83,13 @@ try {
   a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   a.card .host { display: block; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .no-result { text-align: center; color: var(--muted); padding: 60px 0; display: none; }
-  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; margin-left: 170px; }
   footer a { color: var(--muted); text-decoration: none; }
   footer a:hover { color: var(--accent); }
   #sideNav {
-    position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 15;
+    position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 5;
     background: var(--bg); border-right: 1px solid var(--border);
-    padding: 74px 10px 20px; overflow-y: auto;
+    padding: 78px 10px 20px; overflow-y: auto;
   }
   #sideNav a {
     display: block; padding: 7px 12px; border-radius: 8px;
@@ -100,7 +102,7 @@ try {
   section { scroll-margin-top: 72px; }
   @media (max-width: 900px) {
     #sideNav { display: none; }
-    #count, #noResult, #content { margin-left: 0; }
+    #count, #noResult, #content, footer { margin-left: 0; }
   }
 </style>
 </head>
@@ -108,7 +110,7 @@ try {
 
 <header>
   <h1>我的导航</h1>
-  <input id="search" type="text" placeholder="搜索链接、名称或网址…">
+  <input id="search" type="search" placeholder="搜索链接、名称或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
 </header>
 
 <nav id="sideNav"></nav>
@@ -132,14 +134,16 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;"
 const hostOf = url => {
   try { return new URL(url).hostname; } catch (e) { return ""; }
 };
-const nameKey = l => {
-  const n = (l.name || titleOf(l.url) || hostOf(l.url) || "").toLowerCase();
+const pyKey = s => {
   try {
-    if (window.pinyin) return window.pinyin(n, { toneType: "none", type: "array" }).join("").toLowerCase();
+    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array" }).join("").toLowerCase();
   } catch (e) {}
-  return n;
+  return s.toLowerCase();
 };
+const nameKey = l => pyKey(titleOf(l) || hostOf(l) || "");
+const catKey = c => pyKey(c.name || "");
 const compareNames = (a, b) => nameKey(a).localeCompare(nameKey(b));
+const compareCats = (a, b) => catKey(a).localeCompare(catKey(b));
 const nhost = h => h.replace(/^www\./, "");
 let titlesJson = {};
 let iconsJson = {};
@@ -147,10 +151,11 @@ async function loadJson(name, target) {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 4000);
   try {
-    const r = await fetch(name, { cache: "no-store", signal: c.signal });
-    if (r.ok) Object.assign(target, await r.json());
+    const r = await fetch(name, { cache: "no-cache", signal: c.signal });
+    if (r.ok) { Object.assign(target, await r.json()); return true; }
   } catch (e) {}
   finally { clearTimeout(t); }
+  return false;
 }
 function titleOf(url) { return titlesJson[url] || ""; }
 const showFallback = img => {
@@ -173,10 +178,10 @@ function setFavicon(img, host) {
   showFallback(img);
 }
 const cardHTML = link => {
-  const host = hostOf(link.url);
-  const name = link.name || titleOf(link.url) || host;
+  const host = hostOf(link);
+  const name = titleOf(link) || host;
   return `
-    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link.url)}">
+    <a class="card" href="${esc(link)}" target="_blank" rel="noopener noreferrer" data-url="${esc(link)}">
       <img alt="" loading="lazy">
       <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
       <span class="info">
@@ -192,16 +197,16 @@ const noResult = document.getElementById("noResult");
 const search = document.getElementById("search");
 const sideNav = document.getElementById("sideNav");
 let config = { categories: [] };
-const normalize = l => typeof l === "string" ? { url: l } : l;
 let total = 0;
+let linksFailed = false;
 
 function render(q) {
   q = (q || "").trim().toLowerCase();
   let html = "", matched = 0, t = 0, nav = "";
-  const cats = [...config.categories].sort((a, b) => compareNames(a, b));
+  const cats = [...config.categories].sort(compareCats);
   cats.forEach((cat, i) => {
-    const links = cat.links.map(normalize).filter(l =>
-      !q || l.url.toLowerCase().includes(q) || (l.name || "").toLowerCase().includes(q) || titleOf(l.url).toLowerCase().includes(q)
+    const links = cat.links.filter(l =>
+      !q || l.toLowerCase().includes(q) || titleOf(l).toLowerCase().includes(q)
     ).sort(compareNames);
     if (!links.length) return;
     t += links.length;
@@ -216,7 +221,9 @@ function render(q) {
   content.querySelectorAll("a.card img").forEach(img => setFavicon(img, hostOf(img.closest("a").dataset.url)));
   countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${matched} 条` : ""}`;
   countEl.style.display = q ? "block" : "none";
-  noResult.style.display = q && !matched ? "block" : "none";
+  const empty = !total && linksFailed;
+  noResult.textContent = empty ? "数据加载失败，请检查网络后刷新重试" : "没有匹配的链接";
+  noResult.style.display = (q && !matched) || empty ? "block" : "none";
 }
 
 sideNav.addEventListener("click", e => {
@@ -240,7 +247,7 @@ function bindNavObserver() {
 }
 
 render("");
-loadJson("links.json", config).then(() => render(search.value));
+loadJson("links.json", config).then(ok => { if (!ok) linksFailed = true; render(search.value); });
 loadJson("data/titles.json", titlesJson).then(() => render(search.value));
 loadJson("data/icons.json", iconsJson).then(() => render(search.value));
 let debounceId;

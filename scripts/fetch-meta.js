@@ -8,7 +8,6 @@ const iconsPath = path.join(repo, "data", "icons.json");
 
 const cfg = JSON.parse(fs.readFileSync(linksPath, "utf8"));
 const urls = cfg.categories.flatMap(c => c.links)
-  .map(l => typeof l === "string" ? l : l && l.url)
   .filter(u => typeof u === "string" && /^https?:/.test(u));
 
 // ---------- 基础工具 ----------
@@ -28,7 +27,7 @@ const BAD_PAGE = [
   /access denied/i, /^登录/, /登录$/, /^退出中/, /^加载中/, /^首頁/, /^首页/,
   /^i challenge thee/i, /^context$/i, /^哔哩哔哩\s*\(゜/, /^招聘网_/, /^【孔夫子旧书网】网上买书/,
   /^天翼云盘\s/, /^一刻相册：/, /^插画、漫画、小说/, /^书生梦工厂/, /^小云雀AI\s/, /^duck\.ai\s/i, /^portable$/i,
-  /significado/i, /中文官网/i
+  /significado/i, /中文官网/i, /^动态首页$/, /^知乎专栏$/, /^下载.*(?:App|客户端)/i, /在你所在区域无法使用/i, /电脑版下载/
 ];
 const decodeEntities = s => s
   .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
@@ -37,7 +36,7 @@ const decodeEntities = s => s
   .replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 const cleanTitle = s => {
   s = decodeEntities(s || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-  const seg = s.split(/[|｜\-–—：:·…]|\.\.\./)[0].trim().slice(0, 60);
+  const seg = s.split(/[|｜\-–—：:·…，,›]|\.\.\./)[0].trim().slice(0, 60);
   if (!seg || seg.length < 3 || /^error[:\s]/i.test(seg) || BAD.has(seg.toLowerCase())) return "";
   return seg;
 };
@@ -47,7 +46,7 @@ const isBadTitle = s => BAD_PAGE.some(re => re.test(s));
 const ICON_RES = [
   /<link[^>]*rel=["'](?:shortcut\s+)?icon["'][^>]*href=["']([^"']+)["']/i,
   /<link[^>]*href=["']([^"']+)["'][^>]*rel=["'](?:shortcut\s+)?icon["']/i,
-  /<link[^>]*rel=["']apple-touch-icon["'][^>]*href=["']([^"']+)["']/i
+  /<link[^>]*rel=["']apple-touch-icon(?:-precomposed)?["'][^>]*href=["']([^"']+)["']/i
 ];
 const parseIcon = (html, url) => {
   for (const re of ICON_RES) {
@@ -188,16 +187,20 @@ const toDataUri = async (buf, ct, hint) => {
 };
 
 // ---------- 标题源（按顺序尝试，非空即用） ----------
-const hostMatch = (host, host2) => host && (host === host2 || host.includes(host2) || host2.includes(host));
+const hostMatch = (host, host2) => !!host && (host === host2 || host.endsWith("." + host2));
 const resolveHref = raw => {
   const u = decodeEntities(raw);
   try {
-    let url = new URL(u, "https://cn.bing.com");
+    const url = new URL(u, "https://cn.bing.com");
     if (/^(www\.)?bing\.com$/.test(url.hostname)) {
       const p = url.searchParams.get("u") || "";
-      if (!p.startsWith("a1")) return null;
-      const b64 = p.slice(2).replace(/-/g, "+").replace(/_/g, "/");
-      url = new URL(Buffer.from(b64, "base64").toString("utf8"));
+      if (p.startsWith("a1")) {
+        const b64 = p.slice(2).replace(/-/g, "+").replace(/_/g, "/");
+        return new URL(Buffer.from(b64, "base64").toString("utf8"));
+      }
+      const direct = url.searchParams.get("url"); // /ck/a 跳转链接
+      if (direct) return new URL(decodeURIComponent(direct));
+      return null;
     }
     return url;
   } catch (e) { return null; }
@@ -210,7 +213,7 @@ const getBingTitle = async ctx => {
   let m;
   while ((m = re.exec(html))) {
     const title = cleanTitle(m[2]);
-    if (!title || isBadTitle(title)) continue;
+    if (!title || isBadTitle(title) || title.toLowerCase() === ctx.host2) continue;
     const url = resolveHref(m[1]);
     if (url && hostMatch(url.hostname.replace(/^www\./, ""), ctx.host2)) return title;
   }
@@ -224,7 +227,7 @@ const getBaiduTitle = async ctx => {
   let m;
   while ((m = re.exec(html))) {
     const title = cleanTitle(m[1]);
-    if (!title || isBadTitle(title)) continue;
+    if (!title || isBadTitle(title) || title.toLowerCase() === ctx.host2) continue;
     const tail = html.slice(re.lastIndex, re.lastIndex + 800);
     const su = tail.match(/class=["'][^"']*c-showurl[^"']*["'][^>]*>([\s\S]*?)<\/span>/i) ||
               tail.match(/class=["'][^"']*c-color-gray[^"']*["'][^>]*>([\s\S]*?)<\/span>/i);
@@ -279,7 +282,6 @@ async function processUrl(url) {
   const pageP = fetchT(url, 15000, { "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" }).then(async r => {
     if (!r.ok) return;
     const html = await r.text();
-    ctx.html = html;
     const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
     ctx.pageTitle = m ? cleanTitle(m[1]) : "";
     ctx.pageIcon = parseIcon(html, url);
@@ -292,7 +294,7 @@ async function processUrl(url) {
       for (const res of j.Results || []) {
         let rn = "";
         try { rn = new URL(res.FirstURL).hostname.replace(/^www\./, ""); } catch (e) {}
-        if (rn && (rn === ctx.host2 || rn.includes(ctx.host2) || ctx.host2.includes(rn))) {
+        if (rn && (rn === ctx.host2 || rn.endsWith("." + ctx.host2))) {
           const t = cleanTitle(res.Text);
           if (t && !isBadTitle(t)) return t;
         }
@@ -302,13 +304,13 @@ async function processUrl(url) {
   };
   const ddgP = ddgRun();
   await Promise.all([pageP, ddgP]);
-  ctx.ddgTitle = ddgP;
+  ctx.ddgTitle = await ddgP;
 
-  let title = "", icon = "", titleLog = [], iconLog = [];
+  let title = "", icon = "", titleLog = [], iconLog = [], titleSrc = "";
   for (const s of titleSources) {
     try {
       const v = await s.run(ctx);
-      if (v) { title = v; titleLog.push(s.name + ":ok"); break; }
+      if (v) { title = v; titleLog.push(s.name + ":ok"); titleSrc = s.name; break; }
       titleLog.push(s.name + ":empty");
     } catch (e) { titleLog.push(s.name + ":err"); }
   }
@@ -319,7 +321,7 @@ async function processUrl(url) {
       iconLog.push(s.name + ":empty");
     } catch (e) { iconLog.push(s.name + ":err"); }
   }
-  return { title, icon, log: titleLog.join(" ") + " | " + iconLog.join(" ") };
+  return { title, icon, log: titleLog.join(" ") + " | " + iconLog.join(" "), titleSrc };
 }
 
 // ---------- 主流程 ----------
@@ -333,8 +335,10 @@ const conc = Math.min(20, Math.max(1, parseInt(process.argv[2] || "10", 10)));
 async function worker() {
   while (idx < urls.length) {
     const url = urls[idx++];
-    const { title, icon, log } = await processUrl(url);
-    if (title && title !== titles[url]) { titles[url] = title; tChanged++; }
+    const { title, icon, log, titleSrc } = await processUrl(url);
+    // 搜索兜底（bing/baidu）只补空缺，不覆盖已有标题，避免好标题被 SEO 噪音覆盖
+    const canOverwrite = !titles[url] || titleSrc === "ddg" || titleSrc === "page";
+    if (title && title !== titles[url] && canOverwrite) { titles[url] = title; tChanged++; }
     if (icon && icon !== icons[url]) { icons[url] = icon; iChanged++; }
     if (!title && !icon) fails.push(url + "  [" + log + "]");
   }
