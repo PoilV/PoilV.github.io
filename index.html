@@ -163,14 +163,22 @@ const showFallback = img => {
 };
 function setIcon(img, link) {
   const cands = iconCandidates(link);
-  let i = 0;
-  const next = () => {
-    if (i >= cands.length) { showFallback(img); return; }
-    img.onerror = next;
-    img.onload = null;
-    img.src = cands[i++];
+  if (!cands.length) { showFallback(img); return; }
+  // 并行加载所有候选：先完成的先显示；手动图标后到则替换（优先级更高）
+  let shown = null;
+  const finished = new Set();
+  const tryShow = () => {
+    for (const c of cands) {
+      if (finished.has(c) && c !== shown) { img.src = c; shown = c; return; }
+    }
+    if (finished.size === cands.length && !shown) showFallback(img);
   };
-  next();
+  cands.forEach(c => {
+    const p = new Image();
+    p.onload = () => { finished.add(c); tryShow(); };
+    p.onerror = () => { finished.add(c); tryShow(); };
+    p.src = c;
+  });
 }
 const cardHTML = link => {
   link = normalize(link);
