@@ -131,7 +131,6 @@
   {
    "name": "影音娱乐",
    "links": [
-    {"url":"https://rutracker.org/forum/index.php","name":"RuTracker.org"},
     {"url":"https://www.agedm.io/","name":"AGE动漫"},
     {"url":"https://www.bilibili.com/","name":"哔哩哔哩","icon":"https://www.bilibili.com/favicon.ico"},
     {"url":"https://www.douyin.com/","name":"抖音"},
