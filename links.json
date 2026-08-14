@@ -5,9 +5,16 @@
    "links": [
     {"url":"https://docs.qq.com/","name":"腾讯文档"},
     {"url":"https://www.feishu.cn/","name":"飞书"},
-    {"url":"https://mail.qq.com/","name":"QQ邮箱"},
     {"url":"https://www.zhaopin.com/","name":"智联招聘"},
     {"url":"https://www.zhipin.com/","name":"BOSS直聘"}
+   ]
+  },
+  {
+   "name": "邮箱",
+   "links": [
+    {"url":"https://mail.qq.com/","name":"QQ邮箱"},
+    {"url":"https://outlook.live.com/","name":"Outlook"},
+    {"url":"https://mail.google.com/","name":"Gmail"}
    ]
   },
   {
