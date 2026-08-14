@@ -11,20 +11,6 @@
    ]
   },
   {
-   "name": "AI 聊天",
-   "links": [
-    {"url":"https://chat.deepseek.com/","name":"DeepSeek"},
-    {"url":"https://chatgpt.com/","name":"ChatGPT"},
-    {"url":"https://claude.ai/","name":"Claude"},
-    {"url":"https://copilot.microsoft.com/","name":"Microsoft Copilot"},
-    {"url":"https://docs.sillytavern.app/","name":"SillyTavern"},
-    {"url":"https://www.doubao.com/","name":"豆包"},
-    {"url":"https://duck.ai/","name":"Duck.ai"},
-    {"url":"https://gemini.google.com/app","name":"Google Gemini"},
-    {"url":"https://labs.google/","name":"Google Labs"}
-   ]
-  },
-  {
    "name": "AI 模型",
    "links": [
     {"url":"https://bigmodel.cn/","name":"智谱AI开放平台"},
@@ -33,9 +19,14 @@
     {"url":"https://huggingface.co/","name":"Hugging Face"},
     {"url":"https://minimaxi.com/","name":"MiniMax"},
     {"url":"https://openrouter.ai/","name":"OpenRouter"},
-    {"url":"https://platform.deepseek.com/","name":"DeepSeek"},
-    {"url":"https://www.liblib.art/","name":"LiblibAI"},
-    {"url":"https://www.liblib.tv/","name":"LibTV"}
+    {"url":"https://www.deepseek.com/","name":"DeepSeek"},
+    {"url":"https://chatgpt.com/","name":"ChatGPT"},
+    {"url":"https://claude.ai/","name":"Claude"},
+    {"url":"https://copilot.microsoft.com/","name":"Microsoft Copilot"},
+    {"url":"https://docs.sillytavern.app/","name":"SillyTavern"},
+    {"url":"https://www.doubao.com/","name":"豆包"},
+    {"url":"https://duck.ai/","name":"Duck.ai"},
+    {"url":"https://gemini.google.com/app","name":"Google Gemini"}
    ]
   },
   {
@@ -44,10 +35,13 @@
     {"url":"http://49.233.78.71:17861/","name":"IndexTTS Demo"},
     {"url":"https://ai.lfxqai.com/","name":"Star AI"},
     {"url":"https://jimeng.jianying.com/","name":"即梦AI"},
+    {"url":"https://www.liblib.art/","name":"LiblibAI"},
+    {"url":"https://www.liblib.tv/","name":"LibTV"},
     {"url":"https://klingai.com/","name":"Kling AI"},
     {"url":"https://nova.shanhaix.com/","name":"NOVA"},
     {"url":"https://story.neodomain.cn/","name":"Neowow"},
     {"url":"https://www.ttson.cn/","name":"TTS Online"},
+    {"url":"https://labs.google/","name":"Google Labs"},
     {"url":"https://video.jurilu.com/","name":"巨日禄"},
     {"url":"https://www.vidu.cn/","name":"Vidu AI"},
     {"url":"https://voiceailabs.com/","name":"Voice AI Labs"},
