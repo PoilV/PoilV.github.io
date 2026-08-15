@@ -16,7 +16,6 @@ try {
     --bg: #f6f7f9;
     --card: #ffffff;
     --text: #1f2329;
-    --muted: #8a919f;
     --border: #e4e7ed;
     --accent: #e8772e;
     --shadow: 0 1px 3px rgba(0,0,0,.06);
@@ -28,7 +27,6 @@ try {
     --bg: #14161a;
     --card: #1e2126;
     --text: #e6e8eb;
-    --muted: #8a919f;
     --border: #2b2f36;
     --shadow: 0 1px 3px rgba(0,0,0,.4);
   }
@@ -55,7 +53,12 @@ try {
     background: var(--card); color: var(--text); outline: none;
   }
   #search:focus { border-color: var(--accent); }
-  .count { color: var(--muted); font-size: 13px; text-align: center; padding: 10px; display: none; }
+  #search:focus-visible, a.card:focus-visible, #sideNav a:focus-visible, footer a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .loading { text-align: center; padding: 60px 0; font-size: 14px; }
+  .count { font-size: 13px; text-align: center; padding: 10px; display: none; }
   section { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
   section h2 {
     display: flex; align-items: center; gap: 8px;
@@ -75,16 +78,16 @@ try {
   a.card img { width: 32px; height: 32px; padding: 4px; object-fit: contain; border-radius: 8px; background: var(--border); flex-shrink: 0; }
   a.card .fb {
     display: none; width: 32px; height: 32px; border-radius: 8px;
-    background: var(--border); color: var(--muted);
+    background: var(--border);
     font-size: 14px; font-weight: 700; flex-shrink: 0;
     align-items: center; justify-content: center;
   }
   a.card .info { min-width: 0; }
   a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  a.card .host { display: block; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .no-result { text-align: center; color: var(--muted); padding: 60px 0; display: none; }
-  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 32px 0 24px; margin-left: 170px; }
-  footer a { color: var(--muted); text-decoration: none; }
+  a.card .host { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .no-result { text-align: center; padding: 60px 0; display: none; }
+  footer { text-align: center; font-size: 12px; padding: 32px 0 24px; margin-left: 170px; }
+  footer a { color: inherit; text-decoration: none; }
   footer a:hover { color: var(--accent); }
   #sideNav {
     position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 5;
@@ -93,16 +96,16 @@ try {
   }
   #sideNav a {
     display: block; padding: 7px 12px; border-radius: 8px;
-    color: var(--muted); text-decoration: none; font-size: 13px;
+    color: inherit; text-decoration: none; font-size: 13px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   #sideNav a:hover { color: var(--text); background: var(--card); }
   #sideNav a.active { color: var(--accent); background: var(--card); font-weight: 600; }
-  #count, #noResult, #content { margin-left: 170px; }
+  #loading, #count, #noResult, #content { margin-left: 170px; }
   section { scroll-margin-top: 72px; }
   @media (max-width: 900px) {
     #sideNav { display: none; }
-    #count, #noResult, #content, footer { margin-left: 0; }
+    #loading, #count, #noResult, #content, footer { margin-left: 0; }
   }
 </style>
 </head>
@@ -110,13 +113,14 @@ try {
 
 <header>
   <h1>我的导航</h1>
-  <input id="search" type="search" placeholder="搜索链接、名称或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
+  <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
 </header>
 
 <nav id="sideNav"></nav>
 
-<div class="count" id="count"></div>
-<div class="no-result" id="noResult">没有匹配的链接</div>
+<div class="loading" id="loading" role="status">加载中…</div>
+<div class="count" id="count" aria-live="polite"></div>
+<div class="no-result" id="noResult" aria-live="polite">没有匹配的链接</div>
 
 <div id="content"></div>
 
@@ -132,20 +136,28 @@ applyTheme();
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const hostOf = url => {
-  try { return new URL(url).hostname; } catch (e) { return ""; }
+  try { return new URL(url, location.href).hostname; } catch (e) { return ""; }
+};
+const hrefOf = url => {
+  try { return new URL(url, location.href).href; } catch (e) { return String(url); }
 };
 const pyKey = s => {
   try {
-    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array" }).join("").toLowerCase();
+    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array" }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
   } catch (e) {}
-  return s.toLowerCase();
+  return s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, "");
+};
+const pyFirst = s => {
+  try {
+    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array", pattern: "first" }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
+  } catch (e) {}
+  return "";
 };
 const nhost = h => h.replace(/^www\./, "");
 const normalize = l => typeof l === "string" ? { url: l } : l;
 const nameOf = l => (l.name || hostOf(l.url) || "");
-const catKey = c => pyKey(c.name || "");
-const compareCats = (a, b) => catKey(a).localeCompare(catKey(b));
-const compareLinks = (a, b) => pyKey(nameOf(a)).localeCompare(pyKey(nameOf(b)));
+const catKey = name => pyKey(name || "");
+const searchText = l => [l.url, nameOf(l), pyKey(nameOf(l)), pyFirst(nameOf(l))].join(" ").toLowerCase();
 const iconCandidates = link => {
   const out = [];
   if (link.icon) out.push(link.icon); // 手动指定，最高优先
@@ -161,27 +173,35 @@ const showFallback = img => {
   img.remove();
   if (fb) fb.style.display = "flex";
 };
+const iconProbeCache = new Map();
+const probeIcon = src => {
+  if (!iconProbeCache.has(src)) {
+    const p = new Promise(resolve => {
+      const im = new Image();
+      im.onload = () => resolve(true);
+      im.onerror = () => { iconProbeCache.delete(src); resolve(false); };
+      im.src = src;
+    });
+    iconProbeCache.set(src, p);
+  }
+  return iconProbeCache.get(src);
+};
 function setIcon(img, link) {
   const cands = iconCandidates(link);
   if (!cands.length) { showFallback(img); return; }
-  // 并行加载所有候选：先完成的先显示；后到的只有优先级更高（索引更小）才替换
+  // 候选请求全局缓存；先完成的先显示，后到的只有优先级更高（索引更小）才替换
   let shown = -1;
-  const state = cands.map(() => 0); // 0=pending 1=ok 2=failed
-  const tryShow = () => {
-    for (let i = 0; i < cands.length; i++) {
-      if (state[i] === 1 && (shown === -1 || i < shown)) {
-        img.src = cands[i];
-        shown = i;
-        return;
-      }
-    }
-    if (state.every(s => s !== 0) && shown === -1) showFallback(img);
-  };
+  let pending = cands.length;
   cands.forEach((c, i) => {
-    const p = new Image();
-    p.onload = () => { state[i] = 1; tryShow(); };
-    p.onerror = () => { state[i] = 2; tryShow(); };
-    p.src = c;
+    probeIcon(c).then(ok => {
+      pending -= 1;
+      if (!img.isConnected) return;
+      if (ok && (shown === -1 || i < shown)) {
+        img.src = c;
+        shown = i;
+      }
+      if (pending === 0 && shown === -1) showFallback(img);
+    });
   });
 }
 const cardHTML = link => {
@@ -190,7 +210,7 @@ const cardHTML = link => {
   const name = link.name || host;
   return `
     <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
-      <img alt="" loading="lazy">
+      <img alt="" loading="lazy" decoding="async">
       <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
       <span class="info">
         <span class="name" title="${esc(name)}">${esc(name)}</span>
@@ -204,16 +224,25 @@ const countEl = document.getElementById("count");
 const noResult = document.getElementById("noResult");
 const search = document.getElementById("search");
 const sideNav = document.getElementById("sideNav");
+const loading = document.getElementById("loading");
 let config = { categories: [] };
 let total = 0;
 let linksFailed = false;
+let dataLoaded = false;
+const linkByHref = new Map();
 
 async function loadLinks() {
   const c = new AbortController();
   const t = setTimeout(() => c.abort(), 8000);
   try {
     const r = await fetch("links.json", { cache: "no-cache", signal: c.signal });
-    if (r.ok) { Object.assign(config, await r.json()); return true; }
+    if (r.ok) {
+      const data = await r.json();
+      if (data && Array.isArray(data.categories)) {
+        config.categories = data.categories;
+        return true;
+      }
+    }
   } catch (e) {}
   finally { clearTimeout(t); }
   return false;
@@ -221,37 +250,46 @@ async function loadLinks() {
 
 function render(q) {
   q = (q || "").trim().toLowerCase();
-  let html = "", matched = 0, t = 0, nav = "";
-  const cats = [...config.categories].sort(compareCats);
-  cats.forEach((cat, i) => {
-    const links = cat.links.map(normalize).filter(l =>
-      !q || l.url.toLowerCase().includes(q) || nameOf(l).toLowerCase().includes(q)
-    ).sort(compareLinks);
+  buildLinkIndex();
+  let html = "", t = 0, nav = "";
+  const cats = config.categories
+    .map(cat => ({ cat, key: catKey(cat.name) }))
+    .sort((a, b) => a.key.localeCompare(b.key));
+  cats.forEach((entry, i) => {
+    const links = (entry.cat.links || [])
+      .map(normalize)
+      .filter(l => !q || searchText(l).includes(q))
+      .map(link => ({ link, key: pyKey(nameOf(link)) }))
+      .sort((a, b) => a.key.localeCompare(b.key));
     if (!links.length) return;
     t += links.length;
-    matched += links.length;
-    html += `<section id="cat-${i}"><h2>${esc(cat.name)}</h2><div class="grid">${links.map(cardHTML).join("")}</div></section>`;
-    nav += `<a href="#cat-${i}" data-i="${i}">${esc(cat.name)}</a>`;
+    html += `<section id="cat-${i}"><h2>${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
+    nav += `<a href="#cat-${i}" data-i="${i}">${esc(entry.cat.name)}</a>`;
   });
   total = t;
   content.innerHTML = html;
   sideNav.innerHTML = nav;
   bindNavObserver();
-  content.querySelectorAll("a.card").forEach(a => setIcon(a.querySelector("img"), findLink(a.href)));
-  countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${matched} 条` : ""}`;
+  bindIconObserver();
+  loading.style.display = "none";
+  countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${total} 条` : ""}`;
   countEl.style.display = q ? "block" : "none";
   const empty = !total && linksFailed;
   noResult.textContent = empty ? "数据加载失败，请检查网络后刷新重试" : "没有匹配的链接";
-  noResult.style.display = (q && !matched) || empty ? "block" : "none";
+  noResult.style.display = (q && !total) || empty ? "block" : "none";
 }
-function findLink(href) {
+function buildLinkIndex() {
+  linkByHref.clear();
   for (const cat of config.categories) {
-    for (const l of cat.links) {
-      const link = normalize(l);
-      if (link.url === href) return link;
+    for (const raw of cat.links || []) {
+      const link = normalize(raw);
+      const key = hrefOf(link.url);
+      if (!linkByHref.has(key)) linkByHref.set(key, link);
     }
   }
-  return { url: href };
+}
+function findLink(href) {
+  return linkByHref.get(href) || { url: href };
 }
 
 sideNav.addEventListener("click", e => {
@@ -274,14 +312,35 @@ function bindNavObserver() {
   content.querySelectorAll("section").forEach(s => navObserver.observe(s));
 }
 
-render("");
-loadLinks().then(ok => { if (!ok) linksFailed = true; render(search.value); });
+let iconObserver = null;
+function bindIconObserver() {
+  if (iconObserver) iconObserver.disconnect();
+  const cards = content.querySelectorAll("a.card");
+  if (!("IntersectionObserver" in window)) {
+    cards.forEach(a => setIcon(a.querySelector("img"), findLink(a.href)));
+    return;
+  }
+  iconObserver = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      if (!en.isIntersecting || !en.target.isConnected) continue;
+      iconObserver.unobserve(en.target);
+      setIcon(en.target.querySelector("img"), findLink(en.target.href));
+    }
+  }, { rootMargin: "200px 0px" });
+  cards.forEach(a => iconObserver.observe(a));
+}
+
+loadLinks().then(ok => {
+  linksFailed = !ok;
+  dataLoaded = true;
+  render(search.value);
+});
 let debounceId;
 search.addEventListener("input", e => {
   clearTimeout(debounceId);
-  debounceId = setTimeout(() => render(e.target.value), 200);
+  debounceId = setTimeout(() => { if (dataLoaded) render(e.target.value); }, 200);
 });
-window.addEventListener("pinyin-ready", () => render(search.value));
+window.addEventListener("pinyin-ready", () => { if (dataLoaded) render(search.value); });
 let pinyinReady = false;
 const initPinyin = () => {
   if (pinyinReady || !window.pinyinPro) return;
