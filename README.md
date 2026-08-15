@@ -41,7 +41,7 @@
 
 - **搜索**：实时匹配名字、网址、全拼与拼音首字母
 - **侧边导航**：点击分类平滑滚动，滚动时自动高亮当前分类
-- **暗色模式**：跟随系统，强调色跟随系统 AccentColor
+- **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
   1. `icon` 字段手动指定（有则与 favicon.im 并行加载，先完成的先显示，手动图标到达后自动替换）
   2. [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true&throw-error-on-404=true`（缺失时返回 404 而不是默认占位图）

@@ -6,29 +6,15 @@
 <title>我的导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro" defer></script>
-<script>
-try {
-  document.documentElement.setAttribute("data-theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-} catch (e) {}
-</script>
 <style>
   :root {
-    --bg: #f6f7f9;
-    --card: #ffffff;
-    --text: #1f2329;
-    --border: #e4e7ed;
-    --accent: #e8772e;
-    --shadow: 0 1px 3px rgba(0,0,0,.06);
-  }
-  @supports (color: AccentColor) {
-    :root { --accent: AccentColor; }
-  }
-  [data-theme="dark"] {
-    --bg: #14161a;
-    --card: #1e2126;
-    --text: #e6e8eb;
-    --border: #2b2f36;
-    --shadow: 0 1px 3px rgba(0,0,0,.4);
+    color-scheme: light dark;
+    --bg: Canvas;
+    --card: Field;
+    --text: CanvasText;
+    --border: color-mix(in srgb, CanvasText 16%, transparent);
+    --accent: AccentColor;
+    --shadow: 0 1px 3px color-mix(in srgb, CanvasText 15%, transparent);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -127,13 +113,6 @@ try {
 <footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航</a></footer>
 
 <script>
-const mq = matchMedia("(prefers-color-scheme: dark)");
-function applyTheme() {
-  document.documentElement.setAttribute("data-theme", mq.matches ? "dark" : "light");
-}
-mq.addEventListener("change", applyTheme);
-applyTheme();
-
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const hostOf = url => {
   try { return new URL(url, location.href).hostname; } catch (e) { return ""; }
