@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航 · 管理</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: Canvas;
+    --card: Field;
+    --text: CanvasText;
+    --border: color-mix(in srgb, CanvasText 16%, transparent);
+    --accent: AccentColor;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header .spacer { flex: 1; }
+  header a.back { color: inherit; font-size: 13px; text-decoration: none; }
+  header a.back:hover { color: var(--accent); }
+  button {
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--card); color: var(--text);
+    font-size: 13px;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  main { max-width: 860px; margin: 20px auto; padding: 0 24px 80px; }
+  #status {
+    font-size: 13px; padding: 10px 14px; border-radius: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    margin-bottom: 14px; display: none;
+  }
+  #status.err {
+    border-color: color-mix(in srgb, #e11d48 60%, transparent);
+    color: color-mix(in srgb, #e11d48 70%, CanvasText);
+  }
+  details {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 14px; background: var(--card);
+  }
+  details summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+  details .inner { margin-top: 10px; font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  details .inner input { flex: 1; min-width: 260px; }
+  details .inner a { color: var(--accent); }
+  input {
+    padding: 8px 10px; font-size: 13px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--card); color: var(--text); outline: none;
+  }
+  input:focus { border-color: var(--accent); }
+  input.bad { border-color: #e11d48; }
+  .hint { font-size: 12px; opacity: .75; margin-bottom: 12px; line-height: 1.6; }
+  .cat { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; background: var(--card); }
+  .cat-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .cat-head .cat-name { flex: 1; min-width: 140px; font-weight: 600; }
+  .cat-head .cat-icon { width: 150px; }
+  .cat-head label { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer; }
+  .cat-head .del-cat { margin-left: auto; color: color-mix(in srgb, #e11d48 80%, CanvasText); }
+  .link-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .link-row input.link-url { flex: 2.2; }
+  .link-row input.link-name { flex: 1.2; }
+  .link-row input.link-icon { flex: 1.2; }
+  .link-row .del-link { flex-shrink: 0; width: 34px; padding: 8px 0; color: color-mix(in srgb, #e11d48 80%, CanvasText); }
+  .add-link, #addCat { width: 100%; border-style: dashed; background: transparent; margin-top: 2px; }
+  #addCat { margin-bottom: 24px; padding: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>导航 · 管理</h1>
+  <a class="back" href="./">← 返回导航</a>
+  <span class="spacer"></span>
+  <button id="reloadBtn">重新加载</button>
+  <button id="saveBtn" class="primary">保存并部署</button>
+</header>
+<main>
+  <div id="status" role="status" aria-live="polite"></div>
+  <details>
+    <summary>访问令牌设置（仅第一次需要）</summary>
+    <div class="inner">
+      <input id="token" type="password" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+      <button id="tokenSave">保存</button>
+      <button id="tokenClear">清除</button>
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">生成新令牌</a>
+    </div>
+    <p class="hint" style="margin-top:8px;margin-bottom:0">
+      令牌用细粒度 PAT：Repository access → Only select repositories → PoilV/PoilV.github.io；
+      Permissions → Repository permissions → Contents: Read and write（想自动显示部署结果就再给 Pages: Read-only）。
+      令牌只保存在本浏览器的 localStorage，不会写入仓库。
+    </p>
+  </details>
+  <div class="hint">分类和链接的显示顺序不用管，主页按拼音自动排序。改动后点右上角"保存并部署"，约 1 分钟后主页生效。</div>
+  <div id="editor"></div>
+  <button id="addCat">+ 添加分类</button>
+</main>
+<script>
+const REPO = "PoilV/PoilV.github.io";
+const API = "https://api.github.com";
+const TOKEN_KEY = "nav-admin-token";
+let state = null;
+let sha = null;
+let dirty = false;
+
+const $ = id => document.getElementById(id);
+const status = $("status");
+const editor = $("editor");
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const b64Decode = b64 => decodeURIComponent(escape(atob(b64.replace(/\s/g, ""))));
+const b64Encode = s => btoa(unescape(encodeURIComponent(s)));
+
+function setStatus(msg, isErr) {
+  status.textContent = msg;
+  status.classList.toggle("err", !!isErr);
+  status.style.display = msg ? "block" : "none";
+}
+
+async function api(path, opts = {}) {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) throw new Error("未设置访问令牌，请在上方“访问令牌设置”里粘贴");
+  const r = await fetch(`${API}/repos/${REPO}/${path}`, {
+    ...opts,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Accept": "application/vnd.github+json",
+      ...(opts.headers || {}),
+    },
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(`${r.status} ${j.message || r.statusText}`);
+  return j;
+}
+
+// ---------- 令牌 ----------
+const tokenInput = $("token");
+tokenInput.value = localStorage.getItem(TOKEN_KEY) || "";
+$("tokenSave").addEventListener("click", () => {
+  const v = tokenInput.value.trim();
+  if (!v) { setStatus("令牌不能为空", true); return; }
+  localStorage.setItem(TOKEN_KEY, v);
+  setStatus("令牌已保存 ✓ 可以点“重新加载”开始编辑");
+});
+$("tokenClear").addEventListener("click", () => {
+  localStorage.removeItem(TOKEN_KEY);
+  tokenInput.value = "";
+  setStatus("令牌已清除");
+});
+
+// ---------- 编辑器模板 ----------
+function linkHTML(l) {
+  l = typeof l === "string" ? { url: l } : l || {};
+  return `
+  <div class="link-row">
+    <input class="link-url" value="${esc(l.url || "")}" placeholder="https://…（必填）" spellcheck="false">
+    <input class="link-name" value="${esc(l.name || "")}" placeholder="名称（选填）" spellcheck="false">
+    <input class="link-icon" value="${esc(l.icon || "")}" placeholder="图标 URL（选填）" spellcheck="false">
+    <button type="button" class="del-link" aria-label="删除链接">✕</button>
+  </div>`;
+}
+function catHTML(cat) {
+  return `
+  <fieldset class="cat">
+    <div class="cat-head">
+      <input class="cat-name" value="${esc(cat.name || "")}" placeholder="分类名（必填）">
+      <input class="cat-icon" value="${esc(cat.icon || "")}" placeholder="lucide 图标名（选填）" spellcheck="false">
+      <label><input type="checkbox" class="cat-hidden"${cat.hidden ? " checked" : ""}>默认隐藏</label>
+      <button type="button" class="del-cat">删除分类</button>
+    </div>
+    ${(cat.links || []).map(linkHTML).join("")}
+    <button type="button" class="add-link">+ 添加链接</button>
+  </fieldset>`;
+}
+function renderEditor() {
+  editor.innerHTML = (state.categories || []).map(catHTML).join("");
+}
+
+// ---------- 加载 ----------
+async function load() {
+  setStatus("加载中…");
+  try {
+    const meta = await api("contents/links.json");
+    state = JSON.parse(b64Decode(meta.content));
+    sha = meta.sha;
+    if (!state || !Array.isArray(state.categories)) throw new Error("links.json 格式不正确");
+    renderEditor();
+    dirty = false;
+    const total = state.categories.reduce((n, c) => n + (c.links || []).length, 0);
+    setStatus(`已加载：${state.categories.length} 个分类、${total} 条链接`);
+  } catch (e) {
+    setStatus("加载失败：" + e.message, true);
+  }
+}
+$("reloadBtn").addEventListener("click", () => {
+  if (dirty && !confirm("有未保存的改动，确定丢弃并重新加载？")) return;
+  load();
+});
+
+// ---------- 编辑器交互 ----------
+editor.addEventListener("click", e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  if (btn.classList.contains("del-link")) {
+    btn.closest(".link-row").remove();
+    dirty = true;
+  } else if (btn.classList.contains("del-cat")) {
+    if (confirm("删除该分类及其全部链接？")) {
+      btn.closest(".cat").remove();
+      dirty = true;
+    }
+  } else if (btn.classList.contains("add-link")) {
+    btn.insertAdjacentHTML("beforebegin", linkHTML({}));
+    dirty = true;
+  }
+});
+$("addCat").addEventListener("click", () => {
+  editor.insertAdjacentHTML("beforeend", catHTML({ links: [] }));
+  dirty = true;
+});
+editor.addEventListener("input", () => { dirty = true; });
+window.addEventListener("beforeunload", e => {
+  if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+// ---------- 收集并校验 ----------
+function collect() {
+  const bad = [];
+  const categories = [];
+  editor.querySelectorAll(".cat").forEach(catEl => {
+    const name = catEl.querySelector(".cat-name");
+    const icon = catEl.querySelector(".cat-icon");
+    const hidden = catEl.querySelector(".cat-hidden").checked;
+    [name, icon].forEach(x => x.classList.remove("bad"));
+    if (!name.value.trim()) { name.classList.add("bad"); bad.push(name); }
+    const links = [];
+    catEl.querySelectorAll(".link-row").forEach(row => {
+      const url = row.querySelector(".link-url");
+      const lname = row.querySelector(".link-name");
+      const licon = row.querySelector(".link-icon");
+      [url, lname, licon].forEach(x => x.classList.remove("bad"));
+      if (!url.value.trim()) { url.classList.add("bad"); bad.push(url); return; }
+      const link = { url: url.value.trim() };
+      if (lname.value.trim()) link.name = lname.value.trim();
+      if (licon.value.trim()) link.icon = licon.value.trim();
+      links.push(link);
+    });
+    const cat = { name: name.value.trim(), links };
+    if (icon.value.trim()) cat.icon = icon.value.trim();
+    if (hidden) cat.hidden = true;
+    categories.push(cat);
+  });
+  if (bad.length) { bad[0].focus(); return null; }
+  return { categories };
+}
+
+// ---------- 保存并部署 ----------
+async function save() {
+  if (!state || !sha) { setStatus("请先加载数据", true); return; }
+  const data = collect();
+  if (!data) { setStatus("有必填项未填写（分类名 / 链接网址），已标红", true); return; }
+  setStatus("提交中…");
+  try {
+    const res = await api("contents/links.json", {
+      method: "PUT",
+      body: JSON.stringify({
+        message: "通过 admin 页面更新 links.json",
+        content: b64Encode(JSON.stringify(data, null, 2)),
+        sha,
+      }),
+    });
+    sha = res.content.sha;
+    state = data;
+    dirty = false;
+    setStatus("已提交 ✓ 等待 GitHub Pages 部署…");
+    pollDeploy(res.commit.sha);
+  } catch (e) {
+    if (e.message.includes("409")) setStatus("保存失败：文件已被修改（可能在其他地方改过），点“重新加载”后重试", true);
+    else setStatus("保存失败：" + e.message, true);
+  }
+}
+$("saveBtn").addEventListener("click", save);
+
+async function pollDeploy(commitSha) {
+  for (let i = 0; i < 24; i++) {
+    await new Promise(r => setTimeout(r, 5000));
+    try {
+      const builds = await api("pages/builds?per_page=5");
+      const b = builds.find(x => x.commit === commitSha);
+      if (b && b.status === "built") { setStatus("已发布 ✓ 刷新主页即可看到新数据"); return; }
+      if (b && b.status === "errored") { setStatus("构建失败，请到仓库 Actions 页查看日志", true); return; }
+    } catch (e) {
+      setStatus("已提交 ✓（无法查询部署状态，约 1 分钟后生效）");
+      return;
+    }
+  }
+  setStatus("已提交 ✓（部署耗时较久，稍后刷新主页查看）");
+}
+
+if (localStorage.getItem(TOKEN_KEY)) load();
+</script>
+</body>
+</html>
