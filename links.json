@@ -35,7 +35,8 @@
         },
         {
           "url": "https://mail.google.com/",
-          "name": "Gmail"
+          "name": "Gmail",
+          "icon": "gmail"
         }
       ],
       "icon": "mail"
@@ -57,7 +58,8 @@
         },
         {
           "url": "https://huggingface.co/",
-          "name": "Hugging Face"
+          "name": "Hugging Face",
+          "icon": "huggingface"
         },
         {
           "url": "https://minimaxi.com/",
@@ -65,11 +67,13 @@
         },
         {
           "url": "https://openrouter.ai/",
-          "name": "OpenRouter"
+          "name": "OpenRouter",
+          "icon": "openrouter"
         },
         {
           "url": "https://www.deepseek.com/",
-          "name": "DeepSeek"
+          "name": "DeepSeek",
+          "icon": "deepseek"
         },
         {
           "url": "https://chatgpt.com/",
@@ -77,7 +81,8 @@
         },
         {
           "url": "https://claude.ai/",
-          "name": "Claude"
+          "name": "Claude",
+          "icon": "claude"
         },
         {
           "url": "https://copilot.microsoft.com/",
@@ -97,7 +102,8 @@
         },
         {
           "url": "https://gemini.google.com/",
-          "name": "Google Gemini"
+          "name": "Google Gemini",
+          "icon": "googlegemini"
         }
       ],
       "icon": "brain-circuit"
@@ -181,7 +187,8 @@
         },
         {
           "url": "https://www.protondb.com/",
-          "name": "ProtonDB"
+          "name": "ProtonDB",
+          "icon": "protondb"
         },
         {
           "url": "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
@@ -193,15 +200,18 @@
         },
         {
           "url": "https://steamdb.info/",
-          "name": "SteamDB"
+          "name": "SteamDB",
+          "icon": "steamdb"
         },
         {
           "url": "https://store.epicgames.com/",
-          "name": "Epic游戏商城"
+          "name": "Epic游戏商城",
+          "icon": "epicgames"
         },
         {
           "url": "https://store.steampowered.com/",
-          "name": "Steam"
+          "name": "Steam",
+          "icon": "steam"
         },
         {
           "url": "https://ngabbs.com/",
@@ -214,8 +224,9 @@
       "name": "系统工具",
       "links": [
         {
-          "url": "https://www.archlinuxcn.org/",
-          "name": "Arch Linux"
+          "url": "https://archlinux.org/",
+          "name": "Arch Linux",
+          "icon": "archlinux"
         },
         {
           "url": "https://www.catalog.update.microsoft.com/Home.aspx",
@@ -231,7 +242,8 @@
         },
         {
           "url": "https://flathub.org/",
-          "name": "Flathub"
+          "name": "Flathub",
+          "icon": "flathub"
         },
         {
           "url": "https://learn.microsoft.com/zh-cn/sysinternals/",
@@ -262,8 +274,9 @@
           "name": "v4l2loopback"
         },
         {
-          "url": "https://wiki.lineageos.org/devices/kebab/",
-          "name": "LineageOS kebab"
+          "url": "https://www.lineageos.org/",
+          "name": "LineageOS",
+          "icon": "lineageos"
         },
         {
           "url": "https://zhuanlan.zhihu.com/p/429496671",
@@ -293,11 +306,13 @@
         },
         {
           "url": "https://drive.google.com/drive/my-drive",
-          "name": "Google Drive"
+          "name": "Google Drive",
+          "icon": "googledrive"
         },
         {
           "url": "https://www.dropbox.com/home",
-          "name": "Dropbox"
+          "name": "Dropbox",
+          "icon": "dropbox"
         },
         {
           "url": "https://www.jianguoyun.com/#/",
@@ -305,7 +320,8 @@
         },
         {
           "url": "https://mega.nz/fm/r3xmFDLJ",
-          "name": "MEGA"
+          "name": "MEGA",
+          "icon": "mega"
         },
         {
           "url": "https://mypikpak.com/drive/all",
@@ -325,7 +341,8 @@
         },
         {
           "url": "https://photos.google.com/",
-          "name": "Google Photos"
+          "name": "Google Photos",
+          "icon": "googlephotos"
         },
         {
           "url": "https://up.woozooo.com/mydisk.php",
@@ -347,15 +364,18 @@
         },
         {
           "url": "https://discord.com/channels/@me",
-          "name": "Discord"
+          "name": "Discord",
+          "icon": "discord"
         },
         {
           "url": "https://www.instagram.com/",
-          "name": "Instagram"
+          "name": "Instagram",
+          "icon": "instagram"
         },
         {
           "url": "https://m.weibo.cn/",
-          "name": "微博移动版"
+          "name": "微博移动版",
+          "icon": "sinaweibo"
         },
         {
           "url": "https://newsnow.busiyi.world/",
@@ -363,7 +383,8 @@
         },
         {
           "url": "https://www.reddit.com/",
-          "name": "Reddit"
+          "name": "Reddit",
+          "icon": "reddit"
         },
         {
           "url": "https://sspai.com/",
@@ -371,7 +392,8 @@
         },
         {
           "url": "https://weibo.com/",
-          "name": "微博"
+          "name": "微博",
+          "icon": "sinaweibo"
         },
         {
           "url": "https://x.com/",
