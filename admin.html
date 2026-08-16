@@ -69,35 +69,9 @@
   .link-row input.link-url { flex: 2.2; }
   .link-row input.link-name { flex: 1.2; }
   .link-row input.link-icon { flex: 1.2; }
-  .link-row .pick-brand { flex-shrink: 0; }
   .link-row .del-link { flex-shrink: 0; width: 34px; padding: 8px 0; color: color-mix(in srgb, #e11d48 80%, CanvasText); }
   .add-link, #addCat { width: 100%; border-style: dashed; background: transparent; margin-top: 2px; }
   #addCat { margin-bottom: 24px; padding: 10px; }
-  /* simple-icons 品牌选择面板 */
-  #brandPanel {
-    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-    width: min(560px, calc(100vw - 32px)); max-height: 70vh;
-    display: flex; flex-direction: column;
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 8px 30px color-mix(in srgb, CanvasText 25%, transparent);
-    z-index: 50; padding: 12px;
-  }
-  #brandPanel[hidden] { display: none; }
-  #brandPanel .panel-head { display: flex; gap: 8px; margin-bottom: 8px; }
-  #brandPanel .panel-head input { flex: 1; }
-  #brandPanel .panel-head button { flex-shrink: 0; width: 34px; padding: 8px 0; }
-  #brandList { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-  .brand-item {
-    display: flex; align-items: center; gap: 10px; width: 100%;
-    padding: 7px 10px; text-align: left; font-size: 13px;
-    border: 1px solid transparent; background: transparent;
-  }
-  .brand-item:hover { border-color: var(--border); }
-  .brand-item .dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
-  .brand-item .t { flex: 0 0 130px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .brand-item .s { flex: 0 0 120px; opacity: .6; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .brand-item .u { flex: 1; min-width: 0; opacity: .6; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #brandList .empty { padding: 16px; text-align: center; opacity: .6; font-size: 13px; }
 </style>
 </head>
 <body>
@@ -128,14 +102,6 @@
   <div id="editor"></div>
   <button id="addCat">+ 添加分类</button>
 </main>
-
-<div id="brandPanel" hidden>
-  <div class="panel-head">
-    <input id="brandSearch" type="search" placeholder="搜索品牌（如 bilibili）" autocomplete="off" spellcheck="false">
-    <button id="brandClose" type="button" aria-label="关闭">✕</button>
-  </div>
-  <div id="brandList"></div>
-</div>
 <script>
 const REPO = "PoilV/PoilV.github.io";
 const API = "https://api.github.com";
@@ -197,8 +163,7 @@ function linkHTML(l) {
   <div class="link-row">
     <input class="link-url" value="${esc(l.url || "")}" placeholder="https://…（必填）" spellcheck="false">
     <input class="link-name" value="${esc(l.name || "")}" placeholder="名称（选填）" spellcheck="false">
-    <input class="link-icon" value="${esc(l.icon || "")}" placeholder="图标：URL 或 simple-icons 名（选填）" spellcheck="false">
-    <button type="button" class="pick-brand" title="从 simple-icons 品牌库选择图标">品牌</button>
+    <input class="link-icon" value="${esc(l.icon || "")}" placeholder="图标 URL（选填）" spellcheck="false">
     <button type="button" class="del-link" aria-label="删除链接">✕</button>
   </div>`;
 }
@@ -255,8 +220,6 @@ editor.addEventListener("click", e => {
   } else if (btn.classList.contains("add-link")) {
     btn.insertAdjacentHTML("beforebegin", linkHTML({}));
     dirty = true;
-  } else if (btn.classList.contains("pick-brand")) {
-    openBrandPicker(btn.closest(".link-row"));
   }
 });
 $("addCat").addEventListener("click", () => {
@@ -341,71 +304,6 @@ async function pollDeploy(commitSha) {
   }
   setStatus("已提交 ✓（部署耗时较久，稍后刷新主页查看）");
 }
-
-// ---------- simple-icons 品牌库 ----------
-const SI_URL = "https://unpkg.com/simple-icons@latest/data/simple-icons.json";
-const SI_CACHE_KEY = "nav-si-cache-v1";
-let siData = null; // 精简投影：[{t: title, s: slug, h: hex, u: source}]
-let brandTarget = null;
-const brandPanel = $("brandPanel");
-const brandSearch = $("brandSearch");
-const brandList = $("brandList");
-
-async function loadBrandData() {
-  if (siData) return siData;
-  const cached = localStorage.getItem(SI_CACHE_KEY);
-  if (cached) { try { siData = JSON.parse(cached); return siData; } catch (e) {} }
-  setStatus("正在加载 simple-icons 品牌库（首次约 1-2 秒）…");
-  const r = await fetch(SI_URL);
-  if (!r.ok) throw new Error("品牌库加载失败：" + r.status);
-  const raw = await r.json();
-  siData = raw.map(x => ({ t: x.title, s: x.slug, h: x.hex, u: x.source || "" }));
-  try { localStorage.setItem(SI_CACHE_KEY, JSON.stringify(siData)); } catch (e) {}
-  setStatus("");
-  return siData;
-}
-function renderBrandList(q) {
-  q = (q || "").trim().toLowerCase();
-  const items = siData.filter(x => !q || x.t.toLowerCase().includes(q) || x.s.includes(q)).slice(0, 30);
-  brandList.innerHTML = items.length ? items.map(x => `
-    <button type="button" class="brand-item" data-slug="${esc(x.s)}">
-      <span class="dot" style="background:#${esc(x.h)}"></span>
-      <span class="t">${esc(x.t)}</span>
-      <span class="s">${esc(x.s)}</span>
-      <span class="u">${esc(x.u)}</span>
-    </button>`).join("") : `<div class="empty">没有匹配的品牌</div>`;
-}
-async function openBrandPicker(row) {
-  brandTarget = row;
-  try {
-    await loadBrandData();
-    renderBrandList(brandSearch.value);
-    brandPanel.hidden = false;
-    brandSearch.focus();
-  } catch (e) {
-    setStatus(e.message, true);
-  }
-}
-function closeBrandPicker() {
-  brandPanel.hidden = true;
-  brandTarget = null;
-}
-brandSearch.addEventListener("input", () => renderBrandList(brandSearch.value));
-$("brandClose").addEventListener("click", closeBrandPicker);
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && !brandPanel.hidden) closeBrandPicker();
-});
-brandList.addEventListener("click", e => {
-  const b = e.target.closest(".brand-item");
-  if (!b || !brandTarget) return;
-  const it = siData.find(x => x.s === b.dataset.slug);
-  if (!it) return;
-  brandTarget.querySelector(".link-icon").value = it.s; // 直接存 slug，主页自动展开成 unpkg 地址
-  const url = brandTarget.querySelector(".link-url");
-  if (!url.value.trim()) url.value = it.u; // 网址为空时顺带填上品牌官网
-  dirty = true;
-  closeBrandPicker();
-});
 
 if (localStorage.getItem(TOKEN_KEY)) load();
 </script>

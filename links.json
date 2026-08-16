@@ -549,7 +549,7 @@
         },
         {
           "url": "https://www.cloudflare.com/cdn-cgi/trace",
-          "name": "Cloudflare"
+          "name": "Cloudflare IP"
         },
         {
           "url": "https://console.cloud.tencent.com/",

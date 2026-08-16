@@ -36,7 +36,7 @@
 | `hidden`（分类） | 选填 | 设为 `true` 时该分类默认不显示，点击左侧导航后才展开 |
 | `url` | ✅ | 链接地址 |
 | `name` | 选填 | 显示名字，不写则显示域名 |
-| `icon`（链接） | 选填 | 手动指定图标地址（优先级最高）；也可直接写 simple-icons 的 slug（如 `bilibili`），见下文图标机制 |
+| `icon`（链接） | 选填 | 手动指定图标地址（优先级最高），见下文图标机制 |
 
 - 只写 URL 字符串也合法，等价于 `{"url": "..."}`。
 - 分类和链接的显示顺序不用管：页面按拼音自动排序。
@@ -49,7 +49,7 @@
 - **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 是静态文件 [favicon.svg](favicon.svg)（lucide compass 图标，描边用浏览器系统色 CanvasText，随系统明暗自动切换）
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
-  1. `icon` 字段手动指定（有则优先尝试，失败再走 favicon.im）；不是 URL 的值视为 simple-icons 的 slug，自动展开为 `https://cdn.simpleicons.org/{slug}`（官方 CDN，自带品牌色）
+  1. `icon` 字段手动指定（有则优先尝试，失败再走 favicon.im）
   2. [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true&throw-error-on-404=true`（缺失时返回 404 而不是默认占位图）
   3. 首字母回退块
 - 图标懒加载：卡片接近视口时才发起请求，候选结果会缓存复用；favicon.im 响应带约 7 天缓存头，重复访问基本零请求
@@ -57,15 +57,14 @@
 ## 维护
 
 - **在线管理（推荐）**：主页点顶栏齿轮进入 [admin.html](admin.html)（也可直接访问 `https://poilv.github.io/admin.html`）。首次粘贴一个细粒度 PAT（只授权本仓库 Contents 读写），之后即可在页面上增删改分类和链接并一键部署，无需本地 git
-- **加链接**：在对应分类的 `links` 数组里加一行，名字看一眼站点标签页标题抄进去即可；图标可以点行尾"品牌"按钮从 simple-icons 品牌库搜索，自动填入 slug（图标栏只需存 slug 或完整 URL）
+- **加链接**：在对应分类的 `links` 数组里加一行，名字看一眼站点标签页标题抄进去即可
 - **换分类图标**：改分类的 `icon` 字段为任意 [lucide 图标名](https://lucide.dev/icons)（kebab-case），如 `"gamepad-2"`
-- **图标不对**（例如服务商返回了 App 图标）：把 `icon` 换成正确的 URL，或换成 simple-icons slug
+- **图标不对**（例如服务商返回了 App 图标）：把 `icon` 换成正确的 URL
 - **手动改动后**：推送到 main，GitHub Pages 自动发布；图标若显示旧图，Ctrl+F5 强制刷新（浏览器缓存约 7 天）
 
 ## 致谢
 
 - [pinyin-pro](https://github.com/zh-lx/pinyin-pro) - 中文/英文混合名称的拼音排序
 - [lucide](https://github.com/lucide-icons/lucide) - 分类图标与站点 favicon（ISC）
-- [simple-icons](https://github.com/simple-icons/simple-icons) - 品牌图标库（CC0），官方 CDN [cdn.simpleicons.org](https://cdn.simpleicons.org) 自动带品牌色
 - [favicon.im](https://favicon.im) - 站点图标服务
-- [unpkg](https://unpkg.com) - pinyin-pro、lucide 与 simple-icons 数据的 CDN 分发
+- [unpkg](https://unpkg.com) - pinyin-pro 与 lucide 的 CDN 分发

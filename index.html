@@ -181,11 +181,7 @@ const searchText = l => {
 // ---------- 站点图标（手动 icon → favicon.im → 首字母回退） ----------
 const iconCandidates = link => {
   const out = [];
-  if (link.icon) {
-    // 非 URL 的值视为 simple-icons 的 slug，走官方 CDN（自动带品牌色）
-    const ic = link.icon;
-    out.push(/^https?:\/\//i.test(ic) ? ic : `https://cdn.simpleicons.org/${ic}`);
-  }
+  if (link.icon) out.push(link.icon);
   const host = hostOf(link.url);
   if (host) out.push("https://favicon.im/zh/" + host + "?larger=true&throw-error-on-404=true");
   return out;
