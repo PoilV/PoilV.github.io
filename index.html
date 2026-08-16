@@ -51,6 +51,14 @@
     background: var(--card); color: var(--text);
   }
   #search:focus { border-color: var(--accent); }
+  .admin-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); color: var(--text);
+  }
+  .admin-link .lucide { width: 18px; height: 18px; }
+  .admin-link:hover { border-color: var(--accent); color: var(--accent); }
 
   /* 左侧导航 */
   #sideNav {
@@ -137,6 +145,7 @@
     <i data-lucide="search" aria-hidden="true"></i>
     <input id="search" type="search" placeholder="搜索" aria-label="搜索" autocomplete="off" spellcheck="false">
   </div>
+  <a class="admin-link" href="admin.html" aria-label="管理设置"><i data-lucide="settings" aria-hidden="true"></i></a>
 </header>
 
 <nav id="sideNav"></nav>
