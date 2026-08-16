@@ -397,7 +397,8 @@
         },
         {
           "url": "https://x.com/",
-          "name": "X (Twitter)"
+          "name": "X (Twitter)",
+          "icon": "x"
         },
         {
           "url": "https://www.xiaohongshu.com/",
