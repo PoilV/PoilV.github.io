@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="nav-closed">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,78 +18,45 @@
     --shadow: 0 1px 3px color-mix(in srgb, CanvasText 15%, transparent);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    transition: background .3s, color .3s;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* 顶栏 */
   header {
     position: sticky; top: 0; z-index: 30;
-    background: var(--bg);
-    padding: 12px 24px;
     display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px;
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
   }
   header h1 { font-size: 20px; font-weight: 700; white-space: nowrap; }
   .nav-toggle {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px;
+    width: 36px; height: 36px; flex-shrink: 0;
+    border: 1px solid var(--border); border-radius: 8px;
     background: var(--card); color: var(--text); cursor: pointer;
-    flex-shrink: 0;
   }
   .nav-toggle .lucide { width: 18px; height: 18px; }
-  .nav-toggle i::before { content: "☰"; font-style: normal; font-size: 16px; }
+  .nav-toggle i::before { content: "☰"; font-style: normal; font-size: 16px; } /* lucide 加载失败时的兜底 */
   .nav-toggle:hover { border-color: var(--accent); }
-  #search {
+  .search-box {
     flex: 1; min-width: 0; max-width: 520px; margin: 0 auto;
-    padding: 10px 16px; font-size: 14px;
-    border-radius: 10px; border: 1px solid var(--border);
+    position: relative; display: flex; align-items: center;
+  }
+  .search-box .lucide { position: absolute; left: 12px; width: 16px; height: 16px; opacity: .6; pointer-events: none; }
+  #search {
+    width: 100%;
+    padding: 10px 16px 10px 36px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 10px;
     background: var(--card); color: var(--text); outline: none;
   }
   #search:focus { border-color: var(--accent); }
-  #search:focus-visible, .nav-toggle:focus-visible, a.card:focus-visible, #sideNav a:focus-visible, footer a:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  .loading { text-align: center; padding: 60px 0; font-size: 14px; }
-  .count { font-size: 13px; text-align: center; padding: 10px; display: none; }
-  section { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
-  section h2 {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 16px; font-weight: 600; margin-bottom: 14px;
-  }
-  section h2::before {
-    content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent);
-  }
-  section h2 .lucide { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
-  a.card {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 12px 14px; text-decoration: none; color: var(--text);
-    box-shadow: var(--shadow); transition: transform .15s, border-color .15s;
-  }
-  a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
-  a.card img { width: 32px; height: 32px; padding: 4px; object-fit: contain; border-radius: 8px; background: var(--border); flex-shrink: 0; }
-  a.card .fb {
-    display: none; width: 32px; height: 32px; border-radius: 8px;
-    background: var(--border);
-    font-size: 14px; font-weight: 700; flex-shrink: 0;
-    align-items: center; justify-content: center;
-  }
-  a.card .info { min-width: 0; }
-  a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  a.card .host { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .no-result { text-align: center; padding: 60px 0; display: none; }
-  footer { text-align: center; font-size: 12px; padding: 32px 0 24px; margin-left: 170px; }
-  footer a { color: inherit; text-decoration: none; }
-  footer a:hover { color: var(--accent); }
+
+  /* 左侧导航 */
   #sideNav {
-    position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 20;
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 20;
+    width: 170px; padding: 78px 10px 20px; overflow-y: auto;
     background: var(--bg); border-right: 1px solid var(--border);
-    padding: 78px 10px 20px; overflow-y: auto;
     transform: translateX(0); visibility: visible;
     transition: transform .2s, visibility .2s;
   }
@@ -100,55 +67,90 @@
   }
   #sideNav a span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #sideNav a .lucide { width: 15px; height: 15px; flex-shrink: 0; opacity: .8; }
-  #sideNav a:hover { color: var(--text); background: var(--card); }
+  #sideNav a:hover { background: var(--card); }
   #sideNav a.active { color: var(--accent); background: var(--card); font-weight: 600; }
+  #sideNav a[data-hidden] { opacity: .6; } /* 未解锁的隐藏分类 */
   #navBackdrop {
     position: fixed; inset: 0; z-index: 15;
     background: color-mix(in srgb, CanvasText 20%, transparent);
     display: none;
   }
-  #loading, #count, #noResult, #content, footer { margin-left: 170px; transition: margin-left .2s; }
-  section { scroll-margin-top: 72px; }
+
+  /* 主体 */
+  main { margin-left: 170px; transition: margin-left .2s; }
+  #status { text-align: center; font-size: 13px; padding: 24px 0; }
+  section { max-width: 1080px; margin: 24px auto; padding: 0 24px; scroll-margin-top: 72px; }
+  section h2 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: 600; margin-bottom: 14px;
+  }
+  section h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent); }
+  section h2 .lucide { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  a.card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: transform .15s, border-color .15s;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  a.card img {
+    width: 32px; height: 32px; padding: 4px; flex-shrink: 0;
+    object-fit: contain; border-radius: 8px; background: var(--border);
+  }
+  a.card .fb {
+    display: none; width: 32px; height: 32px; flex-shrink: 0;
+    align-items: center; justify-content: center;
+    border-radius: 8px; background: var(--border);
+    font-size: 14px; font-weight: 700;
+  }
+  a.card .info { min-width: 0; }
+  a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.card .host { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  footer { text-align: center; font-size: 12px; padding: 32px 0 24px; }
+  footer a { color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
   @media (max-width: 900px) {
     #sideNav { transform: translateX(-100%); visibility: hidden; }
     html.nav-open #sideNav { transform: translateX(0); visibility: visible; }
     html.nav-open #navBackdrop { display: block; }
-    #loading, #count, #noResult, #content, footer { margin-left: 0; }
+    main { margin-left: 0; }
   }
   @media (min-width: 901px) {
     html.nav-closed #sideNav { transform: translateX(-100%); visibility: hidden; }
-    html.nav-closed #loading,
-    html.nav-closed #count,
-    html.nav-closed #noResult,
-    html.nav-closed #content,
-    html.nav-closed footer { margin-left: 0; }
+    html.nav-closed main { margin-left: 0; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="true" aria-controls="sideNav"><i data-lucide="menu" aria-hidden="true"></i></button>
+  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="false" aria-controls="sideNav"><i data-lucide="menu" aria-hidden="true"></i></button>
   <h1>导航</h1>
-  <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
+  <div class="search-box">
+    <i data-lucide="search" aria-hidden="true"></i>
+    <input id="search" type="search" placeholder="搜索" aria-label="搜索" autocomplete="off" spellcheck="false">
+  </div>
 </header>
 
 <nav id="sideNav"></nav>
 <div id="navBackdrop"></div>
 
-<div class="loading" id="loading" role="status">加载中…</div>
-<div class="count" id="count" aria-live="polite"></div>
-<div class="no-result" id="noResult" aria-live="polite">没有匹配的链接</div>
-
-<div id="content"></div>
-
-<footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航 · GitHub</a></footer>
+<main>
+  <div id="status" role="status" aria-live="polite">加载中…</div>
+  <div id="content"></div>
+  <footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航 · GitHub</a></footer>
+</main>
 
 <script>
+// ---------- 工具函数 ----------
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const hostOf = url => {
-  try { return new URL(url, location.href).hostname; } catch (e) { return ""; }
-};
+const hostOf = url => { try { return new URL(url, location.href).hostname; } catch (e) { return ""; } };
+const normalize = l => typeof l === "string" ? { url: l } : l;
+const nameOf = l => l.name || hostOf(l.url) || "";
 const pyKey = s => {
   try {
     if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array" }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -161,74 +163,56 @@ const pyFirst = s => {
   } catch (e) {}
   return "";
 };
-const nhost = h => h.replace(/^www\./, "");
-const normalize = l => typeof l === "string" ? { url: l } : l;
-const nameOf = l => (l.name || hostOf(l.url) || "");
-const catKey = name => pyKey(name || "");
-const searchText = l => [l.url, nameOf(l), pyKey(nameOf(l)), pyFirst(nameOf(l))].join(" ").toLowerCase();
-const iconCandidates = link => {
-  const out = [];
-  if (link.icon) out.push(link.icon); // 手动指定，最高优先
-  const host = hostOf(link.url);
-  if (host) out.push("https://favicon.im/" + host + "?larger=true&throw-error-on-404=true"); // 服务兜底（缺失时 404，触发字母回退）
-  return out;
+const searchText = l => {
+  const n = nameOf(l);
+  return [l.url, n, pyKey(n), pyFirst(n)].join(" ").toLowerCase();
 };
 
+// ---------- 站点图标（手动 icon → favicon.im → 首字母回退） ----------
+const iconCandidates = link => {
+  const out = [];
+  if (link.icon) out.push(link.icon);
+  const host = hostOf(link.url);
+  if (host) out.push("https://favicon.im/" + host + "?larger=true&throw-error-on-404=true");
+  return out;
+};
 const showFallback = img => {
-  img.onerror = null;
-  img.onload = null;
   const fb = img.parentElement && img.parentElement.querySelector(".fb");
   img.remove();
   if (fb) fb.style.display = "flex";
 };
-const iconProbeCache = new Map();
+const iconCache = new Map(); // 探测结果缓存；失败不缓存，允许重试
 const probeIcon = src => {
-  if (!iconProbeCache.has(src)) {
+  if (!iconCache.has(src)) {
     const p = new Promise(resolve => {
       const im = new Image();
       im.onload = () => resolve(true);
-      im.onerror = () => { iconProbeCache.delete(src); resolve(false); };
+      im.onerror = () => { iconCache.delete(src); resolve(false); };
       im.src = src;
     });
-    iconProbeCache.set(src, p);
+    iconCache.set(src, p);
   }
-  return iconProbeCache.get(src);
+  return iconCache.get(src);
 };
 async function setIcon(img, link) {
-  // 候选按优先级顺序尝试：命中即显示；全部失败则回退首字母块
   for (const c of iconCandidates(link)) {
     if (await probeIcon(c)) { img.src = c; return; }
   }
   showFallback(img);
 }
-const cardHTML = link => {
-  link = normalize(link);
-  const host = hostOf(link.url);
-  const name = link.name || host;
-  return `
-    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-icon="${esc(link.icon || "")}">
-      <img alt="" loading="lazy" decoding="async">
-      <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
-      <span class="info">
-        <span class="name" title="${esc(name)}">${esc(name)}</span>
-        <span class="host" title="${esc(host)}">${esc(host)}</span>
-      </span>
-    </a>`;
-};
 
+// ---------- 数据与渲染 ----------
 const content = document.getElementById("content");
-const countEl = document.getElementById("count");
-const noResult = document.getElementById("noResult");
+const status = document.getElementById("status");
 const search = document.getElementById("search");
 const sideNav = document.getElementById("sideNav");
 const navToggle = document.getElementById("navToggle");
 const navBackdrop = document.getElementById("navBackdrop");
 const mqMobile = matchMedia("(max-width: 900px)");
-const loading = document.getElementById("loading");
 let config = { categories: [] };
-let total = 0;
 let linksFailed = false;
 let dataLoaded = false;
+const revealed = new Set(); // 点击左侧导航解锁的隐藏分类
 
 async function loadLinks() {
   const c = new AbortController();
@@ -247,11 +231,26 @@ async function loadLinks() {
   return false;
 }
 
+function cardHTML(link) {
+  link = normalize(link);
+  const host = hostOf(link.url);
+  const name = nameOf(link);
+  return `
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-icon="${esc(link.icon || "")}">
+      <img alt="" loading="lazy" decoding="async">
+      <span class="fb">${host ? esc((host.replace(/^www\./, "")[0] || "?").toUpperCase()) : "?"}</span>
+      <span class="info">
+        <span class="name" title="${esc(name)}">${esc(name)}</span>
+        <span class="host" title="${esc(host)}">${esc(host)}</span>
+      </span>
+    </a>`;
+}
+
 function render(q) {
   q = (q || "").trim().toLowerCase();
-  let html = "", t = 0, nav = "";
+  let html = "", nav = "", total = 0;
   const cats = config.categories
-    .map(cat => ({ cat, key: catKey(cat.name) }))
+    .map(cat => ({ cat, key: pyKey(cat.name || "") }))
     .sort((a, b) => a.key.localeCompare(b.key));
   cats.forEach((entry, i) => {
     const links = (entry.cat.links || [])
@@ -260,84 +259,68 @@ function render(q) {
       .map(link => ({ link, key: pyKey(nameOf(link)) }))
       .sort((a, b) => a.key.localeCompare(b.key));
     if (!links.length) return;
-    t += links.length;
-    const catIcon = entry.cat.icon ? `<i data-lucide="${esc(entry.cat.icon)}" aria-hidden="true"></i>` : "";
-    html += `<section id="cat-${i}"><h2>${catIcon}${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
-    nav += `<a href="#cat-${i}" data-i="${i}">${catIcon}<span>${esc(entry.cat.name)}</span></a>`;
+    const icon = entry.cat.icon ? `<i data-lucide="${esc(entry.cat.icon)}" aria-hidden="true"></i>` : "";
+    const hidden = entry.cat.hidden && !revealed.has(entry.cat.name);
+    nav += `<a href="#cat-${i}" data-cat="${esc(entry.cat.name)}"${hidden ? ` data-hidden="1"` : ""}>${icon}<span>${esc(entry.cat.name)}</span></a>`;
+    if (hidden) return; // 隐藏分类只进导航，内容解锁后才渲染
+    total += links.length;
+    html += `<section id="cat-${i}"><h2>${icon}${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
   });
-  total = t;
   content.innerHTML = html;
   sideNav.innerHTML = nav;
   if (window.lucide) lucide.createIcons();
   bindNavObserver();
   bindIconObserver();
-  loading.style.display = "none";
-  countEl.textContent = `共 ${total} 条链接${q ? `，匹配 ${total} 条` : ""}`;
-  countEl.style.display = q ? "block" : "none";
-  const empty = !total && linksFailed;
-  noResult.textContent = empty ? "数据加载失败，请检查网络后刷新重试" : "没有匹配的链接";
-  noResult.style.display = (q && !total) || empty ? "block" : "none";
+  let msg = "";
+  if (linksFailed && !total) msg = "数据加载失败，请检查网络后刷新重试";
+  else if (q) msg = total ? `匹配 ${total} 条` : "没有匹配的链接";
+  status.textContent = msg;
+  status.style.display = msg ? "block" : "none";
 }
+
+// ---------- 左侧导航：折叠 + 点击滚动 + 解锁隐藏分类 ----------
+const navIsOpen = () => mqMobile.matches
+  ? document.documentElement.classList.contains("nav-open")
+  : !document.documentElement.classList.contains("nav-closed");
+function setNavOpen(open) {
+  document.documentElement.classList.toggle("nav-open", mqMobile.matches && open);
+  document.documentElement.classList.toggle("nav-closed", !mqMobile.matches && !open);
+  navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+}
+navToggle.addEventListener("click", () => setNavOpen(!navIsOpen()));
+navBackdrop.addEventListener("click", () => setNavOpen(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape" && mqMobile.matches) setNavOpen(false); });
+mqMobile.addEventListener("change", () => setNavOpen(false)); // 跨断点时重置为收起
+setNavOpen(navIsOpen()); // 初始同步 aria-expanded
 
 sideNav.addEventListener("click", e => {
   const a = e.target.closest("a");
   if (!a) return;
   e.preventDefault();
-  const sec = document.getElementById(a.dataset.i ? "cat-" + a.dataset.i : "cat-0");
+  if (a.dataset.hidden !== undefined && !revealed.has(a.dataset.cat)) {
+    revealed.add(a.dataset.cat);
+    render(search.value); // 解锁后重建，内容区出现该分类
+  }
+  const sec = document.getElementById(a.hash.slice(1));
   if (sec) sec.scrollIntoView({ behavior: "smooth" });
-  closeMobileNav();
+  if (mqMobile.matches) setNavOpen(false);
 });
 
-function navIsOpen() {
-  return mqMobile.matches
-    ? document.documentElement.classList.contains("nav-open")
-    : !document.documentElement.classList.contains("nav-closed");
-}
-function updateNavToggle() {
-  navToggle.setAttribute("aria-expanded", navIsOpen() ? "true" : "false");
-}
-function closeMobileNav() {
-  if (mqMobile.matches && document.documentElement.classList.contains("nav-open")) {
-    document.documentElement.classList.remove("nav-open");
-    updateNavToggle();
-  }
-}
-function syncNavState() {
-  if (mqMobile.matches) {
-    document.documentElement.classList.remove("nav-closed");
-  } else {
-    document.documentElement.classList.remove("nav-open");
-  }
-  updateNavToggle();
-}
-navToggle.addEventListener("click", () => {
-  if (mqMobile.matches) {
-    document.documentElement.classList.toggle("nav-open");
-  } else {
-    document.documentElement.classList.toggle("nav-closed");
-  }
-  updateNavToggle();
-});
-navBackdrop.addEventListener("click", closeMobileNav);
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeMobileNav();
-});
-mqMobile.addEventListener("change", syncNavState);
-syncNavState();
-
+// ---------- 滚动高亮 ----------
 let navObserver = null;
 function bindNavObserver() {
   if (navObserver) navObserver.disconnect();
   navObserver = new IntersectionObserver(entries => {
     for (const en of entries) {
       if (en.isIntersecting) {
-        sideNav.querySelectorAll("a").forEach(a => a.classList.toggle("active", a.dataset.i === en.target.id.replace("cat-", "")));
+        sideNav.querySelectorAll("a").forEach(a => a.classList.toggle("active", a.hash === "#" + en.target.id));
       }
     }
   }, { rootMargin: "-25% 0px -65% 0px" });
   content.querySelectorAll("section").forEach(s => navObserver.observe(s));
 }
 
+// ---------- 图标懒加载 ----------
 let iconObserver = null;
 function bindIconObserver() {
   if (iconObserver) iconObserver.disconnect();
@@ -357,6 +340,7 @@ function bindIconObserver() {
   cards.forEach(a => iconObserver.observe(a));
 }
 
+// ---------- 启动 ----------
 loadLinks().then(ok => {
   linksFailed = !ok;
   dataLoaded = true;

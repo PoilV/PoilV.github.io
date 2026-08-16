@@ -20,7 +20,7 @@
    ]
   },
   {
-   "name": "AI 模型",
+   "name": "模型",
    "icon": "brain-circuit",
    "links": [
     {"url":"https://bigmodel.cn/","name":"智谱AI开放平台"},
@@ -40,7 +40,7 @@
    ]
   },
   {
-   "name": "AI 创作",
+   "name": "创作",
    "icon": "wand-sparkles",
    "links": [
     {"url":"http://49.233.78.71:17861/","name":"IndexTTS Demo"},
@@ -96,7 +96,7 @@
    ]
   },
   {
-   "name": "云存储",
+   "name": "云盘",
    "icon": "cloud",
    "links": [
     {"url":"https://www.123pan.com/","name":"123云盘"},
@@ -181,7 +181,8 @@
    "links": [
     {"url":"https://fanyi.caiyunapp.com/","name":"彩云小译"},
     {"url":"https://test.ustc.edu.cn/","name":"USTC 测速"},
-    {"url":"https://www.virustotal.com/gui/home/upload","name":"VirusTotal"}
+    {"url":"https://www.virustotal.com/gui/home/upload","name":"VirusTotal"},
+    {"url":"https://metacubex.github.io/metacubexd/#/","name":"MetaCubeXD"}
    ]
   },
   {
@@ -199,15 +200,15 @@
     {"url":"https://dash.cloudflare.com/","name":"Cloudflare Dashboard"},
     {"url":"https://geoviewer.aloxaf.com/","name":"GeoSite Viewer"},
     {"url":"https://github.com/","name":"GitHub"},
-    {"url":"https://metacubex.github.io/metacubexd/#/","name":"MetaCubeXD"},
     {"url":"https://ppio.com/","name":"PPIO"},
     {"url":"https://www.runoob.com/w3cnote/windows-finds-port-usage.html","name":"Windows 端口占用查询"},
     {"url":"https://wiki.metacubex.one/","name":"虚空终端 Docs"}
    ]
   },
   {
-   "name": "NSFW",
+   "name": "隐秘",
    "icon": "eye-off",
+   "hidden": true,
    "links": [
     {"url":"https://e-hentai.org","name":"E-Hentai Galleries"},
     {"url":"https://hanime1.me/","name":"Hanime1.me"},
