@@ -48,7 +48,7 @@
     width: 100%;
     padding: 10px 16px 10px 36px; font-size: 14px;
     border: 1px solid var(--border); border-radius: 10px;
-    background: var(--card); color: var(--text); outline: none;
+    background: var(--card); color: var(--text);
   }
   #search:focus { border-color: var(--accent); }
 
@@ -96,19 +96,22 @@
     transition: transform .15s, border-color .15s;
   }
   a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
-  a.card img {
-    width: 32px; height: 32px; padding: 4px; flex-shrink: 0;
-    object-fit: contain; border-radius: 8px; background: var(--border);
-  }
-  a.card .fb {
-    display: none; width: 32px; height: 32px; flex-shrink: 0;
-    align-items: center; justify-content: center;
+  a.card img, a.card .fb {
+    width: 32px; height: 32px; flex-shrink: 0;
     border-radius: 8px; background: var(--border);
+  }
+  a.card img { padding: 4px; object-fit: contain; }
+  a.card .fb {
+    display: none;
+    align-items: center; justify-content: center;
     font-size: 14px; font-weight: 700;
   }
   a.card .info { min-width: 0; }
-  a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  a.card .host { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  a.card .name, a.card .host {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  a.card .name { font-size: 14px; font-weight: 600; }
+  a.card .host { font-size: 12px; }
   footer { text-align: center; font-size: 12px; padding: 32px 0 24px; }
   footer a { color: inherit; text-decoration: none; }
   footer a:hover { color: var(--accent); }
@@ -147,22 +150,20 @@
 
 <script>
 // ---------- 工具函数 ----------
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = s => String(s).replace(/[&<>"']/g, c => escMap[c]);
 const hostOf = url => { try { return new URL(url, location.href).hostname; } catch (e) { return ""; } };
 const normalize = l => typeof l === "string" ? { url: l } : l;
 const nameOf = l => l.name || hostOf(l.url) || "";
-const pyKey = s => {
+// 拼音排序/搜索键；CDN 失败时退回原文匹配
+const py = (s, opts = {}) => {
   try {
-    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array" }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array", ...opts }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
   } catch (e) {}
-  return s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, "");
+  return null;
 };
-const pyFirst = s => {
-  try {
-    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array", pattern: "first" }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
-  } catch (e) {}
-  return "";
-};
+const pyKey = s => py(s) || s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, "");
+const pyFirst = s => py(s, { pattern: "first" }) || "";
 const searchText = l => {
   const n = nameOf(l);
   return [l.url, n, pyKey(n), pyFirst(n)].join(" ").toLowerCase();
@@ -232,7 +233,6 @@ async function loadLinks() {
 }
 
 function cardHTML(link) {
-  link = normalize(link);
   const host = hostOf(link.url);
   const name = nameOf(link);
   return `
@@ -325,11 +325,6 @@ let iconObserver = null;
 function bindIconObserver() {
   if (iconObserver) iconObserver.disconnect();
   const setFor = a => setIcon(a.querySelector("img"), { url: a.href, icon: a.dataset.icon || "" });
-  const cards = content.querySelectorAll("a.card");
-  if (!("IntersectionObserver" in window)) {
-    cards.forEach(setFor);
-    return;
-  }
   iconObserver = new IntersectionObserver(entries => {
     for (const en of entries) {
       if (!en.isIntersecting || !en.target.isConnected) continue;
@@ -337,7 +332,7 @@ function bindIconObserver() {
       setFor(en.target);
     }
   }, { rootMargin: "200px 0px" });
-  cards.forEach(a => iconObserver.observe(a));
+  content.querySelectorAll("a.card").forEach(a => iconObserver.observe(a));
 }
 
 // ---------- 启动 ----------

@@ -1,7 +1,7 @@
 {
  "categories": [
   {
-   "name": "办公",
+   "name": "办公求职",
    "icon": "briefcase",
    "links": [
     {"url":"https://docs.qq.com/","name":"腾讯文档"},
@@ -11,7 +11,7 @@
    ]
   },
   {
-   "name": "邮箱",
+   "name": "电子邮件",
    "icon": "mail",
    "links": [
     {"url":"https://mail.qq.com/","name":"QQ邮箱"},
@@ -20,7 +20,7 @@
    ]
   },
   {
-   "name": "模型",
+   "name": "智能模型",
    "icon": "brain-circuit",
    "links": [
     {"url":"https://bigmodel.cn/","name":"智谱AI开放平台"},
@@ -40,7 +40,7 @@
    ]
   },
   {
-   "name": "创作",
+   "name": "智能创作",
    "icon": "wand-sparkles",
    "links": [
     {"url":"http://49.233.78.71:17861/","name":"IndexTTS Demo"},
@@ -61,7 +61,7 @@
    ]
   },
   {
-   "name": "游戏",
+   "name": "游戏娱乐",
    "icon": "gamepad-2",
    "links": [
     {"url":"https://game.maj-soul.com/","name":"雀魂麻将"},
@@ -76,7 +76,7 @@
    ]
   },
   {
-   "name": "系统",
+   "name": "系统工具",
    "icon": "settings",
    "links": [
     {"url":"https://www.archlinuxcn.org/","name":"Arch Linux"},
@@ -96,7 +96,7 @@
    ]
   },
   {
-   "name": "云盘",
+   "name": "云盘存储",
    "icon": "cloud",
    "links": [
     {"url":"https://www.123pan.com/","name":"123云盘"},
@@ -117,7 +117,7 @@
    ]
   },
   {
-   "name": "资讯",
+   "name": "新闻资讯",
    "icon": "rss",
    "links": [
     {"url":"https://60s-demo.viki.moe/","name":"60s 聚合信息流"},
@@ -133,7 +133,7 @@
    ]
   },
   {
-   "name": "论坛",
+   "name": "社区论坛",
    "icon": "messages-square",
    "links": [
     {"url":"https://bbs.pcbeta.com/","name":"远景论坛"},
@@ -145,7 +145,7 @@
    ]
   },
   {
-   "name": "影音",
+   "name": "影音视听",
    "icon": "clapperboard",
    "links": [
     {"url":"https://www.agedm.io/","name":"AGE动漫"},
@@ -161,7 +161,7 @@
    ]
   },
   {
-   "name": "阅读",
+   "name": "阅读图库",
    "icon": "book-open",
    "links": [
     {"url":"https://anilist.co/","name":"AniList"},
@@ -176,7 +176,7 @@
    ]
   },
   {
-   "name": "工具",
+   "name": "在线工具",
    "icon": "wrench",
    "links": [
     {"url":"https://fanyi.caiyunapp.com/","name":"彩云小译"},
@@ -186,7 +186,7 @@
    ]
   },
   {
-   "name": "开发",
+   "name": "编程开发",
    "icon": "code-2",
    "links": [
     {"url":"https://www.tavily.com/","name":"Tavily"},
@@ -206,7 +206,7 @@
    ]
   },
   {
-   "name": "隐秘",
+   "name": "隐秘空间",
    "icon": "eye-off",
    "hidden": true,
    "links": [
