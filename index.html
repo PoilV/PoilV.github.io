@@ -6,6 +6,8 @@
 <title>导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro" defer></script>
+<script src="https://unpkg.com/lucide@1.31.0/dist/umd/lucide.min.js" defer></script>
+<link rel="stylesheet" href="https://unpkg.com/simple-icons-font@16.28.0/font/simple-icons.min.css">
 <style>
   :root {
     color-scheme: light dark;
@@ -39,9 +41,14 @@
     font-size: 16px; line-height: 1; flex-shrink: 0;
   }
   .nav-toggle:hover { border-color: var(--accent); }
+  .search-wrap { flex: 1; min-width: 0; max-width: 520px; margin: 0 auto; position: relative; }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 15px; height: 15px; opacity: .45; pointer-events: none;
+  }
   #search {
-    flex: 1; min-width: 0; max-width: 520px; margin: 0 auto;
-    padding: 10px 16px; font-size: 14px;
+    width: 100%;
+    padding: 10px 16px 10px 38px; font-size: 14px;
     border-radius: 10px; border: 1px solid var(--border);
     background: var(--card); color: var(--text); outline: none;
   }
@@ -74,6 +81,15 @@
     background: var(--border);
     font-size: 14px; font-weight: 700; flex-shrink: 0;
     align-items: center; justify-content: center;
+  }
+  a.card .si {
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 8px;
+    font-size: 17px; line-height: 1;
+  }
+  @media (prefers-color-scheme: dark) {
+    a.card .si.si--color::before { color: CanvasText; }
   }
   a.card .info { min-width: 0; }
   a.card .name { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -124,7 +140,10 @@
 <header>
   <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="true" aria-controls="sideNav">☰</button>
   <h1>导航</h1>
-  <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
+  <div class="search-wrap">
+    <i data-lucide="search" aria-hidden="true"></i>
+    <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
+  </div>
 </header>
 
 <nav id="sideNav"></nav>
@@ -159,6 +178,61 @@ const pyFirst = s => {
   return "";
 };
 const nhost = h => h.replace(/^www\./, "");
+// simple-icons 品牌图标映射：域名（去 www）→ slug，见 https://simpleicons.org
+const SI_MAP = {
+  "mail.qq.com": "qq",
+  "q.qq.com": "qq",
+  "mail.google.com": "gmail",
+  "huggingface.co": "huggingface",
+  "openrouter.ai": "openrouter",
+  "deepseek.com": "deepseek",
+  "claude.ai": "claude",
+  "duck.ai": "duckduckgo",
+  "gemini.google.com": "googlegemini",
+  "labs.google": "google",
+  "protondb.com": "protondb",
+  "steamdb.info": "steamdb",
+  "store.epicgames.com": "epicgames",
+  "store.steampowered.com": "steam",
+  "archlinuxcn.org": "archlinux",
+  "wiki.archlinux.org": "archlinux",
+  "flathub.org": "flathub",
+  "lemmy.dbzer0.com": "lemmy",
+  "wiki.lineageos.org": "lineageos",
+  "zhuanlan.zhihu.com": "zhihu",
+  "drive.google.com": "googledrive",
+  "photos.google.com": "googlephotos",
+  "dropbox.com": "dropbox",
+  "mega.nz": "mega",
+  "pan.baidu.com": "baidu",
+  "photo.baidu.com": "baidu",
+  "discord.com": "discord",
+  "instagram.com": "instagram",
+  "weibo.com": "sinaweibo",
+  "m.weibo.cn": "sinaweibo",
+  "reddit.com": "reddit",
+  "x.com": "x",
+  "xiaohongshu.com": "xiaohongshu",
+  "v2ex.com": "v2ex",
+  "xdaforums.com": "xdadevelopers",
+  "youtube.com": "youtube",
+  "music.youtube.com": "youtube",
+  "open.spotify.com": "spotify",
+  "tiktok.com": "tiktok",
+  "anilist.co": "anilist",
+  "artstation.com": "artstation",
+  "pinterest.com": "pinterest",
+  "pixiv.net": "pixiv",
+  "virustotal.com": "virustotal",
+  "aliyun.com": "alibabacloud",
+  "cloudflare.com": "cloudflare",
+  "dash.cloudflare.com": "cloudflare",
+  "github.com": "github"
+};
+const siSlugOf = link => {
+  const h = hostOf(link.url);
+  return SI_MAP[h] || SI_MAP[nhost(h)] || "";
+};
 const normalize = l => typeof l === "string" ? { url: l } : l;
 const nameOf = l => (l.name || hostOf(l.url) || "");
 const catKey = name => pyKey(name || "");
@@ -213,10 +287,14 @@ const cardHTML = link => {
   link = normalize(link);
   const host = hostOf(link.url);
   const name = link.name || host;
+  // 手动 icon 字段优先走图片链；否则命中映射表用品牌字形（确定性渲染，无网络请求）
+  const slug = !link.icon && siSlugOf(link);
+  const badge = slug
+    ? `<i class="si si-${esc(slug)} si--color" aria-hidden="true"></i>`
+    : `<img alt="" loading="lazy" decoding="async"><span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>`;
   return `
     <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
-      <img alt="" loading="lazy" decoding="async">
-      <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
+      ${badge}
       <span class="info">
         <span class="name" title="${esc(name)}">${esc(name)}</span>
         <span class="host" title="${esc(host)}">${esc(host)}</span>
@@ -365,7 +443,10 @@ function bindIconObserver() {
   if (iconObserver) iconObserver.disconnect();
   const cards = content.querySelectorAll("a.card");
   if (!("IntersectionObserver" in window)) {
-    cards.forEach(a => setIcon(a.querySelector("img"), findLink(a.href)));
+    cards.forEach(a => {
+      const img = a.querySelector("img");
+      if (img) setIcon(img, findLink(a.href));
+    });
     return;
   }
   iconObserver = new IntersectionObserver(entries => {
@@ -375,7 +456,7 @@ function bindIconObserver() {
       setIcon(en.target.querySelector("img"), findLink(en.target.href));
     }
   }, { rootMargin: "200px 0px" });
-  cards.forEach(a => iconObserver.observe(a));
+  cards.forEach(a => { if (a.querySelector("img")) iconObserver.observe(a); });
 }
 
 loadLinks().then(ok => {
@@ -396,8 +477,9 @@ const initPinyin = () => {
   window.pinyin = window.pinyinPro.pinyin;
   window.dispatchEvent(new Event("pinyin-ready"));
 };
-document.addEventListener("DOMContentLoaded", initPinyin);
-window.addEventListener("load", initPinyin);
+const initLucide = () => { if (window.lucide) lucide.createIcons(); };
+document.addEventListener("DOMContentLoaded", () => { initPinyin(); initLucide(); });
+window.addEventListener("load", () => { initPinyin(); initLucide(); });
 initPinyin();
 </script>
 </body>
