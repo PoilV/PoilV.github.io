@@ -183,7 +183,7 @@ const iconCandidates = link => {
   const out = [];
   if (link.icon) out.push(link.icon);
   const host = hostOf(link.url);
-  if (host) out.push("https://favicon.im/zh/" + host + "?larger=true&throw-error-on-404=true");
+  if (host) out.push("https://favicon.im/" + host + "?larger=true&throw-error-on-404=true");
   return out;
 };
 const showFallback = img => {
