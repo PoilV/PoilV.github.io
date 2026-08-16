@@ -35,8 +35,7 @@
         },
         {
           "url": "https://mail.google.com/",
-          "name": "Gmail",
-          "icon": "gmail"
+          "name": "Gmail"
         }
       ],
       "icon": "mail"
@@ -58,8 +57,7 @@
         },
         {
           "url": "https://huggingface.co/",
-          "name": "Hugging Face",
-          "icon": "huggingface"
+          "name": "Hugging Face"
         },
         {
           "url": "https://minimaxi.com/",
@@ -67,13 +65,11 @@
         },
         {
           "url": "https://openrouter.ai/",
-          "name": "OpenRouter",
-          "icon": "openrouter"
+          "name": "OpenRouter"
         },
         {
           "url": "https://www.deepseek.com/",
-          "name": "DeepSeek",
-          "icon": "deepseek"
+          "name": "DeepSeek"
         },
         {
           "url": "https://chatgpt.com/",
@@ -81,8 +77,7 @@
         },
         {
           "url": "https://claude.ai/",
-          "name": "Claude",
-          "icon": "claude"
+          "name": "Claude"
         },
         {
           "url": "https://copilot.microsoft.com/",
@@ -102,8 +97,7 @@
         },
         {
           "url": "https://gemini.google.com/",
-          "name": "Google Gemini",
-          "icon": "googlegemini"
+          "name": "Google Gemini"
         }
       ],
       "icon": "brain-circuit"
@@ -187,8 +181,7 @@
         },
         {
           "url": "https://www.protondb.com/",
-          "name": "ProtonDB",
-          "icon": "protondb"
+          "name": "ProtonDB"
         },
         {
           "url": "https://docs.qq.com/sheet/DT29ia2hSWUN2aU9u?tab=ksihjy",
@@ -200,18 +193,15 @@
         },
         {
           "url": "https://steamdb.info/",
-          "name": "SteamDB",
-          "icon": "steamdb"
+          "name": "SteamDB"
         },
         {
           "url": "https://store.epicgames.com/",
-          "name": "Epic游戏商城",
-          "icon": "epicgames"
+          "name": "Epic游戏商城"
         },
         {
           "url": "https://store.steampowered.com/",
-          "name": "Steam",
-          "icon": "steam"
+          "name": "Steam"
         },
         {
           "url": "https://ngabbs.com/",
@@ -225,8 +215,7 @@
       "links": [
         {
           "url": "https://archlinux.org/",
-          "name": "Arch Linux",
-          "icon": "archlinux"
+          "name": "Arch Linux"
         },
         {
           "url": "https://www.catalog.update.microsoft.com/Home.aspx",
@@ -242,8 +231,7 @@
         },
         {
           "url": "https://flathub.org/",
-          "name": "Flathub",
-          "icon": "flathub"
+          "name": "Flathub"
         },
         {
           "url": "https://learn.microsoft.com/zh-cn/sysinternals/",
@@ -275,8 +263,7 @@
         },
         {
           "url": "https://www.lineageos.org/",
-          "name": "LineageOS",
-          "icon": "lineageos"
+          "name": "LineageOS"
         }
       ],
       "icon": "settings"
@@ -302,13 +289,11 @@
         },
         {
           "url": "https://drive.google.com/drive/my-drive",
-          "name": "Google Drive",
-          "icon": "googledrive"
+          "name": "Google Drive"
         },
         {
           "url": "https://www.dropbox.com/home",
-          "name": "Dropbox",
-          "icon": "dropbox"
+          "name": "Dropbox"
         },
         {
           "url": "https://www.jianguoyun.com/#/",
@@ -316,8 +301,7 @@
         },
         {
           "url": "https://mega.nz/fm/r3xmFDLJ",
-          "name": "MEGA",
-          "icon": "mega"
+          "name": "MEGA"
         },
         {
           "url": "https://mypikpak.com/drive/all",
@@ -337,8 +321,7 @@
         },
         {
           "url": "https://photos.google.com/",
-          "name": "Google Photos",
-          "icon": "googlephotos"
+          "name": "Google Photos"
         },
         {
           "url": "https://up.woozooo.com/mydisk.php",
@@ -360,18 +343,15 @@
         },
         {
           "url": "https://discord.com/channels/@me",
-          "name": "Discord",
-          "icon": "discord"
+          "name": "Discord"
         },
         {
           "url": "https://www.instagram.com/",
-          "name": "Instagram",
-          "icon": "instagram"
+          "name": "Instagram"
         },
         {
           "url": "https://m.weibo.cn/",
-          "name": "微博移动版",
-          "icon": "sinaweibo"
+          "name": "微博移动版"
         },
         {
           "url": "https://newsnow.busiyi.world/",
@@ -379,8 +359,7 @@
         },
         {
           "url": "https://www.reddit.com/",
-          "name": "Reddit",
-          "icon": "reddit"
+          "name": "Reddit"
         },
         {
           "url": "https://sspai.com/",
@@ -388,18 +367,15 @@
         },
         {
           "url": "https://weibo.com/",
-          "name": "微博",
-          "icon": "sinaweibo"
+          "name": "微博"
         },
         {
           "url": "https://x.com/",
-          "name": "X (Twitter)",
-          "icon": "x"
+          "name": "X (Twitter)"
         },
         {
           "url": "https://www.xiaohongshu.com/",
-          "name": "小红书",
-          "icon": "xiaohongshu"
+          "name": "小红书"
         }
       ],
       "icon": "rss"
@@ -425,8 +401,7 @@
         },
         {
           "url": "https://www.v2ex.com/",
-          "name": "V2EX",
-          "icon": "v2ex"
+          "name": "V2EX"
         },
         {
           "url": "https://xdaforums.com/",
@@ -456,13 +431,11 @@
         },
         {
           "url": "https://music.youtube.com/",
-          "name": "YouTube Music",
-          "icon": "youtubemusic"
+          "name": "YouTube Music"
         },
         {
           "url": "https://open.spotify.com/",
-          "name": "Spotify",
-          "icon": "spotify"
+          "name": "Spotify"
         },
         {
           "url": "https://share.dmhy.org/",
@@ -470,8 +443,7 @@
         },
         {
           "url": "https://www.tiktok.com/",
-          "name": "TikTok",
-          "icon": "tiktok"
+          "name": "TikTok"
         },
         {
           "url": "https://vcb-s.com/",
@@ -479,8 +451,7 @@
         },
         {
           "url": "https://www.youtube.com/",
-          "name": "YouTube",
-          "icon": "youtube"
+          "name": "YouTube"
         }
       ],
       "icon": "clapperboard"
@@ -490,13 +461,11 @@
       "links": [
         {
           "url": "https://anilist.co/",
-          "name": "AniList",
-          "icon": "anilist"
+          "name": "AniList"
         },
         {
           "url": "https://www.artstation.com/",
-          "name": "ArtStation",
-          "icon": "artstation"
+          "name": "ArtStation"
         },
         {
           "url": "https://www.ggac.com/",
@@ -516,13 +485,11 @@
         },
         {
           "url": "https://www.pinterest.com/",
-          "name": "Pinterest",
-          "icon": "pinterest"
+          "name": "Pinterest"
         },
         {
           "url": "https://www.pixiv.net/",
-          "name": "pixiv",
-          "icon": "pixiv"
+          "name": "pixiv"
         },
         {
           "url": "https://shuyuan.yiove.com/",
@@ -544,8 +511,7 @@
         },
         {
           "url": "https://www.virustotal.com/gui/home/upload",
-          "name": "VirusTotal",
-          "icon": "virustotal"
+          "name": "VirusTotal"
         },
         {
           "url": "https://metacubex.github.io/metacubexd/#/",
@@ -571,13 +537,11 @@
         },
         {
           "url": "https://www.aliyun.com/",
-          "name": "阿里云",
-          "icon": "alibabacloud"
+          "name": "阿里云"
         },
         {
           "url": "https://alternativeto.net/",
-          "name": "AlternativeTo",
-          "icon": "alternativeto"
+          "name": "AlternativeTo"
         },
         {
           "url": "https://caniuse.com/",
@@ -585,8 +549,7 @@
         },
         {
           "url": "https://www.cloudflare.com/cdn-cgi/trace",
-          "name": "Cloudflare",
-          "icon": "cloudflare"
+          "name": "Cloudflare"
         },
         {
           "url": "https://console.cloud.tencent.com/",
@@ -594,8 +557,7 @@
         },
         {
           "url": "https://www.cloudflare.com/",
-          "name": "Cloudflare",
-          "icon": "cloudflare"
+          "name": "Cloudflare"
         },
         {
           "url": "https://geoviewer.aloxaf.com/",
@@ -603,8 +565,7 @@
         },
         {
           "url": "https://github.com/",
-          "name": "GitHub",
-          "icon": "github"
+          "name": "GitHub"
         },
         {
           "url": "https://ppio.com/",
