@@ -7,7 +7,6 @@
 ```
 ├── index.html                  # 站点入口，纯静态单文件
 ├── links.json                  # 链接与分类（唯一需要维护的文件）
-├── favicon.svg                 # 站点图标
 └── README.md
 ```
 
@@ -43,7 +42,7 @@
 
 - **搜索**：实时匹配名字、网址、全拼与拼音首字母
 - **侧边导航**：可展开/收起；点击分类平滑滚动，滚动时自动高亮当前分类
-- **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 亦取自 lucide（compass）
+- **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 也在运行时由 lucide 的 compass 图标生成（data URI，无需 favicon.svg）
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
   1. `icon` 字段手动指定（有则与 favicon.im 并行加载，先完成的先显示，手动图标到达后自动替换）

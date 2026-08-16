@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>导航</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro" defer></script>
 <script src="https://unpkg.com/lucide@1.31.0/dist/umd/lucide.min.js" defer></script>
 <style>
@@ -402,7 +401,26 @@ const initPinyin = () => {
   window.pinyin = window.pinyinPro.pinyin;
   window.dispatchEvent(new Event("pinyin-ready"));
 };
-const initLucide = () => { if (window.lucide) lucide.createIcons(); };
+let faviconDone = false;
+const initFavicon = () => {
+  // 用已加载的 lucide 直接渲染 compass 作为站点图标，不再需要 favicon.svg
+  if (faviconDone || !window.lucide || !lucide.createIcons) return;
+  const probe = document.createElement("i");
+  probe.setAttribute("data-lucide", "compass");
+  document.body.appendChild(probe);
+  lucide.createIcons();
+  const svg = document.querySelector('svg[data-lucide="compass"]');
+  if (!svg) { probe.remove(); return; }
+  svg.setAttribute("stroke", "#6366F1");
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/svg+xml";
+  link.href = "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
+  document.head.appendChild(link);
+  svg.remove();
+  faviconDone = true;
+};
+const initLucide = () => { if (window.lucide) { lucide.createIcons(); initFavicon(); } };
 document.addEventListener("DOMContentLoaded", () => { initPinyin(); initLucide(); });
 window.addEventListener("load", () => { initPinyin(); initLucide(); });
 initPinyin();
