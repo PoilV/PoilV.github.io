@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>导航</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro"></script>
 <script src="https://unpkg.com/lucide"></script>
 <style>
@@ -36,8 +37,10 @@
     display: inline-flex; align-items: center; justify-content: center;
     width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px;
     background: var(--card); color: var(--text); cursor: pointer;
-    font-size: 16px; line-height: 1; flex-shrink: 0;
+    flex-shrink: 0;
   }
+  .nav-toggle .lucide { width: 18px; height: 18px; }
+  .nav-toggle i::before { content: "☰"; font-style: normal; font-size: 16px; }
   .nav-toggle:hover { border-color: var(--accent); }
   #search {
     flex: 1; min-width: 0; max-width: 520px; margin: 0 auto;
@@ -125,7 +128,7 @@
 <body>
 
 <header>
-  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="true" aria-controls="sideNav">☰</button>
+  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="true" aria-controls="sideNav"><i data-lucide="menu" aria-hidden="true"></i></button>
   <h1>导航</h1>
   <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
 </header>
@@ -145,9 +148,6 @@
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const hostOf = url => {
   try { return new URL(url, location.href).hostname; } catch (e) { return ""; }
-};
-const hrefOf = url => {
-  try { return new URL(url, location.href).href; } catch (e) { return String(url); }
 };
 const pyKey = s => {
   try {
@@ -194,30 +194,19 @@ const probeIcon = src => {
   }
   return iconProbeCache.get(src);
 };
-function setIcon(img, link) {
-  const cands = iconCandidates(link);
-  if (!cands.length) { showFallback(img); return; }
-  // 候选请求全局缓存；先完成的先显示，后到的只有优先级更高（索引更小）才替换
-  let shown = -1;
-  let pending = cands.length;
-  cands.forEach((c, i) => {
-    probeIcon(c).then(ok => {
-      pending -= 1;
-      if (!img.isConnected) return;
-      if (ok && (shown === -1 || i < shown)) {
-        img.src = c;
-        shown = i;
-      }
-      if (pending === 0 && shown === -1) showFallback(img);
-    });
-  });
+async function setIcon(img, link) {
+  // 候选按优先级顺序尝试：命中即显示；全部失败则回退首字母块
+  for (const c of iconCandidates(link)) {
+    if (await probeIcon(c)) { img.src = c; return; }
+  }
+  showFallback(img);
 }
 const cardHTML = link => {
   link = normalize(link);
   const host = hostOf(link.url);
   const name = link.name || host;
   return `
-    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-icon="${esc(link.icon || "")}">
       <img alt="" loading="lazy" decoding="async">
       <span class="fb">${host ? esc((nhost(host)[0] || "?").toUpperCase()) : "?"}</span>
       <span class="info">
@@ -240,7 +229,6 @@ let config = { categories: [] };
 let total = 0;
 let linksFailed = false;
 let dataLoaded = false;
-const linkByHref = new Map();
 
 async function loadLinks() {
   const c = new AbortController();
@@ -261,7 +249,6 @@ async function loadLinks() {
 
 function render(q) {
   q = (q || "").trim().toLowerCase();
-  buildLinkIndex();
   let html = "", t = 0, nav = "";
   const cats = config.categories
     .map(cat => ({ cat, key: catKey(cat.name) }))
@@ -291,19 +278,6 @@ function render(q) {
   noResult.textContent = empty ? "数据加载失败，请检查网络后刷新重试" : "没有匹配的链接";
   noResult.style.display = (q && !total) || empty ? "block" : "none";
 }
-function buildLinkIndex() {
-  linkByHref.clear();
-  for (const cat of config.categories) {
-    for (const raw of cat.links || []) {
-      const link = normalize(raw);
-      const key = hrefOf(link.url);
-      if (!linkByHref.has(key)) linkByHref.set(key, link);
-    }
-  }
-}
-function findLink(href) {
-  return linkByHref.get(href) || { url: href };
-}
 
 sideNav.addEventListener("click", e => {
   const a = e.target.closest("a");
@@ -320,7 +294,6 @@ function navIsOpen() {
     : !document.documentElement.classList.contains("nav-closed");
 }
 function updateNavToggle() {
-  navToggle.textContent = navIsOpen() ? "✕" : "☰";
   navToggle.setAttribute("aria-expanded", navIsOpen() ? "true" : "false");
 }
 function closeMobileNav() {
@@ -368,16 +341,17 @@ function bindNavObserver() {
 let iconObserver = null;
 function bindIconObserver() {
   if (iconObserver) iconObserver.disconnect();
+  const setFor = a => setIcon(a.querySelector("img"), { url: a.href, icon: a.dataset.icon || "" });
   const cards = content.querySelectorAll("a.card");
   if (!("IntersectionObserver" in window)) {
-    cards.forEach(a => setIcon(a.querySelector("img"), findLink(a.href)));
+    cards.forEach(setFor);
     return;
   }
   iconObserver = new IntersectionObserver(entries => {
     for (const en of entries) {
       if (!en.isIntersecting || !en.target.isConnected) continue;
       iconObserver.unobserve(en.target);
-      setIcon(en.target.querySelector("img"), findLink(en.target.href));
+      setFor(en.target);
     }
   }, { rootMargin: "200px 0px" });
   cards.forEach(a => iconObserver.observe(a));
@@ -393,37 +367,9 @@ search.addEventListener("input", e => {
   clearTimeout(debounceId);
   debounceId = setTimeout(() => { if (dataLoaded) render(e.target.value); }, 200);
 });
-window.addEventListener("pinyin-ready", () => { if (dataLoaded) render(search.value); });
-let pinyinReady = false;
-const initPinyin = () => {
-  if (pinyinReady || !window.pinyinPro) return;
-  pinyinReady = true;
-  window.pinyin = window.pinyinPro.pinyin;
-  window.dispatchEvent(new Event("pinyin-ready"));
-};
-let faviconDone = false;
-const initFavicon = () => {
-  // 用已加载的 lucide 直接渲染 compass 作为站点图标，不再需要 favicon.svg
-  if (faviconDone || !window.lucide || !lucide.createIcons) return;
-  const probe = document.createElement("i");
-  probe.setAttribute("data-lucide", "compass");
-  document.body.appendChild(probe);
-  lucide.createIcons();
-  const svg = document.querySelector('svg[data-lucide="compass"]');
-  if (!svg) { probe.remove(); return; }
-  svg.setAttribute("stroke", "#6366F1");
-  const link = document.createElement("link");
-  link.rel = "icon";
-  link.type = "image/svg+xml";
-  link.href = "data:image/svg+xml," + encodeURIComponent(new XMLSerializer().serializeToString(svg));
-  document.head.appendChild(link);
-  svg.remove();
-  faviconDone = true;
-};
-const initLucide = () => { if (window.lucide) { lucide.createIcons(); initFavicon(); } };
-document.addEventListener("DOMContentLoaded", () => { initPinyin(); initLucide(); });
-window.addEventListener("load", () => { initPinyin(); initLucide(); });
-initPinyin();
+// pinyin-pro 与 lucide 都是同步 script，到这里必然已加载；CDN 失败时各自降级
+if (window.pinyinPro) window.pinyin = window.pinyinPro.pinyin;
+if (window.lucide) lucide.createIcons();
 </script>
 </body>
 </html>

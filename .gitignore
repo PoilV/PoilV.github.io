@@ -1,8 +1,0 @@
-.playwright/
-.playwright-cli/
-.claude/
-bookmarks.html
-*.png
-node_modules/
-__pycache__/
-.deps/
