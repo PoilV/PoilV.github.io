@@ -139,7 +139,7 @@
    "name": "影音娱乐",
    "links": [
     {"url":"https://www.agedm.io/","name":"AGE动漫"},
-    {"url":"https://www.bilibili.com/","name":"哔哩哔哩"},
+    {"url":"https://www.bilibili.com/","name":"哔哩哔哩","icon":"https://www.bilibili.com/favicon.ico"},
     {"url":"https://www.douyin.com/","name":"抖音"},
     {"url":"https://mikanani.me/","name":"蜜柑计划"},
     {"url":"https://music.youtube.com/","name":"YouTube Music"},
