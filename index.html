@@ -6,6 +6,7 @@
 <title>导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro" defer></script>
+<script src="https://unpkg.com/lucide@1.31.0/dist/umd/lucide.min.js" defer></script>
 <style>
   :root {
     color-scheme: light dark;
@@ -60,6 +61,7 @@
   section h2::before {
     content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent);
   }
+  section h2 .lucide { width: 17px; height: 17px; flex-shrink: 0; opacity: .85; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
   a.card {
     display: flex; align-items: center; gap: 12px;
@@ -271,12 +273,14 @@ function render(q) {
       .sort((a, b) => a.key.localeCompare(b.key));
     if (!links.length) return;
     t += links.length;
-    html += `<section id="cat-${i}"><h2>${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
+    const catIcon = entry.cat.icon ? `<i data-lucide="${esc(entry.cat.icon)}" aria-hidden="true"></i>` : "";
+    html += `<section id="cat-${i}"><h2>${catIcon}${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
     nav += `<a href="#cat-${i}" data-i="${i}">${esc(entry.cat.name)}</a>`;
   });
   total = t;
   content.innerHTML = html;
   sideNav.innerHTML = nav;
+  if (window.lucide) lucide.createIcons();
   bindNavObserver();
   bindIconObserver();
   loading.style.display = "none";
@@ -396,8 +400,9 @@ const initPinyin = () => {
   window.pinyin = window.pinyinPro.pinyin;
   window.dispatchEvent(new Event("pinyin-ready"));
 };
-document.addEventListener("DOMContentLoaded", initPinyin);
-window.addEventListener("load", initPinyin);
+const initLucide = () => { if (window.lucide) lucide.createIcons(); };
+document.addEventListener("DOMContentLoaded", () => { initPinyin(); initLucide(); });
+window.addEventListener("load", () => { initPinyin(); initLucide(); });
 initPinyin();
 </script>
 </body>

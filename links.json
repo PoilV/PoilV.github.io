@@ -1,7 +1,8 @@
 {
  "categories": [
   {
-   "name": "工作办公",
+   "name": "办公",
+   "icon": "briefcase",
    "links": [
     {"url":"https://docs.qq.com/","name":"腾讯文档"},
     {"url":"https://www.feishu.cn/","name":"飞书"},
@@ -11,6 +12,7 @@
   },
   {
    "name": "邮箱",
+   "icon": "mail",
    "links": [
     {"url":"https://mail.qq.com/","name":"QQ邮箱"},
     {"url":"https://outlook.live.com/","name":"Outlook"},
@@ -19,6 +21,7 @@
   },
   {
    "name": "AI 模型",
+   "icon": "brain-circuit",
    "links": [
     {"url":"https://bigmodel.cn/","name":"智谱AI开放平台"},
     {"url":"https://civitai.com/","name":"Civitai"},
@@ -37,7 +40,8 @@
    ]
   },
   {
-   "name": "AI 音视频",
+   "name": "AI 创作",
+   "icon": "wand-sparkles",
    "links": [
     {"url":"http://49.233.78.71:17861/","name":"IndexTTS Demo"},
     {"url":"https://ai.lfxqai.com/","name":"Star AI"},
@@ -57,7 +61,8 @@
    ]
   },
   {
-   "name": "游戏娱乐",
+   "name": "游戏",
+   "icon": "gamepad-2",
    "links": [
     {"url":"https://game.maj-soul.com/","name":"雀魂麻将"},
     {"url":"https://www.gamer520.com/","name":"Switch520"},
@@ -71,7 +76,8 @@
    ]
   },
   {
-   "name": "系统软件",
+   "name": "系统",
+   "icon": "settings",
    "links": [
     {"url":"https://www.archlinuxcn.org/","name":"Arch Linux"},
     {"url":"https://www.catalog.update.microsoft.com/Home.aspx","name":"Microsoft Update Catalog"},
@@ -90,7 +96,8 @@
    ]
   },
   {
-   "name": "网络存储",
+   "name": "云存储",
+   "icon": "cloud",
    "links": [
     {"url":"https://www.123pan.com/","name":"123云盘"},
     {"url":"https://www.alipan.com/drive/home","name":"阿里云盘"},
@@ -110,7 +117,8 @@
    ]
   },
   {
-   "name": "资讯社交",
+   "name": "资讯",
+   "icon": "rss",
    "links": [
     {"url":"https://60s-demo.viki.moe/","name":"60s 聚合信息流"},
     {"url":"https://discord.com/channels/@me","name":"Discord"},
@@ -125,7 +133,8 @@
    ]
   },
   {
-   "name": "技术论坛",
+   "name": "论坛",
+   "icon": "messages-square",
    "links": [
     {"url":"https://bbs.pcbeta.com/","name":"远景论坛"},
     {"url":"https://www.itsk.com/","name":"IT天空"},
@@ -136,7 +145,8 @@
    ]
   },
   {
-   "name": "影音娱乐",
+   "name": "影音",
+   "icon": "clapperboard",
    "links": [
     {"url":"https://www.agedm.io/","name":"AGE动漫"},
     {"url":"https://www.bilibili.com/","name":"哔哩哔哩","icon":"https://www.bilibili.com/favicon.ico"},
@@ -151,7 +161,8 @@
    ]
   },
   {
-   "name": "图文阅读",
+   "name": "阅读",
+   "icon": "book-open",
    "links": [
     {"url":"https://anilist.co/","name":"AniList"},
     {"url":"https://www.artstation.com/","name":"ArtStation"},
@@ -165,7 +176,8 @@
    ]
   },
   {
-   "name": "在线工具",
+   "name": "工具",
+   "icon": "wrench",
    "links": [
     {"url":"https://fanyi.caiyunapp.com/","name":"彩云小译"},
     {"url":"https://test.ustc.edu.cn/","name":"USTC 测速"},
@@ -173,7 +185,8 @@
    ]
   },
   {
-   "name": "开发工具",
+   "name": "开发",
+   "icon": "code-2",
    "links": [
     {"url":"https://www.tavily.com/","name":"Tavily"},
     {"url":"https://q.qq.com/","name":"QQ开放平台"},
@@ -194,6 +207,7 @@
   },
   {
    "name": "NSFW",
+   "icon": "eye-off",
    "links": [
     {"url":"https://e-hentai.org","name":"E-Hentai Galleries"},
     {"url":"https://hanime1.me/","name":"Hanime1.me"},
