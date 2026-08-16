@@ -419,7 +419,8 @@
         },
         {
           "url": "https://www.bilibili.com/",
-          "name": "哔哩哔哩"
+          "name": "哔哩哔哩",
+          "icon": "https://www.bilibili.com/favicon.ico"
         },
         {
           "url": "https://www.douyin.com/",
