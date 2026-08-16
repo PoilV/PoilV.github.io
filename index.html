@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的导航</title>
+<title>导航</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://unpkg.com/pinyin-pro" defer></script>
 <style>
@@ -25,21 +25,28 @@
     min-height: 100vh;
   }
   header {
-    position: sticky; top: 0; z-index: 10;
+    position: sticky; top: 0; z-index: 30;
     background: var(--bg);
-    padding: 16px 24px;
-    display: flex; align-items: center; gap: 16px;
+    padding: 12px 24px;
+    display: flex; align-items: center; gap: 12px;
     border-bottom: 1px solid var(--border);
   }
   header h1 { font-size: 20px; font-weight: 700; white-space: nowrap; }
+  .nav-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); color: var(--text); cursor: pointer;
+    font-size: 16px; line-height: 1; flex-shrink: 0;
+  }
+  .nav-toggle:hover { border-color: var(--accent); }
   #search {
-    flex: 1; max-width: 520px; margin: 0 auto;
+    flex: 1; min-width: 0; max-width: 520px; margin: 0 auto;
     padding: 10px 16px; font-size: 14px;
     border-radius: 10px; border: 1px solid var(--border);
     background: var(--card); color: var(--text); outline: none;
   }
   #search:focus { border-color: var(--accent); }
-  #search:focus-visible, a.card:focus-visible, #sideNav a:focus-visible, footer a:focus-visible {
+  #search:focus-visible, .nav-toggle:focus-visible, a.card:focus-visible, #sideNav a:focus-visible, footer a:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
@@ -76,9 +83,11 @@
   footer a { color: inherit; text-decoration: none; }
   footer a:hover { color: var(--accent); }
   #sideNav {
-    position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 5;
+    position: fixed; top: 0; bottom: 0; left: 0; width: 170px; z-index: 20;
     background: var(--bg); border-right: 1px solid var(--border);
     padding: 78px 10px 20px; overflow-y: auto;
+    transform: translateX(0); visibility: visible;
+    transition: transform .2s, visibility .2s;
   }
   #sideNav a {
     display: block; padding: 7px 12px; border-radius: 8px;
@@ -87,22 +96,39 @@
   }
   #sideNav a:hover { color: var(--text); background: var(--card); }
   #sideNav a.active { color: var(--accent); background: var(--card); font-weight: 600; }
-  #loading, #count, #noResult, #content { margin-left: 170px; }
+  #navBackdrop {
+    position: fixed; inset: 0; z-index: 15;
+    background: color-mix(in srgb, CanvasText 20%, transparent);
+    display: none;
+  }
+  #loading, #count, #noResult, #content, footer { margin-left: 170px; transition: margin-left .2s; }
   section { scroll-margin-top: 72px; }
   @media (max-width: 900px) {
-    #sideNav { display: none; }
+    #sideNav { transform: translateX(-100%); visibility: hidden; }
+    html.nav-open #sideNav { transform: translateX(0); visibility: visible; }
+    html.nav-open #navBackdrop { display: block; }
     #loading, #count, #noResult, #content, footer { margin-left: 0; }
+  }
+  @media (min-width: 901px) {
+    html.nav-closed #sideNav { transform: translateX(-100%); visibility: hidden; }
+    html.nav-closed #loading,
+    html.nav-closed #count,
+    html.nav-closed #noResult,
+    html.nav-closed #content,
+    html.nav-closed footer { margin-left: 0; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>我的导航</h1>
+  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="true" aria-controls="sideNav">☰</button>
+  <h1>导航</h1>
   <input id="search" type="search" placeholder="搜索名称、拼音或网址…" aria-label="搜索" autocomplete="off" spellcheck="false">
 </header>
 
 <nav id="sideNav"></nav>
+<div id="navBackdrop"></div>
 
 <div class="loading" id="loading" role="status">加载中…</div>
 <div class="count" id="count" aria-live="polite"></div>
@@ -110,7 +136,7 @@
 
 <div id="content"></div>
 
-<footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航</a></footer>
+<footer><a href="https://github.com/PoilV/PoilV.github.io" target="_blank" rel="noopener noreferrer">PoilV · 个人导航 · GitHub</a></footer>
 
 <script>
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -203,6 +229,9 @@ const countEl = document.getElementById("count");
 const noResult = document.getElementById("noResult");
 const search = document.getElementById("search");
 const sideNav = document.getElementById("sideNav");
+const navToggle = document.getElementById("navToggle");
+const navBackdrop = document.getElementById("navBackdrop");
+const mqMobile = matchMedia("(max-width: 900px)");
 const loading = document.getElementById("loading");
 let config = { categories: [] };
 let total = 0;
@@ -277,7 +306,47 @@ sideNav.addEventListener("click", e => {
   e.preventDefault();
   const sec = document.getElementById(a.dataset.i ? "cat-" + a.dataset.i : "cat-0");
   if (sec) sec.scrollIntoView({ behavior: "smooth" });
+  closeMobileNav();
 });
+
+function navIsOpen() {
+  return mqMobile.matches
+    ? document.documentElement.classList.contains("nav-open")
+    : !document.documentElement.classList.contains("nav-closed");
+}
+function updateNavToggle() {
+  navToggle.textContent = navIsOpen() ? "✕" : "☰";
+  navToggle.setAttribute("aria-expanded", navIsOpen() ? "true" : "false");
+}
+function closeMobileNav() {
+  if (mqMobile.matches && document.documentElement.classList.contains("nav-open")) {
+    document.documentElement.classList.remove("nav-open");
+    updateNavToggle();
+  }
+}
+function syncNavState() {
+  if (mqMobile.matches) {
+    document.documentElement.classList.remove("nav-closed");
+  } else {
+    document.documentElement.classList.remove("nav-open");
+  }
+  updateNavToggle();
+}
+navToggle.addEventListener("click", () => {
+  if (mqMobile.matches) {
+    document.documentElement.classList.toggle("nav-open");
+  } else {
+    document.documentElement.classList.toggle("nav-closed");
+  }
+  updateNavToggle();
+});
+navBackdrop.addEventListener("click", closeMobileNav);
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeMobileNav();
+});
+mqMobile.addEventListener("change", syncNavState);
+syncNavState();
+
 let navObserver = null;
 function bindNavObserver() {
   if (navObserver) navObserver.disconnect();
