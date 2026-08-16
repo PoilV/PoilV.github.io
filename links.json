@@ -277,10 +277,6 @@
           "url": "https://www.lineageos.org/",
           "name": "LineageOS",
           "icon": "lineageos"
-        },
-        {
-          "url": "https://zhuanlan.zhihu.com/p/429496671",
-          "name": "WIFI 无法自动连接"
         }
       ],
       "icon": "settings"
@@ -614,10 +610,6 @@
         {
           "url": "https://ppio.com/",
           "name": "PPIO"
-        },
-        {
-          "url": "https://www.runoob.com/w3cnote/windows-finds-port-usage.html",
-          "name": "Windows 端口占用查询"
         },
         {
           "url": "https://wiki.metacubex.one/",
