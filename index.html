@@ -92,10 +92,12 @@
     transition: transform .2s, visibility .2s;
   }
   #sideNav a {
-    display: block; padding: 7px 12px; border-radius: 8px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-radius: 8px;
     color: inherit; text-decoration: none; font-size: 13px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
+  #sideNav a span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #sideNav a .lucide { width: 15px; height: 15px; flex-shrink: 0; opacity: .8; }
   #sideNav a:hover { color: var(--text); background: var(--card); }
   #sideNav a.active { color: var(--accent); background: var(--card); font-weight: 600; }
   #navBackdrop {
@@ -275,7 +277,7 @@ function render(q) {
     t += links.length;
     const catIcon = entry.cat.icon ? `<i data-lucide="${esc(entry.cat.icon)}" aria-hidden="true"></i>` : "";
     html += `<section id="cat-${i}"><h2>${catIcon}${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
-    nav += `<a href="#cat-${i}" data-i="${i}">${esc(entry.cat.name)}</a>`;
+    nav += `<a href="#cat-${i}" data-i="${i}">${catIcon}<span>${esc(entry.cat.name)}</span></a>`;
   });
   total = t;
   content.innerHTML = html;
