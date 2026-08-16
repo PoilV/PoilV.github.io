@@ -44,7 +44,7 @@
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
   1. `icon` 字段手动指定（最高优先，走图片链）
-  2. [simple-icons-font](https://github.com/simple-icons/simple-icons-font) 品牌字形：域名命中 `index.html` 内置的「域名 → slug」映射表时直接渲染品牌图标（带品牌色，暗色模式自动切换为文字色），零额外请求、确定性渲染
+  2. [simple-icons](https://github.com/simple-icons/simple-icons) 品牌 SVG：域名命中 `index.html` 内置的「域名 → path」映射表时直接内联渲染（带品牌色，暗色模式自动切换为文字色），零请求、零依赖、确定性渲染
   3. [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true&throw-error-on-404=true`（缺失时返回 404 而不是默认占位图）
   4. 首字母回退块
 - 图标懒加载：卡片接近视口时才发起请求，候选结果会缓存复用；favicon.im 响应带约 7 天缓存头，重复访问基本零请求
@@ -53,7 +53,7 @@
 ## 维护
 
 - **加链接**：在对应分类的 `links` 数组里加一行，名字看一眼站点标签页标题抄进去即可
-- **品牌图标**：站点若在 [simpleicons.org](https://simpleicons.org) 有图标，把「域名 → slug」加进 `index.html` 的 `SI_MAP`（域名去 `www.`），即可显示品牌字形
+- **品牌图标**：站点若在 [simpleicons.org](https://simpleicons.org) 有图标，把该图标的 path 和品牌色加进 `index.html` 的 `SI_MAP`（域名去 `www.`，格式 `[颜色, path]`），即可显示品牌 SVG
 - **图标不对**（例如服务商返回了 App 图标）：加 `"icon": "https://..."` 指向正确的图标地址
 - **改动后**：推送到 main，GitHub Pages 自动发布；图标若显示旧图，Ctrl+F5 强制刷新（浏览器缓存约 7 天）
 
@@ -61,6 +61,6 @@
 
 - [pinyin-pro](https://github.com/zh-lx/pinyin-pro) - 中文/英文混合名称的拼音排序
 - [lucide](https://github.com/lucide-icons/lucide) - 界面图标（ISC）
-- [simple-icons-font](https://github.com/simple-icons/simple-icons-font) - 品牌图标字体（CC0-1.0）
+- [simple-icons](https://github.com/simple-icons/simple-icons) - 品牌图标来源（CC0-1.0）
 - [favicon.im](https://favicon.im) - 站点图标服务
-- [unpkg](https://unpkg.com) - pinyin-pro、lucide 与 simple-icons-font 的 CDN 分发
+- [unpkg](https://unpkg.com) - pinyin-pro 与 lucide 的 CDN 分发
