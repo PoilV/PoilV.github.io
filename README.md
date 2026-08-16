@@ -20,7 +20,8 @@
       "name": "AI 聊天",
       "links": [
         {"url": "https://chat.deepseek.com/", "name": "DeepSeek"},
-        {"url": "https://www.bilibili.com/", "name": "哔哩哔哩", "icon": "https://www.bilibili.com/favicon.ico"},
+        {"url": "https://www.bilibili.com/", "name": "哔哩哔哩"},
+        {"url": "https://example.com/", "icon": "https://example.com/favicon.ico"},
         "https://example.com/"
       ]
     }
