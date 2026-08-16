@@ -36,7 +36,7 @@
 | `hidden`（分类） | 选填 | 设为 `true` 时该分类默认不显示，点击左侧导航后才展开 |
 | `url` | ✅ | 链接地址 |
 | `name` | 选填 | 显示名字，不写则显示域名 |
-| `icon`（链接） | 选填 | 手动指定图标地址（优先级最高），见下文图标机制 |
+| `icon`（链接） | 选填 | 手动指定图标地址（优先级最高）；也可直接写 simple-icons 的 slug（如 `bilibili`），见下文图标机制 |
 
 - 只写 URL 字符串也合法，等价于 `{"url": "..."}`。
 - 分类和链接的显示顺序不用管：页面按拼音自动排序。
@@ -48,7 +48,7 @@
 - **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 是静态文件 [favicon.svg](favicon.svg)（lucide compass 图标，描边用浏览器系统色 CanvasText，随系统明暗自动切换）
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
-  1. `icon` 字段手动指定（有则优先尝试，失败再走 favicon.im）
+  1. `icon` 字段手动指定（有则优先尝试，失败再走 favicon.im）；不是 URL 的值视为 simple-icons 的 slug，自动展开为 `https://cdn.simpleicons.org/{slug}`（官方 CDN，自带品牌色）
   2. [favicon.im](https://favicon.im) 的 `https://favicon.im/{域名}?larger=true&throw-error-on-404=true`（缺失时返回 404 而不是默认占位图）
   3. 首字母回退块
 - 图标懒加载：卡片接近视口时才发起请求，候选结果会缓存复用；favicon.im 响应带约 7 天缓存头，重复访问基本零请求
