@@ -1,5 +1,5 @@
-<!-- lucide-static compass icon (ISC), stroke recolored to #6366F1 -->
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<!-- lucide-static compass icon (ISC)；描边用浏览器系统色 CanvasText，随系统明暗自动切换 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: CanvasText; color-scheme: light dark;">
   <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" />
   <circle cx="12" cy="12" r="10" />
 </svg>

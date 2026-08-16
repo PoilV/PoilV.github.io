@@ -45,7 +45,7 @@
 
 - **搜索**：实时匹配名字、网址、全拼与拼音首字母
 - **侧边导航**：可展开/收起；点击分类平滑滚动，滚动时自动高亮当前分类
-- **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 是静态文件 [favicon.svg](favicon.svg)（lucide compass 图标，靛蓝色）
+- **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 是静态文件 [favicon.svg](favicon.svg)（lucide compass 图标，描边用浏览器系统色 CanvasText，随系统明暗自动切换）
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
   1. `icon` 字段手动指定（有则优先尝试，失败再走 favicon.im）
