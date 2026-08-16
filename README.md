@@ -6,7 +6,7 @@
 
 ```
 ├── index.html                  # 站点入口，纯静态单文件
-├── admin.html                  # 在线管理页（无入口链接，直接访问）
+├── admin.html                  # 在线管理页（顶栏齿轮图标进入）
 ├── links.json                  # 链接与分类（唯一需要维护的数据文件）
 ├── favicon.svg                 # 站点图标（lucide compass）
 └── README.md
@@ -18,11 +18,11 @@
 {
   "categories": [
     {
-      "name": "AI 聊天",
+      "name": "智能模型",
       "icon": "brain-circuit",
       "links": [
         {"url": "https://chat.deepseek.com/", "name": "DeepSeek"},
-        {"url": "https://www.bilibili.com/", "name": "哔哩哔哩", "icon": "https://www.bilibili.com/favicon.ico"},
+        {"url": "https://www.bilibili.com/", "name": "哔哩哔哩", "icon": "bilibili"},
         "https://example.com/"
       ]
     }
@@ -44,7 +44,8 @@
 ## 页面特性
 
 - **搜索**：实时匹配名字、网址、全拼与拼音首字母
-- **侧边导航**：可展开/收起；点击分类平滑滚动，滚动时自动高亮当前分类
+- **侧边导航**：默认收起（点顶栏 ☰ 展开）；点击分类平滑滚动，滚动时自动高亮当前分类
+- **隐藏分类**：`hidden: true` 的分类不出现在内容区，点击左侧导航解锁后展示
 - **分类图标**：每个分类可配一个 [lucide](https://lucide.dev/icons) 图标（`icon` 字段），跟随文字颜色；站点 favicon 是静态文件 [favicon.svg](favicon.svg)（lucide compass 图标，描边用浏览器系统色 CanvasText，随系统明暗自动切换）
 - **暗色模式**：使用浏览器系统颜色（`Canvas` / `Field` / `CanvasText` / `AccentColor`），自动跟随系统明暗与强调色
 - **图标加载链**（逐级兜底）：
@@ -55,15 +56,16 @@
 
 ## 维护
 
-- **在线管理（推荐）**：打开 `https://poilv.github.io/admin.html`，首次粘贴一个细粒度 PAT（只授权本仓库 Contents 读写），即可在页面上增删改分类和链接并一键部署，无需本地 git
-- **加链接**：在对应分类的 `links` 数组里加一行，名字看一眼站点标签页标题抄进去即可
+- **在线管理（推荐）**：主页点顶栏齿轮进入 [admin.html](admin.html)（也可直接访问 `https://poilv.github.io/admin.html`）。首次粘贴一个细粒度 PAT（只授权本仓库 Contents 读写），之后即可在页面上增删改分类和链接并一键部署，无需本地 git
+- **加链接**：在对应分类的 `links` 数组里加一行，名字看一眼站点标签页标题抄进去即可；图标可以点行尾"品牌"按钮从 simple-icons 品牌库搜索，自动填入 slug（图标栏只需存 slug 或完整 URL）
 - **换分类图标**：改分类的 `icon` 字段为任意 [lucide 图标名](https://lucide.dev/icons)（kebab-case），如 `"gamepad-2"`
-- **图标不对**（例如服务商返回了 App 图标）：加 `"icon": "https://..."` 指向正确的图标地址
+- **图标不对**（例如服务商返回了 App 图标）：把 `icon` 换成正确的 URL，或换成 simple-icons slug
 - **手动改动后**：推送到 main，GitHub Pages 自动发布；图标若显示旧图，Ctrl+F5 强制刷新（浏览器缓存约 7 天）
 
 ## 致谢
 
 - [pinyin-pro](https://github.com/zh-lx/pinyin-pro) - 中文/英文混合名称的拼音排序
 - [lucide](https://github.com/lucide-icons/lucide) - 分类图标与站点 favicon（ISC）
+- [simple-icons](https://github.com/simple-icons/simple-icons) - 品牌图标库（CC0），官方 CDN [cdn.simpleicons.org](https://cdn.simpleicons.org) 自动带品牌色
 - [favicon.im](https://favicon.im) - 站点图标服务
-- [unpkg](https://unpkg.com) - pinyin-pro 与 lucide 的 CDN 分发
+- [unpkg](https://unpkg.com) - pinyin-pro、lucide 与 simple-icons 数据的 CDN 分发
