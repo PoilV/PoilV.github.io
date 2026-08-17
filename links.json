@@ -1,7 +1,7 @@
 {
   "categories": [
     {
-      "name": "办公求职",
+      "name": "工作办公",
       "links": [
         {
           "url": "https://docs.qq.com/",
@@ -23,7 +23,7 @@
       "icon": "briefcase"
     },
     {
-      "name": "电子邮件",
+      "name": "电子邮箱",
       "links": [
         {
           "url": "https://mail.qq.com/",
@@ -269,7 +269,7 @@
       "icon": "settings"
     },
     {
-      "name": "云盘存储",
+      "name": "云存储",
       "links": [
         {
           "url": "https://www.123pan.com/",
