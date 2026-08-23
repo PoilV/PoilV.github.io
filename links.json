@@ -521,6 +521,10 @@
         {
           "url": "https://metacubex.github.io/metacubexd/#/",
           "name": "MetaCubeXD"
+        },
+        {
+          "url": "https://geoviewer.aloxaf.com/",
+          "name": "GeoSite Viewer"
         }
       ],
       "icon": "wrench"
@@ -563,10 +567,6 @@
         {
           "url": "https://www.cloudflare.com/",
           "name": "Cloudflare"
-        },
-        {
-          "url": "https://geoviewer.aloxaf.com/",
-          "name": "GeoSite Viewer"
         },
         {
           "url": "https://github.com/",
