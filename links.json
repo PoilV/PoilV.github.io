@@ -520,7 +520,8 @@
         },
         {
           "url": "https://metacubex.github.io/metacubexd/#/",
-          "name": "MetaCubeXD"
+          "name": "MetaCubeXD",
+          "icon": "https://metacubex.github.io/metacubexd/favicon.svg"
         },
         {
           "url": "https://geoviewer.aloxaf.com/",
