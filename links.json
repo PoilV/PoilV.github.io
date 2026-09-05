@@ -526,6 +526,10 @@
         {
           "url": "https://geoviewer.aloxaf.com/",
           "name": "GeoSite Viewer"
+        },
+        {
+          "url": "https://hosted.weblate.org/",
+          "name": "Hosted Weblate"
         }
       ],
       "icon": "wrench"
