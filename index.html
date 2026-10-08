@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>导航</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://unpkg.com/pinyin-pro"></script>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: Canvas;
+    --card: Field;
+    --text: CanvasText;
+    --border: color-mix(in srgb, CanvasText 16%, transparent);
+    --accent: AccentColor;
+    --shadow: 0 1px 3px color-mix(in srgb, CanvasText 15%, transparent);
+    /* 侧栏形态：drawer = 手机抽屉（浮层 + 遮罩），docked = 桌面常驻（推开内容）。
+       只在这里和唯一的媒体查询里定义，JS 读它来判断，不再各写一遍断点 */
+    --nav-mode: drawer;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-padding-top: calc(var(--headerh, 0px) + 8px); } /* 锚点滚动留出顶栏高度（顶栏高由 JS 量） */
+  body { background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* 顶栏 */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 20px; font-weight: 700; white-space: nowrap; }
+  .nav-toggle, .admin-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--card); color: var(--text); cursor: pointer;
+    text-decoration: none;
+  }
+  .nav-toggle .ico, .admin-link .ico { font-size: 17px; line-height: 1; }
+  .nav-toggle:hover { border-color: var(--accent); }
+  .search-box {
+    flex: 1; min-width: 0; max-width: 520px; margin: 0 auto;
+    position: relative; display: flex; align-items: center;
+  }
+  .search-box .ico { position: absolute; left: 10px; font-size: 15px; line-height: 1; opacity: .8; pointer-events: none; }
+  #search {
+    width: 100%;
+    padding: 10px 16px 10px 36px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--card); color: var(--text);
+  }
+  #search:focus { border-color: var(--accent); }
+  .admin-link:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* 左侧导航：收起是唯一默认态，html.nav-open 是唯一开关（手机/桌面共用） */
+  #sideNav {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 20;
+    width: max-content; min-width: var(--navw, 0px);
+    padding: calc(var(--headerh, 0px) + 14px) 10px 20px; overflow-y: auto; /* 顶栏高度由 JS 量，不写死 */
+    background: var(--bg); border-right: 1px solid var(--border);
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform .2s, visibility .2s;
+  }
+  html.nav-open #sideNav { transform: translateX(0); visibility: visible; }
+  #sideNav a {
+    display: grid; grid-template-columns: 18px minmax(0, 1fr); column-gap: 7px;
+    align-items: center;
+    padding: 7px 12px; border-radius: 8px;
+    color: inherit; text-decoration: none; font-size: 13px;
+  }
+  #sideNav a .name { grid-column: 2; min-width: 0; overflow: hidden; white-space: nowrap; text-align: justify; text-align-last: justify; }
+  #sideNav a .ico { grid-column: 1; font-size: 14px; line-height: 1; text-align: center; }
+  #sideNav a:hover { background: var(--card); }
+  #sideNav a.active { color: var(--accent); background: var(--card); font-weight: 600; }
+  #navBackdrop {
+    position: fixed; inset: 0; z-index: 15;
+    background: color-mix(in srgb, CanvasText 20%, transparent);
+    display: none;
+  }
+  html.nav-open #navBackdrop { display: block; } /* 抽屉模式才铺遮罩，桌面由下面的媒体查询关掉 */
+
+  /* 主体 */
+  main { transition: margin-left .2s; }
+  #status { text-align: center; font-size: 13px; padding: 24px 0; }
+  #status:empty { display: none; }
+  section { max-width: 1080px; margin: 24px auto; padding: 0 24px; }
+  section h2 {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 16px; font-weight: 600; margin-bottom: 14px;
+  }
+  section h2::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--accent); }
+  section h2 .ico { font-size: 16px; line-height: 1; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  a.card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    color: var(--text); text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: transform .15s, border-color .15s;
+  }
+  a.card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  a.card img, a.card .fb {
+    width: 32px; height: 32px; flex-shrink: 0;
+    border-radius: 8px; background: var(--border);
+  }
+  a.card img { padding: 4px; object-fit: contain; }
+  a.card .fb {
+    display: none;
+    align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+  }
+  a.card .info { min-width: 0; }
+  a.card .name, a.card .host {
+    display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  a.card .name { font-size: 14px; font-weight: 600; }
+  a.card .host { font-size: 12px; }
+  footer { text-align: center; font-size: 12px; padding: 32px 0 24px; }
+  footer a { color: inherit; text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  /* 全站唯一断点：56.25em = 默认字号下的 900px（em 会跟着用户的默认字号缩放）。
+     手机/桌面的差异只有这三行，形态本身由同一个 nav-open 类驱动 */
+  @media (min-width: 56.25em) {
+    :root { --nav-mode: docked; }
+    html.nav-open main { margin-left: var(--navw, 0px); }
+    html.nav-open #navBackdrop { display: none; } /* 常驻侧栏不遮内容 */
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <button id="navToggle" class="nav-toggle" type="button" aria-label="展开或收起分类导航" aria-expanded="false" aria-controls="sideNav"><span class="ico" aria-hidden="true">☰</span></button>
+  <h1>导航</h1>
+  <div class="search-box">
+    <span class="ico" aria-hidden="true">🔍</span>
+    <input id="search" type="search" placeholder="搜索" aria-label="搜索" autocomplete="off" spellcheck="false">
+  </div>
+  <a class="admin-link" href="admin.html" aria-label="管理设置"><span class="ico" aria-hidden="true">⚙️</span></a>
+</header>
+
+<nav id="sideNav" aria-label="分类导航"></nav>
+<div id="navBackdrop"></div>
+
+<main>
+  <div id="status" role="status">加载中…</div>
+  <div id="content"></div>
+  <footer><a id="repoLink" href="https://github.com/" target="_blank" rel="noopener noreferrer">个人导航 · GitHub</a></footer>
+</main>
+
+<script>
+// ---------- 工具函数 ----------
+const escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const esc = s => String(s).replace(/[&<>"']/g, c => escMap[c]);
+const hostOf = url => { try { return new URL(url, location.href).hostname; } catch (e) { return ""; } };
+const normalize = l => typeof l === "string" ? { url: l } : l;
+const nameOf = l => l.name || hostOf(l.url) || "";
+// 拼音排序/搜索键；CDN 失败时退回原文匹配
+const py = (s, opts = {}) => {
+  try {
+    if (window.pinyin) return window.pinyin(s, { toneType: "none", type: "array", ...opts }).join("").toLowerCase().replace(/[^a-z0-9]/g, "");
+  } catch (e) {}
+  return null;
+};
+const pyKey = s => py(s) || s.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, "");
+const pyFirst = s => py(s, { pattern: "first" }) || "";
+const searchText = l => {
+  const n = nameOf(l);
+  return [l.url, n, pyKey(n), pyFirst(n)].join(" ").toLowerCase();
+};
+
+// ---------- 站点图标（手动 icon → favicon.im → 首字母回退） ----------
+const iconCandidates = link => {
+  const out = [];
+  if (link.icon) out.push(link.icon);
+  const host = hostOf(link.url);
+  if (host) out.push("https://favicon.im/" + host + "?larger=true&throw-error-on-404=true");
+  return out;
+};
+const showFallback = img => {
+  const fb = img.parentElement.querySelector(".fb");
+  img.remove();
+  if (fb) fb.style.display = "flex";
+};
+const iconCache = new Map(); // 探测结果缓存；失败不缓存，允许重试
+const probeIcon = src => {
+  if (!iconCache.has(src)) {
+    const p = new Promise(resolve => {
+      const im = new Image();
+      im.onload = () => resolve(true);
+      im.onerror = () => { iconCache.delete(src); resolve(false); };
+      im.src = src;
+    });
+    iconCache.set(src, p);
+  }
+  return iconCache.get(src);
+};
+async function setIcon(img, link) {
+  for (const c of iconCandidates(link)) {
+    if (await probeIcon(c)) { img.src = c; return; }
+  }
+  showFallback(img);
+}
+
+// ---------- 数据与渲染 ----------
+const content = document.getElementById("content");
+const status = document.getElementById("status");
+const search = document.getElementById("search");
+const sideNav = document.getElementById("sideNav");
+const navToggle = document.getElementById("navToggle");
+const navBackdrop = document.getElementById("navBackdrop");
+const header = document.querySelector("header");
+// 侧栏形态由 CSS 定义（--nav-mode），JS 只读它，不重复写断点
+const isDrawer = () => getComputedStyle(document.documentElement).getPropertyValue("--nav-mode").trim() !== "docked";
+// 量布局：顶栏高度（侧栏 padding 与锚点滚动偏移都基于它）+ 侧栏宽度（只增不减，搜索过滤时不抖）
+let navW = 0;
+const measure = () => {
+  document.documentElement.style.setProperty("--headerh", header.offsetHeight + "px");
+  const w = sideNav.offsetWidth;
+  if (w > navW) {
+    navW = w;
+    document.documentElement.style.setProperty("--navw", w + "px");
+  }
+};
+let config = { categories: [] };
+let linksFailed = false;
+let dataLoaded = false;
+
+async function loadLinks() {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 8000);
+  try {
+    const r = await fetch("links.json", { cache: "no-cache", signal: c.signal });
+    if (r.ok) {
+      const data = await r.json();
+      if (data && Array.isArray(data.categories)) {
+        config.categories = data.categories;
+        return true;
+      }
+    }
+  } catch (e) {}
+  finally { clearTimeout(t); }
+  return false;
+}
+
+function cardHTML(link) {
+  const host = hostOf(link.url);
+  const name = nameOf(link);
+  return `
+    <a class="card" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" data-icon="${esc(link.icon || "")}">
+      <img alt="" loading="lazy" decoding="async">
+      <span class="fb">${host ? esc((host.replace(/^www\./, "")[0] || "?").toUpperCase()) : "?"}</span>
+      <span class="info">
+        <span class="name" title="${esc(name)}">${esc(name)}</span>
+        <span class="host" title="${esc(host)}">${esc(host)}</span>
+      </span>
+    </a>`;
+}
+
+function render(q) {
+  q = (q || "").trim().toLowerCase();
+  let html = "", nav = "", total = 0;
+  const cats = config.categories
+    .map(cat => ({ cat, key: pyKey(cat.name || "") }))
+    .sort((a, b) => a.key.localeCompare(b.key));
+  cats.forEach((entry, i) => {
+    const links = (entry.cat.links || [])
+      .map(normalize)
+      .filter(l => !q || searchText(l).includes(q))
+      .map(link => ({ link, key: pyKey(nameOf(link)) }))
+      .sort((a, b) => a.key.localeCompare(b.key));
+    if (!links.length) return;
+    const icon = entry.cat.icon ? `<span class="ico" aria-hidden="true">${esc(entry.cat.icon)}</span>` : "";
+    nav += `<a href="#cat-${i}">${icon}<span class="name">${esc(entry.cat.name)}</span></a>`;
+    total += links.length;
+    html += `<section id="cat-${i}"><h2>${icon}${esc(entry.cat.name)}</h2><div class="grid">${links.map(x => cardHTML(x.link)).join("")}</div></section>`;
+  });
+  content.innerHTML = html;
+  sideNav.innerHTML = nav;
+  measure();
+  bindNavObserver();
+  bindIconObserver();
+  let msg = "";
+  if (linksFailed && !total) msg = "数据加载失败，请检查网络后刷新重试";
+  else if (q) msg = total ? `匹配 ${total} 条` : "没有匹配的链接";
+  status.textContent = msg;
+}
+
+// ---------- 左侧导航：只有一个 nav-open 状态，手机抽屉 / 桌面常驻是 CSS 里的形态差异 ----------
+const navIsOpen = () => document.documentElement.classList.contains("nav-open");
+function setNavOpen(open) {
+  document.documentElement.classList.toggle("nav-open", open);
+  navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+}
+navToggle.addEventListener("click", () => setNavOpen(!navIsOpen()));
+navBackdrop.addEventListener("click", () => setNavOpen(false));
+document.addEventListener("keydown", e => { if (e.key === "Escape") setNavOpen(false); });
+addEventListener("resize", measure);
+measure(); // 首帧就把 --headerh / --navw 量出来
+
+sideNav.addEventListener("click", e => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  const sec = document.getElementById(a.hash.slice(1));
+  if (sec) sec.scrollIntoView({ behavior: "smooth" });
+  if (isDrawer()) setNavOpen(false); // 抽屉模式点完就收起；常驻模式留着
+});
+
+// ---------- 滚动高亮 ----------
+let navObserver = null;
+function bindNavObserver() {
+  if (navObserver) navObserver.disconnect();
+  navObserver = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      if (en.isIntersecting) {
+        sideNav.querySelectorAll("a").forEach(a => a.classList.toggle("active", a.hash === "#" + en.target.id));
+      }
+    }
+  }, { rootMargin: "-25% 0px -65% 0px" });
+  content.querySelectorAll("section").forEach(s => navObserver.observe(s));
+}
+
+// ---------- 图标懒加载 ----------
+let iconObserver = null;
+function bindIconObserver() {
+  if (iconObserver) iconObserver.disconnect();
+  const setFor = a => setIcon(a.querySelector("img"), { url: a.href, icon: a.dataset.icon || "" });
+  iconObserver = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      if (!en.isIntersecting || !en.target.isConnected) continue;
+      iconObserver.unobserve(en.target);
+      setFor(en.target);
+    }
+  }, { rootMargin: "200px 0px" });
+  content.querySelectorAll("a.card").forEach(a => iconObserver.observe(a));
+}
+
+// ---------- 页脚仓库链接：只靠当前网址推（不写死账号/仓库，复刻后自动指向自己的仓库）----------
+(() => {
+  const a = document.getElementById("repoLink");
+  const host = location.hostname;
+  // 用户页 <owner>.github.io：仓库名就是域名本身；项目页：路径首段是仓库名（首段带 "." 说明是用户页里的文件）
+  const seg = location.pathname.split("/").filter(Boolean)[0] || "";
+  const repo = /\.github\.io$/i.test(host)
+    ? host.split(".")[0] + "/" + (seg.includes(".") ? host : seg || host)
+    : (localStorage.getItem("nav-admin-repo") || ""); // 自定义域名：用管理页里填过的仓库
+  if (!repo) { a.remove(); return; } // 推不出来就不显示，免得链到别人的仓库
+  a.href = "https://github.com/" + repo;
+  a.textContent = repo.split("/")[0] + " · 个人导航 · GitHub";
+})();
+
+// ---------- 启动 ----------
+loadLinks().then(ok => {
+  linksFailed = !ok;
+  dataLoaded = true;
+  render(search.value);
+});
+let debounceId;
+search.addEventListener("input", e => {
+  clearTimeout(debounceId);
+  debounceId = setTimeout(() => { if (dataLoaded) render(e.target.value); }, 200);
+});
+// pinyin-pro 是同步 script，到这里必然已加载；CDN 失败时退回原文匹配
+if (window.pinyinPro) window.pinyin = window.pinyinPro.pinyin;
+</script>
+</body>
+</html>
